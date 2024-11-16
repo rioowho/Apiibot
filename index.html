@@ -1,132 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>API Documentation</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #000018;
-    color: #fff;
-    margin: 0;
-    padding: 0;
-    min-width: 5px;
-  }
-  .container {
-    width: 100%;
-    padding: 20px;
-    background-color: #000018;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  h1 {
-    color: #fff;
-    text-align: center;
-  }
-  h2 {
-    color: #fff;
-    margin-top: 20px;
-    text-align: center;
-  }
-  p {
-    line-height: 1.6;
-    color: #6c757d;
-  }
-  ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-  li {
-    margin-bottom: 10px;
-  }
-  pre {
-    background-color: #191c31;
-    padding: 10px;
-    border-radius: 5px;
-    overflow-x: auto;
-  }
-  .btn-container {
-    margin-bottom: 20px;
-    background-color: #191c31;
-    border-radius: 1rem;
-    padding: 10px;
-  }
-  .work__card {
-    background-color: #191c31;
-    padding: 1rem;
-    border-radius: 1rem;
-    margin-top: 10px; /* Adjusted to be closer to Information heading */
-  }
-  .work__title {
-    font-size: var(--normal-font-size);
-    font-weight: var(--font-medium);
-    margin-bottom: .25rem;
-  }
-  .btn {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 4px 0;
-    background-color: #191c31;
-    color: #fff;
-    border: none;
-    padding: 13px;
-    text-decoration: none;
-    font-size: 18px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  .btn-text {
-    flex-grow: 1;
-    text-align: left;
-  }
-  .btn-link {
-    text-decoration: none;
-    color: #fff;
-    border: 1px solid #fff;
-    padding: 5px 10px;
-    border-radius: 5px;
-  }
-  .section-spacing {
-    margin-top: 60px;
-  }
-  .large-spacing {
-    margin-top: 100px; /* Increased spacing */
-  }
-  .section__subtitle {
-    display: block;
-    font-size: 12px;
-    color: #fff;
-    text-align: center;
-    margin-top: 30px;
-  }
-  .centered-title {
-    text-align: center;
-  }
-
-  /* Media Queries */
-  @media (min-width: 768px) {
-    .container {
-      width: 75%;
-      margin: 0 auto;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .container {
-      width: 50%;
-      margin: 0 auto;
-    }
-  }
-</style>
+    <title> RiooXdzz API </title>
+    <meta name="description" content="Website API Gratis.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <!-- Facebook -->
+    <meta property="og:title" content="Tioo" />
+    <meta property="og:url" content="https://nightmares.my.id" />
+    <meta property="og:site_name" content="Nightmare's API" />
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="Website API Gratis." />
+    <meta property="og:image" content="/image/logo.png" />
+    <!-- CSS -->
+    <link href='/css/styles.css' rel='stylesheet'>
+    <link href='/css/animate.css' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
+    
 </head>
+<style>
+    body {
+        background-image: url('https://telegra.ph/file/9e57ea7f93a331c4432f7.jpg');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+</style>
 <body>
-<div class="container">
-  <h1>API Documentation</h1>
-  <p>Welcome to the API documentation for our service. Below you will find information about the available endpoints and how to use them.</p>
+    <div class="center">
+        <h1 class="title"> RiooXdzz API </h1>
+        <div class="description">
+            Website API Gratis.</a>
+        </div>
+        <div class="controls">
+            <form>
+                <div class="select">
+                    <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
   
   <span class="section__subtitle">01</span>
   <h2 class="centered-title">Information</h2>
@@ -208,8 +117,7 @@
       <div class="btn-link">/api/mediafire</div>
       <a href="/api/mediafire?url=https://www.mediafire.com/file/81l573keliuj09v/AntiBanidoV1.txt/file" class="btn-link">Try</a>
       </div>
-      </div>
-      </div>
+</div>
       
   <h2>Usage</h2>
   <p>To use the endpoints, send a GET request to the desired endpoint with the following query parameter:</p>
