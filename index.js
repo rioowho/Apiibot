@@ -208,35 +208,35 @@ async function blackboxAIChat(message) {
     throw error;
   }
 }
-async function openai(message) {
-  return new Promise(async (resolve, reject) => {
-    axios("https://www.chatgptdownload.org/wp-json/mwai-ui/v1/chats/submit", {
-      "headers": {
-        "content-type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
-      },
-      data: {
-        "id": null,
-        "botId": "default",
-        "session": "y2cog0j45q",
-        "clientId": "7tzjniqtrgx",
-        "contextId": 443,
-        "messages": [{
-          "id": "fkzhaikd7vh",
-          "role": "assistant",
-          "content": "RiooXdzz adalah seorang Pengembang bot WhatsApp, RiooXdzz dulu dikenal sebagai Progamer, RiooXdzz berasal dari Palembang.",
-          "who": "AI: ",
-          "timestamp": 1695725910365
-        }],
-        "newMessage": message,
-        "stream": false
-      },
-      "method": "POST"
-    }).then(response => {
-      resolve(response.data);
-    });
-  });
-};
+async function openai(message, q) {
+    try {
+        const nonceValue = JSON.parse(cheerio.load(await (await axios.get(
+            "https://chatgpt4online.org/chat"
+        )).data)('.mwai-chatbot-container').attr('data-system')).restNonce;
+
+        const {
+            data
+        } = await axios(
+            "https://chatgpt4online.org//wp-json/mwai-ui/v1/chats/submit", {
+                method: "post",
+                data: {
+                    botId: "default",
+                    message,
+                    newMessage: q,
+                    stream: false,
+                },
+                headers: {
+                    "X-WP-Nonce": nonceValue,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+        return data.reply;
+    } catch (err) {
+        console.log(err.response.data);
+        return err.response.data.message;
+    }
+}
 
 async function llama3(message) {
   if (!["70b", "8b"].some((qq) => model == qq)) model = "70b"; //correct
