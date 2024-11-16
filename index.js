@@ -144,8 +144,10 @@ async function gemini(message) {
             body: body
         });
 
-if (!response.ok) {
-            throw new Error(`Error: ${response.status}`);
+         if (response.ok) {
+            return data; 
+        } else {
+            throw new Error(data.error.message || 'Request failed');
         }
 
         const data = await response.json();
