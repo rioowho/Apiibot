@@ -209,33 +209,23 @@ async function blackboxAIChat(message) {
   }
 }
 async function openai(message) {
-  const messages = [
-    {
-      role: "system",
-      content:
-        "Kamu Adalah RiooXdzz",
-    },
-    { role: "user", content: message },
-  ];
-
   try {
-    const response = await fetch(
-      "https://deepenglish.com/wp-json/ai-chatbot/v1/chat",
+    const response = await axios.get(
+      "https://tools.revesery.com/ai/ai.php?query=" + message,
       {
-        method: "POST",
         headers: {
-          Accept: "text/event-stream",
+          Accept: "*/*",
           "Content-Type": "application/json",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.9999.999 Safari/537.36",
         },
-        body: JSON.stringify({ messages }),
       },
     );
-
-    const responseData = await response.json();
-    return responseData;
+    const res = response.data;
+    const result = res.result;
+    return result;
   } catch (error) {
-    console.error("Error fetching data:", error);
-    throw error;
+    console.error(error);
   }
 }
 
