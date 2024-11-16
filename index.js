@@ -193,7 +193,37 @@ async function blackboxAIChat(message) {
     throw error;
   }
 }
-async function openai(message) {
+
+function openai(message) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!Array.isArray(message)) {
+                messages = [message];
+            }
+
+            const url = 'https://chatsandbox.com/api/chat';
+            const requestData = {
+                messages: message,
+                character: 'openai'
+            };
+
+            const headers = {
+                "Content-Type": "application/json"
+            };
+
+            const response = await axios.post(url, requestData, { headers });
+
+            if (response.status === 200 && response.data) {
+                resolve(response.data);
+            } else {
+                reject(new Error('Failed to get a valid response'));
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+async function openaii(message) {
     const messages = [
         { role: "assistant", content: "Kamu adalah asisten AI yang siap membantu segala hal." },
         { role: "user", content: message }
