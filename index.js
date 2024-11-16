@@ -128,15 +128,14 @@ async function tiktoks(message) {
   })
 }
 async function gemini(message) {
-const sendToGemini = async (message) => {
-    const apiKey = 'AIzaSyB2mvsGVTZAU-h-GtCLzoLhjHEdvugx9uQ';
+    const apiKey = 'AIzaSyD-BIXRyW2O3x4vLTFmfRWIk_pxnMc_SVs';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
     
     const body = {
         contents: [
             {
                 parts: [
-                    { text: message }
+                    { text: "Hallo Nama Saya Adalah RiooXdzz" }
                 ]
             }
         ]
@@ -162,7 +161,6 @@ const sendToGemini = async (message) => {
         console.error('Error:', error.message);
         return null;
     }
-  }
 };
 
 
