@@ -14,7 +14,7 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-function youtube(link) {
+async function youtube(link) {
 	return new Promise((resolve, reject) => {
 		const ytIdRegex = /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)([-_0-9A-Za-z]{11})/
 		if (ytIdRegex.test(link)) {
@@ -560,7 +560,7 @@ app.get('/api/ytmp4', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await youtube(link);
+    const response = await youtube(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
