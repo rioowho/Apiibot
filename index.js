@@ -208,33 +208,23 @@ async function blackboxAIChat(message) {
     throw error;
   }
 }
-async function openai(message, q) {
-    try {
-        const nonceValue = JSON.parse(cheerio.load(await (await axios.get(
-            "https://chatgpt4online.org/chat"
-        )).data)('.mwai-chatbot-container').attr('data-system')).restNonce;
+async function openai(message) {
+    const messages = [
+        { role: "assistant", content: "Kamu adalah asisten AI yang siap membantu segala hal." },
+        { role: "user", content: message }
+    ];
 
-        const {
-            data
-        } = await axios(
-            "https://chatgpt4online.org//wp-json/mwai-ui/v1/chats/submit", {
-                method: "post",
-                data: {
-                    botId: "default",
-                    message,
-                    newMessage: q,
-                    stream: false,
-                },
-                headers: {
-                    "X-WP-Nonce": nonceValue,
-                    "Content-Type": "application/json",
-                },
-            }
-        );
-        return data.reply;
-    } catch (err) {
-        console.log(err.response.data);
-        return err.response.data.message;
+    try {
+        const response = await fetch("https://deepenglish.com/wp-json/ai-chatbot/v1/chat", {
+            method: "POST",
+            headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
+            body: JSON.stringify({ messages })
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error("An error occurred during data fetching:", error);
+        throw error;
     }
 }
 
