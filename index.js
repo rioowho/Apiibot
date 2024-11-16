@@ -162,6 +162,35 @@ async function tiktoks(message) {
     }
   })
 }
+
+async function AimusicLyrics(message) {
+  const url = "https://aimusic.one/api/v3/lyrics/generator"
+  const headers = {
+    "Content-Type": "application/json",
+    "User-Agent":
+      "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36",
+    Referer: "https://aimusic.one/ai-lyrics-generator"
+  }
+  const data = {
+    description: message,
+    style: "Auto",
+    topic: "Auto",
+    mood: "Auto",
+    lan: "auto",
+    isPublic: true
+  }
+  try {
+    let response = await fetch(url, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(data)
+    })
+    let result = await response.json()
+    return result.lyrics
+  } catch (e) {
+    throw e
+  }
+}
 async function gemini(message) {
     const apiKey = 'AIzaSyD-BIXRyW2O3x4vLTFmfRWIk_pxnMc_SVs'; // Dapatkan apikey dari  https://aistudio.google.com/app/apikey
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
@@ -484,7 +513,22 @@ app.get('/api/blackboxAIChat', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+app.get('/api/aimusic', async (req, res) => {
+  try {
+    const message = req.query.message;
+    if (!message) {
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
+    }
+    const response = await AimusicLyrics(message);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 app.get('/api/search-tiktok', async (req, res) => {
   try {
     const message = req.query.message;
