@@ -14,11 +14,11 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-async function youtube(link) {
+async function youtube(url) {
 	return new Promise((resolve, reject) => {
 		const ytIdRegex = /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)([-_0-9A-Za-z]{11})/
-		if (ytIdRegex.test(link)) {
-			let url = ytIdRegex.exec(link)
+		if (ytIdRegex.test(url)) {
+			let url = ytIdRegex.exec(url)
 			let config = {
 				'url': 'https://www.youtube.be/' + url,
 				'q_auto': 0,
