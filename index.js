@@ -159,7 +159,7 @@ async function gemini(message) {
         }
     } catch (error) {
         console.error('Error:', error.message);
-        return null;
+        return data;
     }
 };
 
