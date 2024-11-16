@@ -19,13 +19,124 @@
     
 </head>
 <style>
-    body {
-        background-image: url('https://pomf2.lain.la/f/i7gigpxj.jpg');
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #000018;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    min-width: 5px;
+  }
+  .container {
+    width: 100%;
+    padding: 20px;
+    background-color: #000018;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  h1 {
+    color: #fff;
+    text-align: center;
+  }
+  h2 {
+    color: #fff;
+    margin-top: 20px;
+    text-align: center;
+  }
+  p {
+    line-height: 1.6;
+    color: #6c757d;
+  }
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    margin-bottom: 10px;
+  }
+  pre {
+    background-color: #191c31;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+  }
+  .btn-container {
+    margin-bottom: 20px;
+    background-color: #191c31;
+    border-radius: 1rem;
+    padding: 10px;
+  }
+  .work__card {
+    background-color: #191c31;
+    padding: 1rem;
+    border-radius: 1rem;
+    margin-top: 10px; /* Adjusted to be closer to Information heading */
+  }
+  .work__title {
+    font-size: var(--normal-font-size);
+    font-weight: var(--font-medium);
+    margin-bottom: .25rem;
+  }
+  .btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4px 0;
+    background-color: #191c31;
+    color: #fff;
+    border: none;
+    padding: 13px;
+    text-decoration: none;
+    font-size: 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .btn-text {
+    flex-grow: 1;
+    text-align: left;
+  }
+  .btn-link {
+    text-decoration: none;
+    color: #fff;
+    border: 1px solid #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  .section-spacing {
+    margin-top: 60px;
+  }
+  .large-spacing {
+    margin-top: 100px; /* Increased spacing */
+  }
+  .section__subtitle {
+    display: block;
+    font-size: 12px;
+    color: #fff;
+    text-align: center;
+    margin-top: 30px;
+  }
+  .centered-title {
+    text-align: center;
+  }
+
+  /* Media Queries */
+  @media (min-width: 768px) {
+    .container {
+      width: 75%;
+      margin: 0 auto;
     }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      width: 50%;
+      margin: 0 auto;
+    }
+  }
 </style>
+</head>
 <body>
     <div class="center">
         <h1 class="title"> RiooXdzz API </h1>
@@ -37,16 +148,16 @@
                 <div class="select">
                     <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
                      <option value="" selected disabled>--- OPENAI ---</option>
-                     <option value="/api/spotify/search?q=dj&apikey=Tio">Spotify search</option>
-                      <option value="/api/spotify/dl?link=https://open.spotify.com/track/4356Typ82hUiFAynbLYbPn&apikey=Tio">Spotify download</option>
-                     <option value="/api/video?q=dj&apikey=Tio">Video</option>
-                       <option value="/api/tiktok-search?q=dj&apikey=Tio">Tiktok search</option>
-                    <option value="/api/tiktok?link=https://vt.tiktok.com/ZSNjugL4u/&apikey=Tio">Tiktok</option>
+                     <option value="/api/luminai?message=hallo">Luminai</option>
+                      <option value="/api/gemini?message=hallo">Gemini</option>
+                     <option value="/api/degreeguru?message=hallo">Degreeguru</option>
+                       <option value="/api/gpt3?message=hallo">Tiktok search</option>
+                    <option value="/api/llama3?message=hallo">Tiktok</option>
                     
-                     <option value="/api/yta?url=https://youtu.be/SRQmwK8Z5Nw&apikey=Tio">Youtube MP3</option>
-                     <option value="/api/ytv?url=https://youtu.be/SRQmwK8Z5Nw&apikey=Tio">Youtube MP4</option>
-                     <option value="/api/yts?q=dj&apikey=Tio">Youtube Search</option>
-                      <option value= '' selected disabled>--- AI ---
+                     <option value="/api/blackboxAIChat?message=hallo">Youtube MP3</option>
+                     <option value="/api/smartcontract?message=hallo">Youtube MP4</option>
+                     <option value="/api/openai?message=hallo">Youtube Search</option>
+                      <option value= '' selected disabled>--- Downloader ---
                       </option>
                       
                       <option value="/api/botika?text=presiden%20indonesia&apikey=Tio">Botika</option>
