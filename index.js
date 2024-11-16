@@ -556,7 +556,7 @@ app.get('/api/search-apk', async (req, res) => {
 
 app.get('/api/ytmp4', async (req, res) => {
   try {
-    const url = req.query.message;
+    const url = req.query.url;
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
