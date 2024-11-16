@@ -162,20 +162,18 @@ async function tiktoks(message) {
     }
   })
 }
-async function gemini(message) {
-    const apiKey = 'AIzaSyD-BIXRyW2O3x4vLTFmfRWIk_pxnMc_SVs';
+async function gemini(prompt, message) {
+    const apiKey = 'AIzaSyD-BIXRyW2O3x4vLTFmfRWIk_pxnMc_SVs'; // Dapatkan apikey dari  https://aistudio.google.com/app/apikey
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-    
     const body = {
         contents: [
             {
                 parts: [
-                    { text: `Nama Kamu adalah gemini.google, kamu adalah assisten virtual yang dikembangkan langsung dari google.` }
+                    { text: prompt }
                 ]
             }
         ]
     };
-
     try {
         const response = await fetch(url, {
             method: 'POST',
@@ -188,7 +186,7 @@ async function gemini(message) {
         const data = await response.json();
 
         if (response.ok) {
-            return data; // Mengembalikan data respons dari API
+            return data; 
         } else {
             throw new Error(data.error.message || 'Request failed');
         }
@@ -197,8 +195,9 @@ async function gemini(message) {
         return null;
     }
 };
-
-
+const prompt = `Nama kamu adalah Kurumi, kamu adalah assisten virtual yang dikembangkan langsung dari google.`;
+    const combinedPrompt = `${prompt} ${message}`;
+    
 async function gpt3(message) {
     const url = 'https://shinoa.us.kg/api/gpt/gpt3';
     const headers = {
