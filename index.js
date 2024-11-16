@@ -14,90 +14,37 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-async function youtube(url) {
-	return new Promise((resolve, reject) => {
-		const ytIdRegex = /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)([-_0-9A-Za-z]{11})/
-		if (ytIdRegex.test(url)) {
-			let url = ytIdRegex.exec(url)
-			let config = {
-				'url': 'https://www.youtube.be/' + url,
-				'q_auto': 0,
-				'ajax': 1
-			}
-			let headerss = {
-				"sec-ch-ua": '" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
-				"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-				"Cookie": 'PHPSESSID=6jo2ggb63g5mjvgj45f612ogt7; _ga=GA1.2.405896420.1625200423; _gid=GA1.2.2135261581.1625200423; _PN_SBSCRBR_FALLBACK_DENIED=1625200785624; MarketGidStorage={"0":{},"C702514":{"page":5,"time":1625200846733}}'
-			}
-			axios('https://www.y2mate.com/mates/en68/analyze/ajax', {
-					method: 'POST',
-					data: new URLSearchParams(Object.entries(config)),
-					headers: headerss
-				})
-				.then(({
-					data
-				}) => {
-					const $ = cheerio.load(data.result)
-					let img = $('div.thumbnail.cover > a > img').attr('src');
-					let title = $('div.thumbnail.cover > div > b').text();
-					let size = $('#mp4 > table > tbody > tr:nth-child(3) > td:nth-child(2)').text()
-					let size_mp3 = $('#audio > table > tbody > tr:nth-child(1) > td:nth-child(2)').text()
-					let id = /var k__id = "(.*?)"/.exec(data.result)[1]
-					let configs = {
-						type: 'youtube',
-						_id: id,
-						v_id: url[1],
-						ajax: '1',
-						token: '',
-						ftype: 'mp4',
-						fquality: 480
-					}
-					axios('https://www.y2mate.com/mates/en68/convert', {
-							method: 'POST',
-							data: new URLSearchParams(Object.entries(configs)),
-							headers: headerss
-						})
-						.then(({
-							data
-						}) => {
-							const $ = cheerio.load(data.result)
-							let link = $('div > a').attr('href')
-							let configss = {
-								type: 'youtube',
-								_id: id,
-								v_id: url[1],
-								ajax: '1',
-								token: '',
-								ftype: 'mp3',
-								fquality: 128
-							}
-							axios('https://www.y2mate.com/mates/en68/convert', {
-									method: 'POST',
-									data: new URLSearchParams(Object.entries(configss)),
-									headers: headerss
-								})
-								.then(({
-									data
-								}) => {
-									const $ = cheerio.load(data.result)
-									let audio = $('div > a').attr('href')
-									resolve({
-										id: url[1],
-										title: title,
-										size: size,
-										quality: '480p',
-										thumb: img,
-										link: link,
-										size_mp3: size_mp3,
-										mp3: audio
-									})
+async function tiktok(url) {
+  return new Promise(async (resolve, reject) => {
+    try {
+    const encodedParams = new URLSearchParams();
+encodedParams.set('url', url);
+encodedParams.set('hd', '1');
 
-								})
-						})
-				})
-				.catch(reject)
-		} else reject('link invalid')
-	})
+      const response = await axios({
+        method: 'POST',
+        url: 'https://tikwm.com/api/',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'Cookie': 'current_language=en',
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36'
+        },
+        data: encodedParams
+      });
+      const videos = response.data.data;
+        const result = {
+          title: videos.title,
+          cover: videos.cover,
+          origin_cover: videos.origin_cover,
+          no_watermark: videos.play,
+          watermark: videos.wmplay,
+          music: videos.music
+        };
+        resolve(result);
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 async function searchApp(message) {
   try {
@@ -180,7 +127,34 @@ async function tiktoks(message) {
     }
   })
 }
+async function gemini(message, cookies) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let cf = {
+       url: "https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?bl=boq_assistant-bard-web-server_20240617.01_p0&f.sid=-7133274499348542060&hl=id&_reqid=1172215&rt=c",
+       data: `f.req=%5Bnull%2C%22%5B%5B%5C%22${encodeURIComponent(message)}%5C%22%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2C0%5D%2C%5B%5C%22id%5C%22%5D%2C%5B%5C%22%5C%22%2C%5C%22%5C%22%2C%5C%22%5C%22%5D%2C%5C%22!09Cl0IjNAAbTqBB886hCnceliZu3i-g7ADQBEArZ1JjY03YP3WAoqGtlKZ0O7Stk0icqB42vSz000o7ee4mwEpfDd1-LHDoR48JAyoSoAgAABLJSAAABZGgBB34AOPVB5b3bS8ti9LaoxVvfkPdoSwkXcJS-b9mWS1wBUH3-rOExGzLoLVasHsUepgvkIohv1Jr5VY2VCgAFOftUKDyZAsaUOJgg5cuU5ZivHfBlk4V7_6ALgjpjFXV8J-UajFJhPNW1havFFHm_c2i0nXMXWRQdejmk9xSCU4eDrs423v6BDoz9bEUKQuY4Teri-dic70qhv42GerkSHwCK7m9YHoxTe3NRVDjk99RjZ1vZubK_TIQ3m4tiBEEYckEBkxMpNHw7R5IL-JNELn71ZPFWMV8HRA-BhaTRqsyO64FHT2TdIaXPjc7_bVm3_9Zo8T2WEj9ZIgiQ8BZ1gBMs5iJvsmBEwV3RISjyZCH6aLsK4rAaRn-DbJPfV3Yn4e3FElEuU0Ioa-i_Noz5PZycf_lxlF2_OgheW5Ob-9v1gUIRhdwmtchCUPvpRnO7CIVTbWlJ_eVtFOAaOHkiga1R0S2t34dck85HaJg8IUDLfguyAqPJQnQH9IJt8T0GBSchPUyqyC8en0fW40GtQ5H29zBYILSWgjA3GO5d0qhwriIWlDAXMI3e3LsHCK5gPB4iVGBbyBopoSNEr2KjND4rRGxUpmasLJ2KJ6jymwD0TGTGOZNqWUaV-D2vAsCOWa5cbvYmJiLNL87p81j4qcaH8M4uJ-ZQvqzUnDj6nD8X5w49Mi2jJfEtoZcOZBDWnGQfSoXIXHdjoXT-OrhE8XxfLYidtPQjji1ScYWjScehqUBvEvrqFrqVKqV6en0H7lspWEa7CzussBAQii2ORxkZLW7Paxeqyb3hyqeeo_3_VvkB6_d3B5fvFD_SwecO4rD3EzFsDcUc73N4KJqduVk5-nkwUVccBFxiSxzG6kVJttRNiYjT89Hqp0zObcXZN7mEoXxBq-qaxkngckQTXwsLIKqrknpNkkvwtZhDH2goWOAXBdoSWqZdtpVkVuy2lc6Lg7dIrYGI5S_CWsWqlC3wTTe2jQq2rPcMeEWshDINX_Zg5SAsKHndcjtsgPyBOCznZ2En5UxV6ZtFhw%5C%22%2C%5C%226b3da83b37418203a14307e6be9868f4%5C%22%2Cnull%2C%5B1%5D%2C1%2Cnull%2Cnull%2C1%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2C0%2Cnull%2C1%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C0%2C1%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5D%5D%22%5D&at=AFQ3XeaEGtInLQONqGLwSva82YLp%3A1718802207209&`,
+       cookie: cookies // isi cookie
+    }
 
+      const {
+        data
+      } = await axios({
+          url: cf.url,
+          headers: {
+            Cookie: cf.cookie
+          },
+          data: cf.data,
+          method: "POST"
+        })
+
+      data.replace(/\\/g, '\\'.slice(1)).split('",[\"')[1].split('"]')[0].replace(/"rc_9df8b312d145653b\\\\\\\",\\[\\\"(.*?)(?<!\\\\)\\\"\\]/g, '').replace(/null/g, '').replace('nn**', '\n *').replace('nn*', '\n').replace('**nn*', '\n').replace(/\\\\\\/g, '').replace(/\\\\n/g, '\n').replace(/\\\\/g, '').replace(/rnrn/g, '').replace(/"\\"/g, '').replace(/rn/g, '\n').replace(/\\n*/g, '')
+      resolve(JSON.stringify(data))
+    } catch (error) {
+      console.error(error)
+      reject(error)
+    }
+  })
+}
 async function gpt3(message) {
     const url = 'https://shinoa.us.kg/api/gpt/gpt3';
     const headers = {
@@ -385,13 +359,13 @@ app.get('/api/luminai', async (req, res) => {
 });
 
 // Endpoint untuk ragBot
-app.get('/api/ragbot', async (req, res) => {
+app.get('/api/gemini', async (req, res) => {
   try {
     const message = req.query.message;
     if (!message) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await ragBot(message);
+    const response = await gemini(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -554,13 +528,13 @@ app.get('/api/search-apk', async (req, res) => {
   }
 });
 
-app.get('/api/ytmp4', async (req, res) => {
+app.get('/api/tiktok', async (req, res) => {
   try {
     const url = req.query.url;
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await youtube(url);
+    const response = await tiktok(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
