@@ -92,7 +92,7 @@ async function tiktoks(message) {
         reject("Tidak ada video ditemukan.")
       } else {
         const riooxdzz = Math.floor(Math.random() * videos.length)
-        const videorndm = videos[dann]
+        const videorndm = videos[riooxdzz]
 
         const result = {
           author: creator,
