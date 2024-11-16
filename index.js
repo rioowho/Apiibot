@@ -128,12 +128,19 @@ async function tiktoks(message) {
   })
 }
 async function gemini(message) {
-    const apiKey = 'AIzaSyD-BIXRyW2O3x4vLTFmfRWIk_pxnMc_SVs'; // Dapatkan apikey dari  https://aistudio.google.com/app/apikey
+const sendToGemini = async (message) => {
+    const apiKey = 'AIzaSyB2mvsGVTZAU-h-GtCLzoLhjHEdvugx9uQ';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
     
-    const body = JSON.stringify({
-        text: message
-    });
+    const body = {
+        contents: [
+            {
+                parts: [
+                    { text: message }
+                ]
+            }
+        ]
+    };
 
     try {
         const response = await fetch(url, {
@@ -141,22 +148,22 @@ async function gemini(message) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: body
+            body: JSON.stringify(body)
         });
 
-         if (response.ok) {
-            return data; 
+        const data = await response.json();
+
+        if (response.ok) {
+            return data; // Mengembalikan data respons dari API
         } else {
             throw new Error(data.error.message || 'Request failed');
         }
-
-        const data = await response.json();
-        return data;
     } catch (error) {
-        console.error('Request failed:', error);
-        throw error;
+        console.error('Error:', error.message);
+        return null;
     }
-}
+  }
+};
 
 
 async function gpt3(message) {
