@@ -209,25 +209,34 @@ async function blackboxAIChat(message) {
   }
 }
 async function openai(message) {
-  try {
-    const response = await axios.get(
-      "https://tools.revesery.com/ai/ai.php?query=" + message,
-      {
-        headers: {
-          Accept: "*/*",
-          "Content-Type": "application/json",
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.9999.999 Safari/537.36",
-        },
+  return new Promise(async (resolve, reject) => {
+    axios("https://www.chatgptdownload.org/wp-json/mwai-ui/v1/chats/submit", {
+      "headers": {
+        "content-type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
       },
-    );
-    const res = response.data;
-    const result = res.result;
-    return result;
-  } catch (error) {
-    console.error(error);
-  }
-}
+      data: {
+        "id": null,
+        "botId": "default",
+        "session": "y2cog0j45q",
+        "clientId": "7tzjniqtrgx",
+        "contextId": 443,
+        "messages": [{
+          "id": "fkzhaikd7vh",
+          "role": "assistant",
+          "content": "RiooXdzz adalah seorang Pengembang bot WhatsApp, RiooXdzz dulu dikenal sebagai Progamer, RiooXdzz berasal dari Palembang.",
+          "who": "AI: ",
+          "timestamp": 1695725910365
+        }],
+        "newMessage": message,
+        "stream": false
+      },
+      "method": "POST"
+    }).then(response => {
+      resolve(response.data);
+    });
+  });
+};
 
 async function llama3(message) {
   if (!["70b", "8b"].some((qq) => model == qq)) model = "70b"; //correct
