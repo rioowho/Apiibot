@@ -158,6 +158,7 @@
                      <option value="/api/smartcontract?message=hallo">Smartcontract</option>
                      <option value="/api/openai?message=hallo">Openai</option>
                        <option value="/api/aimusic?message=night changes">Ai Music</option>
+                       <option value="/api/gpt4o?message=night changes">Gpt4o</option>
                       <option value= '' selected disabled>--- Downloader ---
                       
                       <option value="/api/tiktok?url=https://vt.tiktok.com/ZSj5B4r5H/">Tiktok</option>
@@ -176,6 +177,48 @@
         </div>
     </div>
     <iframe src="/music/song.mp3" allow="autoplay" style="display:none"></iframe>
-</body>
+ <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Fetch IP Address
+  fetch('https://api.ipify.org?format=json')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('ip').textContent = data.ip;
+    });
 
+  // Update Time
+  function updateTime() {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const timeString = `${hours}:${minutes}:${seconds}`;
+    document.getElementById('jam').textContent = timeString;
+  }
+  setInterval(updateTime, 1000);
+  updateTime();
+
+  // Update Date
+  function updateDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const dateString = `${day}-${month}-${year}`;
+    document.getElementById('tanggal').textContent = dateString;
+  }
+  updateDate();
+
+  // Fetch Battery Status
+  navigator.getBattery().then(function(battery) {
+    function updateBatteryStatus() {
+      const level = Math.round(battery.level * 100) + '%';
+      document.getElementById('batre').textContent = level;
+    }
+    updateBatteryStatus();
+    battery.addEventListener('levelchange', updateBatteryStatus);
+  });
+});
+</script>
+</body>
 </html>
