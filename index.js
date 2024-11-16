@@ -4,6 +4,8 @@ const path = require('path');
 const axios = require('axios');
 const fetch = require('node-fetch');
 const { randomBytes, randomUUID } = require('crypto');
+const cheerio = require('cheerio');
+
 const model = "70b";
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,52 +14,35 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-async function PlayStore(message) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const { data, status } = await axios.get(
-          `https://play.google.com/store/search?q=${message}&c=apps`,
-        ),
-        hasil = [],
-        $ = cheerio.load(data);
-      if (
-        ($(
-          ".ULeU3b > .VfPpkd-WsjYwc.VfPpkd-WsjYwc-OWXEXe-INsAgc.KC1dQ.Usd1Ac.AaN0Dd.Y8RQXd > .VfPpkd-aGsRMb > .VfPpkd-EScbFb-JIbuQc.TAQqTe > a",
-        ).each((i, u) => {
-          const linkk = $(u).attr("href"),
-            nama = $(u).find(".j2FCNc > .cXFu1 > .ubGTjb > .DdYX5").text(),
-            developer = $(u)
-              .find(".j2FCNc > .cXFu1 > .ubGTjb > .wMUdtb")
-              .text(),
-            img = $(u).find(".j2FCNc > img").attr("src"),
-            rate = $(u)
-              .find(".j2FCNc > .cXFu1 > .ubGTjb > div")
-              .attr("aria-label"),
-            rate2 = $(u)
-              .find(".j2FCNc > .cXFu1 > .ubGTjb > div > span.w2kbF")
-              .text(),
-            link = `https://play.google.com${linkk}`;
-          hasil.push({
-            link: link,
-            nama: nama || "No name",
-            developer: developer || "No Developer",
-            img: img || "https://i.ibb.co/G7CrCwN/404.png",
-            rate: rate || "No Rate",
-            rate2: rate2 || "No Rate",
-            link_dev: `https://play.google.com/store/apps/developer?id=${developer.split(" ").join("+")}`,
-          });
-        }),
-        hasil.every((x) => void 0 === x))
-      )
-        return resolve({
-          developer: "@RiooXdzz",
-          mess: "no result found",
-        });
-      resolve(hasil);
-    } catch (err) {
-      console.error(err);
-    }
-  });
+async function searchApp(message) {
+  try {
+    const url = 'https://m.playmods.net/id/search/' + message; // Ganti dengan URL sumber HTML
+
+    const response = await fetch(url);
+    const html = await response.text();
+
+    const $ = cheerio.load(html);
+
+    const dataArray = [];
+
+    $('a.beautify.ajax-a-1').each((index, element) => {
+      const $element = $(element);
+
+      const data = {
+        link: 'https://m.playmods.net' + $element.attr('href'),
+        title: $element.find('.common-exhibition-list-detail-name').text().trim(),
+        menu: $element.find('.common-exhibition-list-detail-menu').text().trim(),
+        detail: $element.find('.common-exhibition-list-detail-txt').text().trim(),
+        image: $element.find('.common-exhibition-list-icon img').attr('data-src'),
+        downloadText: $element.find('.common-exhibition-line-download').text().trim(),
+      };
+
+      dataArray.push(data);
+    });
+    return dataArray;
+  } catch (error) {
+    console.log(error);
+  }
 }
 async function pinterest(message) {
 
@@ -437,13 +422,13 @@ app.get('/api/search-pinterest', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/search-playstore', async (req, res) => {
+app.get('/api/search-apk', async (req, res) => {
   try {
     const message = req.query.message;
     if (!message) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await PlayStore(message);
+    const response = await searchApp(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
