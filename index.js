@@ -127,34 +127,43 @@ async function tiktoks(message) {
     }
   })
 }
-async function gemini(message, cookies) {
-  return new Promise(async (resolve, reject) => {
+async function gemini(message) {
+    const apiKey = 'AIzaSyD-BIXRyW2O3x4vLTFmfRWIk_pxnMc_SVs'; // Dapatkan apikey dari  https://aistudio.google.com/app/apikey
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    
+    const body = {
+        contents: [
+            {
+                parts: [
+                    { text: message }
+                ]
+            }
+        ]
+    };
+
     try {
-      let cf = {
-       url: "https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?bl=boq_assistant-bard-web-server_20240617.01_p0&f.sid=-7133274499348542060&hl=id&_reqid=1172215&rt=c",
-       data: `f.req=%5Bnull%2C%22%5B%5B%5C%22${encodeURIComponent(message)}%5C%22%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2C0%5D%2C%5B%5C%22id%5C%22%5D%2C%5B%5C%22%5C%22%2C%5C%22%5C%22%2C%5C%22%5C%22%5D%2C%5C%22!09Cl0IjNAAbTqBB886hCnceliZu3i-g7ADQBEArZ1JjY03YP3WAoqGtlKZ0O7Stk0icqB42vSz000o7ee4mwEpfDd1-LHDoR48JAyoSoAgAABLJSAAABZGgBB34AOPVB5b3bS8ti9LaoxVvfkPdoSwkXcJS-b9mWS1wBUH3-rOExGzLoLVasHsUepgvkIohv1Jr5VY2VCgAFOftUKDyZAsaUOJgg5cuU5ZivHfBlk4V7_6ALgjpjFXV8J-UajFJhPNW1havFFHm_c2i0nXMXWRQdejmk9xSCU4eDrs423v6BDoz9bEUKQuY4Teri-dic70qhv42GerkSHwCK7m9YHoxTe3NRVDjk99RjZ1vZubK_TIQ3m4tiBEEYckEBkxMpNHw7R5IL-JNELn71ZPFWMV8HRA-BhaTRqsyO64FHT2TdIaXPjc7_bVm3_9Zo8T2WEj9ZIgiQ8BZ1gBMs5iJvsmBEwV3RISjyZCH6aLsK4rAaRn-DbJPfV3Yn4e3FElEuU0Ioa-i_Noz5PZycf_lxlF2_OgheW5Ob-9v1gUIRhdwmtchCUPvpRnO7CIVTbWlJ_eVtFOAaOHkiga1R0S2t34dck85HaJg8IUDLfguyAqPJQnQH9IJt8T0GBSchPUyqyC8en0fW40GtQ5H29zBYILSWgjA3GO5d0qhwriIWlDAXMI3e3LsHCK5gPB4iVGBbyBopoSNEr2KjND4rRGxUpmasLJ2KJ6jymwD0TGTGOZNqWUaV-D2vAsCOWa5cbvYmJiLNL87p81j4qcaH8M4uJ-ZQvqzUnDj6nD8X5w49Mi2jJfEtoZcOZBDWnGQfSoXIXHdjoXT-OrhE8XxfLYidtPQjji1ScYWjScehqUBvEvrqFrqVKqV6en0H7lspWEa7CzussBAQii2ORxkZLW7Paxeqyb3hyqeeo_3_VvkB6_d3B5fvFD_SwecO4rD3EzFsDcUc73N4KJqduVk5-nkwUVccBFxiSxzG6kVJttRNiYjT89Hqp0zObcXZN7mEoXxBq-qaxkngckQTXwsLIKqrknpNkkvwtZhDH2goWOAXBdoSWqZdtpVkVuy2lc6Lg7dIrYGI5S_CWsWqlC3wTTe2jQq2rPcMeEWshDINX_Zg5SAsKHndcjtsgPyBOCznZ2En5UxV6ZtFhw%5C%22%2C%5C%226b3da83b37418203a14307e6be9868f4%5C%22%2Cnull%2C%5B1%5D%2C1%2Cnull%2Cnull%2C1%2C0%2Cnull%2Cnull%2Cnull%2Cnull%2C0%2Cnull%2C1%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C0%2C1%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5D%5D%22%5D&at=AFQ3XeaEGtInLQONqGLwSva82YLp%3A1718802207209&`,
-       cookie: cookies // isi cookie
-    }
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
 
-      const {
-        data
-      } = await axios({
-          url: cf.url,
-          headers: {
-            Cookie: cf.cookie
-          },
-          data: cf.data,
-          method: "POST"
-        })
+        const data = await response.json();
 
-      data.replace(/\\/g, '\\'.slice(1)).split('",[\"')[1].split('"]')[0].replace(/"rc_9df8b312d145653b\\\\\\\",\\[\\\"(.*?)(?<!\\\\)\\\"\\]/g, '').replace(/null/g, '').replace('nn**', '\n *').replace('nn*', '\n').replace('**nn*', '\n').replace(/\\\\\\/g, '').replace(/\\\\n/g, '\n').replace(/\\\\/g, '').replace(/rnrn/g, '').replace(/"\\"/g, '').replace(/rn/g, '\n').replace(/\\n*/g, '')
-      resolve(JSON.stringify(data))
+        if (response.ok) {
+            return data; 
+        } else {
+            throw new Error(data.error.message || 'Request failed');
+        }
     } catch (error) {
-      console.error(error)
-      reject(error)
+        console.error('Error:', error.message);
+        return null;
     }
-  })
-}
+};
+
+
 async function gpt3(message) {
     const url = 'https://shinoa.us.kg/api/gpt/gpt3';
     const headers = {
@@ -358,7 +367,7 @@ app.get('/api/luminai', async (req, res) => {
   }
 });
 
-// Endpoint untuk ragBot
+// Endpoint untuk gemini
 app.get('/api/gemini', async (req, res) => {
   try {
     const message = req.query.message;
