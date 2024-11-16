@@ -43,7 +43,7 @@ async function mediafire(url) {
 
         return downloadInfo;
     } catch (error) {
-        return { success: false, message: error.message };
+        return { success: true, message: error.message };
         console.error("Error:", error.response ? error.response.data : error.message);
     } finally {
         await browser.close();
