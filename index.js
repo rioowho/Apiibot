@@ -131,15 +131,9 @@ async function gemini(message) {
     const apiKey = 'AIzaSyD-BIXRyW2O3x4vLTFmfRWIk_pxnMc_SVs'; // Dapatkan apikey dari  https://aistudio.google.com/app/apikey
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
     
-    const body = {
-        contents: [
-            {
-                parts: [
-                    { text: `Nama Kamu adalah gemini.google, kamu adalah assisten virtual yang dikembangkan langsung dari google.` }
-                ]
-            }
-        ]
-    };
+    const body = JSON.stringify({
+        text: message
+    });
 
     try {
         const response = await fetch(url, {
@@ -147,21 +141,20 @@ async function gemini(message) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(body)
+            body: body
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-            return data; 
-        } else {
-            throw new Error(data.error.message || 'Request failed');
+if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
         }
-    } catch (error) {
-        console.error('Error:', error.message);
+
+        const data = await response.json();
         return data;
+    } catch (error) {
+        console.error('Request failed:', error);
+        throw error;
     }
-};
+}
 
 
 async function gpt3(message) {
