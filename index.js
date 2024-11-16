@@ -135,7 +135,7 @@ async function gemini(message) {
         contents: [
             {
                 parts: [
-                    { text: message }
+                    { text: `Nama Kamu adalah gemini.google, kamu adalah assisten virtual yang dikembangkan langsung dari google.` }
                 ]
             }
         ]
