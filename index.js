@@ -198,7 +198,8 @@ async function gemini(message) {
         text: message
     });
     headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
+        }
     try {
         const response = await fetch(url, {
             method: 'POST',
