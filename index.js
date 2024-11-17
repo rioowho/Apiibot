@@ -3,8 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const axios = require('axios');
 const fetch = require('node-fetch');
-const { randomBytes, randomUUID } = require('crypto');
-const { chromium } = require('playwright');
+const chromium = require('playwright');
 const cheerio = require('cheerio');
 
 const model = "70b";
@@ -20,7 +19,7 @@ app.use(cors());
 async function mediafire(url) {
     const browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({
-        userAgent: 'Mozilla/5.0 (Linux; Android 6.0; iris50) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36'
+        userAgent: 'Mozilla/5.0 (Linux; Android 10; iris50) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36'
     });
     const page = await context.newPage();
     try {
@@ -43,7 +42,7 @@ async function mediafire(url) {
 
         return downloadInfo;
     } catch (error) {
-        return { success: true, message: error.message };
+        return { success: false, message: error.message };
         console.error("Error:", error.response ? error.response.data : error.message);
     } finally {
         await browser.close();
