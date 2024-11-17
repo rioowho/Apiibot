@@ -197,7 +197,8 @@ async function gemini(message) {
     const body = JSON.stringify({
         text: message
     });
-
+    headers: {
+        "Content-Type": "application/json",
     try {
         const response = await fetch(url, {
             method: 'POST',
@@ -244,7 +245,7 @@ async function gemini(message) {
       body: JSON.stringify({
         messages: [{
           role: "system",
-          content: `hallo world 👋\nCurrent model: gpt-4o-mini\nCurrent time: ${formattedDate}\nLatex inline: $ x^2 $ \nLatex block: $$ e=mc^2 $$\n\n`
+          content: `hallo world 👋\nCurrent model: gpt-4-turbo\nCurrent time: ${formattedDate}\nLatex inline: $ x^2 $ \nLatex block: $$ e=mc^2 $$\n\n`
         }, {
           role: "user",
           content: content
