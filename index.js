@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const axios = require('axios');
 const fetch = require('node-fetch');
+const FormData = require('form-data'); 
 const { chromium } = require('playwright');
 const cheerio = require('cheerio');
 
@@ -15,38 +16,31 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-
 async function mediafire(url) {
-    const browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext({
-        userAgent: 'Mozilla/5.0 (Linux; Android 10; iris50) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36'
-    });
-    const page = await context.newPage();
-    try {
-        await page.goto(url);
-        const downloadInfo = await page.evaluate(() => {
-            const fileNameElement = document.querySelector('.dl-btn-label');
-            const fileName = fileNameElement ? fileNameElement.textContent.trim() : '';
-            const downloadLinkElement = document.querySelector('#downloadButton');
-            const downloadLink = downloadLinkElement ? downloadLinkElement.href : '';
-            const fileSizeText = downloadLinkElement ? downloadLinkElement.textContent : '';
-            const sizeMatch = fileSizeText.match(/\(([^)]+)\)/);
-            const fileSize = sizeMatch ? sizeMatch[1] : '';
+    return new Promise(async (resolve, reject) => {
+        try {
+            const response = await fetch(url);
+            const data = await response.text();
+            const $ = cheerio.load(data);
 
-            return {
-                fileName: fileName,
-                downloadLink: downloadLink,
-                fileSize: fileSize
+            let name = $('.dl-info > div > div.filename').text();
+            let link = $('#downloadButton').attr('href');
+            let type = $('.dl-info > div > div.filetype').text();
+
+            if (!link) return reject('Download link not found.');
+
+            const hasil = {
+                filename: name.trim(),
+                filetype: type.trim(),
+                link: link
             };
-        });
 
-        return downloadInfo;
-    } catch (error) {
-        return { success: false, message: error.message };
-        console.error("Error:", error.response ? error.response.data : error.message);
-    } finally {
-        await browser.close();
-    }
+            resolve(hasil);
+        } catch (err) {
+            console.error(err);
+            reject(err);
+        }
+    });
 }
 async function igdl(url) {
   return new Promise(async (resolve, reject) => {
@@ -118,41 +112,7 @@ encodedParams.set('hd', '1');
     }
   });
 }
-async function ssweb(url, device = 'desktop') {
-     return new Promise((resolve, reject) => {
-          const base = 'https://www.screenshotmachine.com'
-          const param = {
-            url: url,
-            device: device,
-            cacheLimit: 0
-          }
-          axios({url: base + '/capture.php',
-               method: 'POST',
-               data: new URLSearchParams(Object.entries(param)),
-               headers: {
-                    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
-               }
-          }).then((data) => {
-               const cookies = data.headers['set-cookie']
-               if (data.data.status == 'success') {
-                    axios.get(base + '/' + data.data.link, {
-                         headers: {
-                              'cookie': cookies.join('')
-                         },
-                         responseType: 'arraybuffer'
-                    }).then(({ data }) => {
-                        result = {
-                            status: 200,
-                            result: data
-                        }
-                         resolve(result)
-                    })
-               } else {
-                    reject({ status: 404, statuses: `Link Error`, message: data.data })
-               }
-          }).catch(reject)
-     })
-}
+
 async function searchApp(message) {
   try {
     const url = 'https://m.playmods.net/id/search/' + message; // Ganti dengan URL sumber HTML
@@ -264,7 +224,7 @@ async function AimusicLyrics(message) {
   }
 }
 
-async function YanzGPT = (query, prompt, model) {
+async function YanzGPT(query, prompt, model) {
     return new Promise(async (resolve, reject) => {
         const response = await axios("https://yanzgpt.my.id/chat", {
             headers: {
