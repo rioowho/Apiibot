@@ -244,13 +244,13 @@ async function gemini(message) {
       body: JSON.stringify({
         messages: [{
           role: "system",
-          content: `\nCurrent model: gpt-4o-mini\nCurrent time: ${formattedDate}\nLatex inline: $ x^2 $ \nLatex block: $$ e=mc^2 $$\n\n`
+          content: `hallo world 👋\nCurrent model: gpt-4o-mini\nCurrent time: ${formattedDate}\nLatex inline: $ x^2 $ \nLatex block: $$ e=mc^2 $$\n\n`
         }, {
           role: "user",
           content: content
         }],
         stream: true,
-        model: "gpt-4o-mini",
+        model: "gpt-4-turbo",
         temperature: .5,
         presence_penalty: 0,
         frequency_penalty: 0,
