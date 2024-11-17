@@ -5,6 +5,8 @@ const axios = require('axios');
 const fetch = require('node-fetch');
 const FormData = require('form-data'); 
 const { chromium } = require('playwright');
+const ytdl = require('ytdl-core');
+const yts = require('yt-search');
 const cheerio = require('cheerio');
 
 const model = "70b";
@@ -513,6 +515,89 @@ async function llama3(message) {
     throw error;
   }
 }
+function ssweb(url, device) {
+  return new Promise((resolve, reject) => {
+    const baseURL = 'https://www.screenshotmachine.com'
+    const param = {
+      url: url,
+      device: device,
+      cacheLimit: 0
+    }
+    axios({
+      url: baseURL + '/capture.php',
+      method: 'POST',
+      data: new URLSearchParams(Object.entries(param)),
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded charset=UTF-8'
+      }
+    }).then((data) => {
+      const cookies = data.headers['set-cookie']
+      if (data.data.status == 'success') {
+        axios.get(baseURL + '/' + data.data.link, {
+          headers: {
+            'cookie': cookies.join('')
+          },
+          responseType: 'arraybuffer'
+        }).then(({
+            data
+          }) => {
+          resolve(data)
+        })
+      } else {
+        reject()
+      }
+    }).catch(reject)
+  })
+}
+async function playvideo(message) {
+  return new Promise((resolve, reject) => {
+    try {
+      const search = yts(message)
+      .then((data) => {
+        const url = []
+        const pormat = data.all
+        for (let i = 0 i < pormat.length i++) {
+          if (pormat[i].type == 'video') {
+            let dapet = pormat[i]
+            url.push(dapet.url)
+          }
+        }
+        const id = yt.getVideoID(url[0])
+        const yutub = yt.getInfo(`https://www.youtube.com/watch?v=${id}`)
+        .then((data) => {
+          let pormat = data.formats
+          let video = []
+          for (let i = 0 i < pormat.length i++) {
+            if (pormat[i].container == 'mp4' && pormat[i].hasVideo == true && pormat[i].hasAudio == true) {
+              let vid = pormat[i]
+              video.push(vid.url)
+            }
+          }
+          const title = data.player_response.microformat.playerMicroformatRenderer.title.simpleText
+          const thumb = data.player_response.microformat.playerMicroformatRenderer.thumbnail.thumbnails[0].url
+          const channel = data.player_response.microformat.playerMicroformatRenderer.ownerChannelName
+          const views = data.player_response.microformat.playerMicroformatRenderer.viewCount
+          const published = data.player_response.microformat.playerMicroformatRenderer.publishDate
+          const result = {
+            author: creator,
+            title: title,
+            thumb: thumb,
+            channel: channel,
+            published: published,
+            views: views,
+            url: video[0]
+          }
+          return(result)
+        })
+        return(yutub)
+      })
+      resolve(search)
+    } catch (error) {
+      reject(error)
+    }
+    console.log(error)
+  })
+}
 // Endpoint untuk servis dokumen HTML
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -711,6 +796,22 @@ app.get('/api/search-tiktok', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
     const response = await tiktoks(message);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/play', async (req, res) => {
+  try {
+    const message = req.query.message;
+    if (!message) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await playvideo(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
