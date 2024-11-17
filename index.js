@@ -372,8 +372,37 @@ async function blackboxAIChat(message) {
   }
 }
 
+function openai(messages) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!Array.isArray(messages)) {
+                messages = [messages];
+            }
 
-async function openai(message) {
+            const url = 'https://chatsandbox.com/api/chat';
+            const requestData = {
+                messages: messages,
+                character: 'openai'
+            };
+
+            const headers = {
+                "Content-Type": "application/json"
+            };
+
+            const response = await axios.post(url, requestData, { headers });
+
+            if (response.status === 200 && response.data) {
+                resolve(response.data);
+            } else {
+                reject(new Error('Failed to get a valid response'));
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+async function openaii(message) {
     const messages = [
         { role: "assistant", content: "Kamu adalah asisten AI yang siap membantu segala hal." },
         { role: "user", content: message }
@@ -520,11 +549,11 @@ app.get('/api/llama3', async (req, res) => {
 });
 app.get('/api/openai', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const messages = req.query.message;
+    if (!messages) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await openai(message);
+    const response = await openai(messages);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
