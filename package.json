@@ -7,11 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "MIT",
+  "author": "RiooXdzz",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "form-data": "^4.0.0",
-  "playwright": "^1.48.2",
+     "playwright": "^1.48.2",
     "axios": "^1.6.8",
     "cors": "^2.8.5",
     "express": "^4.19.2",
