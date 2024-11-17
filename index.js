@@ -515,40 +515,7 @@ async function llama3(message) {
     throw error;
   }
 }
-function ssweb(url, device) {
-  return new Promise((resolve, reject) => {
-    const baseURL = 'https://www.screenshotmachine.com'
-    const param = {
-      url: url,
-      device: device,
-      cacheLimit: 0
-    }
-    axios({
-      url: baseURL + '/capture.php',
-      method: 'POST',
-      data: new URLSearchParams(Object.entries(param)),
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded charset=UTF-8'
-      }
-    }).then((data) => {
-      const cookies = data.headers['set-cookie']
-      if (data.data.status == 'success') {
-        axios.get(baseURL + '/' + data.data.link, {
-          headers: {
-            'cookie': cookies.join('')
-          },
-          responseType: 'arraybuffer'
-        }).then(({
-            data
-          }) => {
-          resolve(data)
-        })
-      } else {
-        reject()
-      }
-    }).catch(reject)
-  })
-}
+
 async function playvideo(message) {
   return new Promise((resolve, reject) => {
     try {
@@ -902,22 +869,7 @@ app.get('/api/igdl', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/ssweb', async (req, res) => {
-  try {
-    const url = req.query.url;
-    if (!url) {
-      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
-    }
-    const response = await ssweb(url);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+
 // Handle 404 error
 app.use((req, res, next) => {
   res.status(404).send("Sorry can't find that!");
