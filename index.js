@@ -5,8 +5,6 @@ const axios = require('axios');
 const fetch = require('node-fetch');
 const FormData = require('form-data'); 
 const { chromium } = require('playwright');
-const ytdl = require('ytdl-core');
-const yts = require('yt-search');
 const cheerio = require('cheerio');
 
 const model = "70b";
@@ -18,67 +16,23 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-function post(url, formdata) {
-    return fetch(url, {
+async function yt(url) {
+    const response = await fetch('https://shinoa.us.kg/api/download/ytdl', {
         method: 'POST',
         headers: {
-            accept: "*/*",
-            'accept-language': "en-US,en;q=0.9",
-            'content-type': "application/x-www-form-urlencoded; charset=UTF-8"
+            'Accept': '*/*',
+            'api_key': 'free',
+            'Content-Type': 'application/json',
         },
-        body: new URLSearchParams(Object.entries(formdata))
-    })
-}
-const ytIdRegex = /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)([-_0-9A-Za-z]{11})/
+        body: JSON.stringify({ text: url }),
+    });
 
-async function yt(url, quality, type, bitrate, server = 'en68') {
-    if (!ytIdRegex.test(url)) throw 'Invalid URL'
-    let ytId = ytIdRegex.exec(url)
-    url = 'https://youtu.be/' + ytId[1]
-    let res = await post(`https://www.y2mate.com/mates/${server}/analyze/ajax`, {
-        url,
-        q_auto: 0,
-        ajax: 1
-    })
-    let json = await res.json()
-    let { document } = (new JSDOM(json.result)).window
-    let tables = document.querySelectorAll('table')
-    let table = tables[{ mp4: 0, mp3: 1 }[type] || 0]
-    let list
-    switch (type) {
-        case 'mp4':
-            list = Object.fromEntries([...table.querySelectorAll('td > a[href="#"]')].filter(v => !/\.3gp/.test(v.innerHTML)).map(v => [v.innerHTML.match(/.*?(?=\()/)[0].trim(), v.parentElement.nextSibling.nextSibling.innerHTML]))
-            break
-        case 'mp3':
-            list = {
-                '128kbps': table.querySelector('td > a[href="#"]').parentElement.nextSibling.nextSibling.innerHTML
-            }
-            break
-        default:
-            list = {}
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
     }
-    let filesize = list[quality]
-    let id = /var k__id = "(.*?)"/.exec(document.body.innerHTML) || ['', '']
-    let thumb = document.querySelector('img').src
-    let title = document.querySelector('b').innerHTML
-    let res2 = await post(`https://www.y2mate.com/mates/${server}/convert`, {
-        type: 'youtube',
-        _id: id[1],
-        v_id: ytId[1],
-        ajax: '1',
-        token: '',
-        ftype: type,
-        fquality: bitrate
-    })
-    let json2 = await res2.json()
-    let KB = parseFloat(filesize) * (1000 * /MB$/.test(filesize))
-    return {
-        dl_link: /<a.+?href="(.+?)"/.exec(json2.result)[1],
-        thumb,
-        title,
-        filesizeF: filesize,
-        filesize: KB
-    }
+
+    const data = await response.json();
+    return data;
 }
 
 async function mediafire(url) {
