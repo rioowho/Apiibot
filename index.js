@@ -674,11 +674,11 @@ app.get('/api/aimusic', async (req, res) => {
 });
 app.get('/api/gpt4o', async (req, res) => {
   try {
-    const content = req.query.message;
-    if (!content) {
+    const message = req.query.message;
+    if (!message) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await gpt4o(content);
+    const response = await gpt4o(message, content);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -690,11 +690,11 @@ app.get('/api/gpt4o', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const query = req.query.message;
-    if (!query) {
+    const message = req.query.message;
+    if (!message) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await YanzGPT(query);
+    const response = await YanzGPT(message, query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
