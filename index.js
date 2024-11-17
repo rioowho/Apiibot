@@ -49,6 +49,44 @@ async function mediafire(url) {
         await browser.close();
     }
 }
+async function igdl(url) {
+  return new Promise(async (resolve, reject) => {
+    const payload = new URLSearchParams(
+      Object.entries({
+        url: url,
+        host: "instagram"
+      })
+    )
+    await axios.request({
+      method: "POST",
+      baseURL: "https://saveinsta.io/core/ajax.php",
+      data: payload,
+      headers: {
+        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+        cookie: "PHPSESSID=rmer1p00mtkqv64ai0pa429d4o",
+        "user-agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+      }
+    })
+    .then(( response ) => {      
+      const $ = cheerio.load(response.data)
+      const mediaURL = $("div.row > div.col-md-12 > div.row.story-container.mt-4.pb-4.border-bottom").map((_, el) => {
+        return "https://saveinsta.io/" + $(el).find("div.col-md-8.mx-auto > a").attr("href")
+      }).get()
+      const res = {
+        status: 200,
+        media: mediaURL
+      }
+      resolve(res)
+    })
+    .catch((e) => {
+      console.log(e)
+      throw {
+        status: 400,
+        message: "error",
+      }
+    })
+  })
+}
 async function tiktok(url) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -80,6 +118,41 @@ encodedParams.set('hd', '1');
       reject(error);
     }
   });
+}
+async function ssweb(url, device = 'desktop') {
+     return new Promise((resolve, reject) => {
+          const base = 'https://www.screenshotmachine.com'
+          const param = {
+            url: url,
+            device: device,
+            cacheLimit: 0
+          }
+          axios({url: base + '/capture.php',
+               method: 'POST',
+               data: new URLSearchParams(Object.entries(param)),
+               headers: {
+                    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+               }
+          }).then((data) => {
+               const cookies = data.headers['set-cookie']
+               if (data.data.status == 'success') {
+                    axios.get(base + '/' + data.data.link, {
+                         headers: {
+                              'cookie': cookies.join('')
+                         },
+                         responseType: 'arraybuffer'
+                    }).then(({ data }) => {
+                        result = {
+                            status: 200,
+                            result: data
+                        }
+                         resolve(result)
+                    })
+               } else {
+                    reject({ status: 404, statuses: `Link Error`, message: data.data })
+               }
+          }).catch(reject)
+     })
 }
 async function searchApp(message) {
   try {
@@ -702,6 +775,38 @@ app.get('/api/mediafire', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
     const response = await mediafire(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/igdl', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await igdl(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/ssweb', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await ssweb(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
