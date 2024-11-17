@@ -18,29 +18,20 @@ app.use(cors());
 
 async function yt(url) {
   try {
-    const res = await fetch(
-      `https://cdn-555.saveservall.xyz/youtube?url=${encodeURIComponent(url)}`
-    );
+    const response = await fetch(`https://cdn-555.saveservall.xyz/youtube`);
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: url }),
+    });
 
-    if (!res.ok) {
-      throw new Error(`HTTP error! Status: ${res.status}`);
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
     }
 
-    const responseJson = await res.json();
-    const data = responseJson?.data ?? null;
-
-    if (!data) return null;
-
-    return {
-      title: data.title,
-      thumbnail: data.thumbnail,
-      duration: data.duration,
-      video_formats: data.video_formats,
-    };
-  } catch (error) {
-    console.error('Terjadi kesalahan:', error.message);
-    return null; // Mengembalikan null jika terjadi kesalahan
-  }
+    const data = await response.json();
+    return data;
 }
 
 async function mediafire(url) {
