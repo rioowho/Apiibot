@@ -3,7 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const axios = require('axios');
 const fetch = require('node-fetch');
-const chromium = require('playwright');
+const { chromium } = require('playwright');
 const cheerio = require('cheerio');
 
 const model = "70b";
@@ -263,6 +263,32 @@ async function AimusicLyrics(message) {
     throw e
   }
 }
+
+async function YanzGPT = (query, prompt, model) {
+    return new Promise(async (resolve, reject) => {
+        const response = await axios("https://yanzgpt.my.id/chat", {
+            headers: {
+                authorization: "Bearer yzgpt-sc4tlKsMRdNMecNy",
+                "content-type": "application/json"
+            },
+            data: {
+                messages: [
+                    {
+                        role: "system",
+                        content: `Nama Lu Pasti RiooXdzz, Aku Sendiri Adalah: Soraa Di Buat Oleh Rioo`
+                    },
+                    {
+                        role: "user",
+                        content: query
+                    }
+                ],
+                model: "yanzgpt-legacy-72b-v3.0"
+            },
+            method: "POST"
+        });
+        resolve(response.data);
+    });
+};
 async function gemini(message) {
     const apiKey = 'AIzaSyD-BIXRyW2O3x4vLTFmfRWIk_pxnMc_SVs'; // Dapatkan apikey dari  https://aistudio.google.com/app/apikey
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
@@ -693,6 +719,22 @@ app.get('/api/gpt4o', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
     const response = await gpt4o(content);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/gptlogic', async (req, res) => {
+  try {
+    const query = req.query.message;
+    if (!query) {
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
+    }
+    const response = await YanzGPT(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
