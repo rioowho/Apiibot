@@ -616,8 +616,8 @@ app.get('/api/aimusic', async (req, res) => {
 });
 app.get('/api/gpt4o', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const content = req.query.message;
+    if (!content) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
     const response = await gpt4o(content);
