@@ -21,16 +21,25 @@ async function yt(url) {
     const res = await fetch(
       `https://cdn-555.saveservall.xyz/youtube?url=${encodeURIComponent(url)}`
     );
-    const data = (await res.json())?.data ?? null;
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! Status: ${res.status}`);
+    }
+
+    const responseJson = await res.json();
+    const data = responseJson?.data ?? null;
+
     if (!data) return null;
+
     return {
       title: data.title,
       thumbnail: data.thumbnail,
       duration: data.duration,
       video_formats: data.video_formats,
     };
-  } catch {
-    return null;
+  } catch (error) {
+    console.error('Terjadi kesalahan:', error.message);
+    return null; // Mengembalikan null jika terjadi kesalahan
   }
 }
 
