@@ -219,7 +219,7 @@ async function gemini(message) {
     }
 };
    
-   async function gpt4o(message, content) {
+   async function gpt4o(content) {
   try {
     const formattedDate = new Date().toLocaleString("id-ID", {
       day: "numeric",
@@ -245,7 +245,7 @@ async function gemini(message) {
       body: JSON.stringify({
         messages: [{
           role: "system",
-          content: `hallo world 👋\nCurrent model: gpt-4-turbo\nCurrent time: ${formattedDate}\nLatex inline: $ x^2 $ \nLatex block: $$ e=mc^2 $$\n\n`
+          content: `\nCurrent model: gpt-4-turbo\nCurrent time: ${formattedDate}\nLatex inline: $ x^2 $ \nLatex block: $$ e=mc^2 $$\n\n`
         }, {
           role: "user",
           content: content
@@ -620,7 +620,7 @@ app.get('/api/gpt4o', async (req, res) => {
     if (!message) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await gpt4o(message);
+    const response = await gpt4o(content);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
