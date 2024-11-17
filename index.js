@@ -17,22 +17,21 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 async function yt(url) {
-    const response = await fetch('https://shinoa.us.kg/api/download/ytdl', {
-        method: 'POST',
-        headers: {
-            'Accept': '*/*',
-            'api_key': 'free',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: url }),
-    });
-
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
-    }
-
-    const data = await response.json();
-    return data;
+  try {
+    const res = await fetch(
+      `https://cdn-555.saveservall.xyz/youtube?url=${encodeURIComponent(url)}`
+    );
+    const data = (await res.json())?.data ?? null;
+    if (!data) return null;
+    return {
+      title: data.title,
+      thumbnail: data.thumbnail,
+      duration: data.duration,
+      video_formats: data.video_formats,
+    };
+  } catch {
+    return null;
+  }
 }
 
 async function mediafire(url) {
