@@ -218,7 +218,7 @@ async function gemini(message) {
     }
 };
    
-   async function gpt4o(message) {
+   async function gpt4o(message, content) {
   try {
     const formattedDate = new Date().toLocaleString("id-ID", {
       day: "numeric",
@@ -247,7 +247,7 @@ async function gemini(message) {
           content: `\nCurrent model: gpt-4o-mini\nCurrent time: ${formattedDate}\nLatex inline: $ x^2 $ \nLatex block: $$ e=mc^2 $$\n\n`
         }, {
           role: "user",
-          content: message
+          content: content
         }],
         stream: true,
         model: "gpt-4o-mini",
