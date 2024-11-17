@@ -18,22 +18,21 @@ app.use(cors());
 
 async function yt(url) {
   try {
-    const response = await fetch(`https://cdn-555.saveservall.xyz/youtube`);
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: url }),
-    });
-
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
-    }
-
-    const data = await response.json();
-    return data;
+    const res = await fetch(
+      `https://cdn59.savetube.su/info?url=${encodeURIComponent(url)}`
+    );
+    const data = (await res.json())?.data ?? null;
+    if (!data) return null;
+    return {
+      title: data.title,
+      thumbnail: data.thumbnail,
+      duration: data.duration,
+      video_formats: data.video_formats,
+    };
+  } catch {
+    return null;
+  }
 }
-
 async function mediafire(url) {
     return new Promise(async (resolve, reject) => {
         try {
