@@ -18,6 +18,69 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
+function post(url, formdata) {
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            accept: "*/*",
+            'accept-language': "en-US,en;q=0.9",
+            'content-type': "application/x-www-form-urlencoded; charset=UTF-8"
+        },
+        body: new URLSearchParams(Object.entries(formdata))
+    })
+}
+const ytIdRegex = /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)([-_0-9A-Za-z]{11})/
+
+async function yt(url, quality, type, bitrate, server = 'en68') {
+    if (!ytIdRegex.test(url)) throw 'Invalid URL'
+    let ytId = ytIdRegex.exec(url)
+    url = 'https://youtu.be/' + ytId[1]
+    let res = await post(`https://www.y2mate.com/mates/${server}/analyze/ajax`, {
+        url,
+        q_auto: 0,
+        ajax: 1
+    })
+    let json = await res.json()
+    let { document } = (new JSDOM(json.result)).window
+    let tables = document.querySelectorAll('table')
+    let table = tables[{ mp4: 0, mp3: 1 }[type] || 0]
+    let list
+    switch (type) {
+        case 'mp4':
+            list = Object.fromEntries([...table.querySelectorAll('td > a[href="#"]')].filter(v => !/\.3gp/.test(v.innerHTML)).map(v => [v.innerHTML.match(/.*?(?=\()/)[0].trim(), v.parentElement.nextSibling.nextSibling.innerHTML]))
+            break
+        case 'mp3':
+            list = {
+                '128kbps': table.querySelector('td > a[href="#"]').parentElement.nextSibling.nextSibling.innerHTML
+            }
+            break
+        default:
+            list = {}
+    }
+    let filesize = list[quality]
+    let id = /var k__id = "(.*?)"/.exec(document.body.innerHTML) || ['', '']
+    let thumb = document.querySelector('img').src
+    let title = document.querySelector('b').innerHTML
+    let res2 = await post(`https://www.y2mate.com/mates/${server}/convert`, {
+        type: 'youtube',
+        _id: id[1],
+        v_id: ytId[1],
+        ajax: '1',
+        token: '',
+        ftype: type,
+        fquality: bitrate
+    })
+    let json2 = await res2.json()
+    let KB = parseFloat(filesize) * (1000 * /MB$/.test(filesize))
+    return {
+        dl_link: /<a.+?href="(.+?)"/.exec(json2.result)[1],
+        thumb,
+        title,
+        filesizeF: filesize,
+        filesize: KB
+    }
+}
+
 async function mediafire(url) {
     return new Promise(async (resolve, reject) => {
         try {
@@ -462,26 +525,6 @@ function openai(messages) {
     });
 }
 
-async function openaii(message) {
-    const messages = [
-        { role: "assistant", content: "Kamu adalah asisten AI yang siap membantu segala hal." },
-        { role: "user", content: message }
-    ];
-
-    try {
-        const response = await fetch("https://deepenglish.com/wp-json/ai-chatbot/v1/chat", {
-            method: "POST",
-            headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
-            body: JSON.stringify({ messages })
-        });
-
-        return await response.json();
-    } catch (error) {
-        console.error("An error occurred during data fetching:", error);
-        throw error;
-    }
-}
-
 async function llama3(message) {
   if (!["70b", "8b"].some((qq) => model == qq)) model = "70b"; //correct
   try {
@@ -516,55 +559,7 @@ async function llama3(message) {
   }
 }
 
-async function playvideo(message) {
-  return new Promise((resolve, reject) => {
-    try {
-      const search = yts(message)
-      .then((data) => {
-        const url = []
-        const pormat = data.all
-        for (let i = 0 i < pormat.length i++) {
-          if (pormat[i].type == 'video') {
-            let dapet = pormat[i]
-            url.push(dapet.url)
-          }
-        }
-        const id = yt.getVideoID(url[0])
-        const yutub = yt.getInfo(`https://www.youtube.com/watch?v=${id}`)
-        .then((data) => {
-          let pormat = data.formats
-          let video = []
-          for (let i = 0 i < pormat.length i++) {
-            if (pormat[i].container == 'mp4' && pormat[i].hasVideo == true && pormat[i].hasAudio == true) {
-              let vid = pormat[i]
-              video.push(vid.url)
-            }
-          }
-          const title = data.player_response.microformat.playerMicroformatRenderer.title.simpleText
-          const thumb = data.player_response.microformat.playerMicroformatRenderer.thumbnail.thumbnails[0].url
-          const channel = data.player_response.microformat.playerMicroformatRenderer.ownerChannelName
-          const views = data.player_response.microformat.playerMicroformatRenderer.viewCount
-          const published = data.player_response.microformat.playerMicroformatRenderer.publishDate
-          const result = {
-            author: creator,
-            title: title,
-            thumb: thumb,
-            channel: channel,
-            published: published,
-            views: views,
-            url: video[0]
-          }
-          return(result)
-        })
-        return(yutub)
-      })
-      resolve(search)
-    } catch (error) {
-      reject(error)
-    }
-    console.log(error)
-  })
-}
+
 // Endpoint untuk servis dokumen HTML
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -772,13 +767,13 @@ app.get('/api/search-tiktok', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/play', async (req, res) => {
+app.get('/api/ytdl', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const url = req.query.url;
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await playvideo(message);
+    const response = await yt(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
