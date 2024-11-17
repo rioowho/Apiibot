@@ -26,6 +26,7 @@ async function yt(url) {
     return {
       title: data.title,
       thumbnail: data.thumbnail,
+      url: data.url,
       duration: data.duration,
       video_formats: data.video_formats,
     };
