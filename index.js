@@ -224,7 +224,7 @@ async function AimusicLyrics(message) {
   }
 }
 
-async function YanzGPT(query, prompt, model) {
+async function YanzGPT(message) {
     return new Promise(async (resolve, reject) => {
         const response = await axios("https://yanzgpt.my.id/chat", {
             headers: {
@@ -239,7 +239,7 @@ async function YanzGPT(query, prompt, model) {
                     },
                     {
                         role: "user",
-                        content: query
+                        content: message
                     }
                 ],
                 model: "yanzgpt-legacy-72b-v3.0"
@@ -277,7 +277,7 @@ async function gemini(message) {
     }
 };
    
-   async function gpt4o(content) {
+   async function gpt4o(message) {
   try {
     const formattedDate = new Date().toLocaleString("id-ID", {
       day: "numeric",
@@ -306,7 +306,7 @@ async function gemini(message) {
           content: `\nCurrent model: gpt-4-turbo\nCurrent time: ${formattedDate}\nLatex inline: $ x^2 $ \nLatex block: $$ e=mc^2 $$\n\n`
         }, {
           role: "user",
-          content: content
+          content: message
         }],
         stream: true,
         model: "gpt-4-turbo",
@@ -678,7 +678,7 @@ app.get('/api/gpt4o', async (req, res) => {
     if (!message) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await gpt4o(message, content);
+    const response = await gpt4o(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -694,7 +694,7 @@ app.get('/api/gptlogic', async (req, res) => {
     if (!message) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await YanzGPT(message, query);
+    const response = await YanzGPT(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
