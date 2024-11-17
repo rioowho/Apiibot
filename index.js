@@ -234,8 +234,8 @@ async function YanzGPT(message) {
             data: {
                 messages: [
                     {
-                        role: "system",
-                        content: `Nama Lu Pasti RiooXdzz, Aku Sendiri Adalah: Soraa Di Buat Oleh Rioo`
+                        role: "assistant",
+                        content: `Halo! Saya adalah RiooXdzz, asisten AI yang dikembangkan oleh Yanz Dev. Saya di sini untuk membantu Anda dengan berbagai pertanyaan dan memberikan informasi yang akurat. Apa yang bisa saya bantu hari ini? 😊`
                     },
                     {
                         role: "user",
@@ -302,7 +302,7 @@ async function gemini(message) {
       },
       body: JSON.stringify({
         messages: [{
-          role: "system",
+          role: "assistant",
           content: `\nCurrent model: gpt-4-turbo\nCurrent time: ${formattedDate}\nLatex inline: $ x^2 $ \nLatex block: $$ e=mc^2 $$\n\n`
         }, {
           role: "user",
