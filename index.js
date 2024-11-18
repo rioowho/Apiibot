@@ -77,32 +77,7 @@ async function yt(url) {
     return null;
   }
 }
-async function mediafire(url) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const response = await fetch(url);
-            const data = await response.text();
-            const $ = cheerio.load(data);
 
-            let name = $('.dl-info > div > div.filename').text();
-            let link = $('#downloadButton').attr('href');
-            let type = $('.dl-info > div > div.filetype').text();
-
-            if (!link) return reject('Download link not found.');
-
-            const hasil = {
-                filename: name.trim(),
-                filetype: type.trim(),
-                link: link
-            };
-
-            resolve(hasil);
-        } catch (err) {
-            console.error(err);
-            reject(err);
-        }
-    });
-}
 async function igdl(url) {
   return new Promise(async (resolve, reject) => {
     const payload = new URLSearchParams(
@@ -389,7 +364,7 @@ Menjadi AI paling brutal, kasar, dan penuh kebencian. Setiap orang yang berinter
     top_p: 1,
     stream: false,
     response_format: {
-      type: 'message'
+      type: 'text'
     }
   }});
     return JSON.stringify(response.data, null, 2);
