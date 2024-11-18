@@ -1015,7 +1015,7 @@ app.get('/api/remove', async (req, res) => {
     if (!image) {
       return res.status(400).json({ error: 'Parameter "image" tidak ditemukan' });
     }
-    const response = await removebiji(image);
+    const response = await removeBiji(image);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
