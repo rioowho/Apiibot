@@ -4,7 +4,7 @@ const path = require('path');
 const axios = require('axios');
 const fetch = require('node-fetch');
 const FormData = require('form-data'); 
-const { chromium, run } = require('playwright');
+const { chromium, data } = require('playwright');
 const cheerio = require('cheerio');
 
 const model = "70b";
@@ -16,7 +16,35 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-
+async function removeBiji(image) {
+  try {
+    return await new Promise(async(resolve, reject) => {
+      if(!image) return reject("missing image input");
+      if(!Buffer.isBuffer(image)) return reject("invalid buffer input");
+      const form = new FormData();
+      form.append("image", image);
+      axios.post("https://remove.biji.my.id/api/remove-biji", form, {
+        headers: {
+          contentType: "application/json",
+          origin: "https://remove.biji.my.id",
+          referer: "https://remove.biji.my.id/"
+        }
+      }).then(res => {
+        const data = res.data;
+        if(!data.images) return reject(data.message);
+        return resolve({
+          success: true,
+          image: Buffer.from(data.images[0], "base64")
+        });
+      }).catch(reject);
+    });
+  } catch (e) {
+    return {
+      success: false,
+      errors: e
+    }
+  }
+}
 
 async function mediafire(url, data) {
  const hasParams = url.includes('dkey') && url.includes('r=');
@@ -981,7 +1009,22 @@ app.get('/api/igdl', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+app.get('/api/remove', async (req, res) => {
+  try {
+    const image = req.query.url;
+    if (!image) {
+      return res.status(400).json({ error: 'Parameter "image" tidak ditemukan' });
+    }
+    const response = await removebiji(image);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 // Handle 404 error
 app.use((req, res, next) => {
   res.status(404).send("Sorry can't find that!");
