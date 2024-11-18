@@ -63,8 +63,34 @@ async function mediafire(url) {
     return downloadLink;
 }
 
+async function ytmp3(id, format = "360p") {
+      const curlCommand = `curl 'https://solyptube.com/api/v1.1/findvideo' \
+      -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+      -H 'Accept: application/json, text/javascript, */*; q=0.01' \
+      -H 'X-Requested-With: XMLHttpRequest' \
+      -H 'User-Agent: Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36' \
+      -H 'Referer: https://solyptube.com/?url=https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3D${id}#searchrResult' \
+      --data-raw 'url=https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3D${id}' \
+      --compressed`
+      
+      return new Promise((resolve, reject) => {
+        exec(curlCommand, (error, stdout) => {
+          if (error) return reject(error)
 
-async function yt(url) {
+          try {
+            const selected = JSON.parse(stdout)
+            const formatData = selected?.data?.formats?.find(v => v?.format_note === format) || selected?.data?.formats?.[0] || {}
+            resolve({
+              title: selected?.data?.title ?? "Unknown Title",
+              ...formatData
+            })
+          } catch (e) {
+            reject(e)
+          }
+        })
+      })
+    }
+async function ytmp4(url) {
   try {
     const res = await fetch(
       `https://cdn59.savetube.su/info?url=${encodeURIComponent(url)}`
@@ -886,13 +912,29 @@ app.get('/api/search-tiktok', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/ytdl', async (req, res) => {
+app.get('/api/ytmp3', async (req, res) => {
   try {
     const url = req.query.url;
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await yt(url);
+    const response = await ytmp3(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/ytmp4', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await ytmp4(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
