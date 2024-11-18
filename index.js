@@ -4,7 +4,7 @@ const path = require('path');
 const axios = require('axios');
 const fetch = require('node-fetch');
 const FormData = require('form-data'); 
-const { chromium, data } = require('playwright');
+const { chromium } = require('playwright');
 const cheerio = require('cheerio');
 
 const model = "70b";
@@ -46,16 +46,16 @@ async function removeBiji(image) {
   }
 }
 
-async function mediafire(url, data) {
+async function mediafire(url) {
  const hasParams = url.includes('dkey') && url.includes('r=');
 
  if (hasParams) {
- const strng = await data(url);
+ const strng = await chromium(url);
  return parseResultToJson(strng);
  } else {
- const firstResult = await data(url);
+ const firstResult = await chromium(url);
  const urlLink = extractDownloadLink(firstResult);
- const fetching = await data(urlLink);
+ const fetching = await chromium(urlLink);
  return parseResultToJson(fetching);
  }
 }
