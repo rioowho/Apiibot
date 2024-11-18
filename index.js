@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const axios = require('axios');
 const fetch = require('node-fetch');
+const { exec } = require("child_process");
 const FormData = require('form-data'); 
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
@@ -90,7 +91,7 @@ async function ytmp3(id, format = "360p") {
         })
       })
     }
-async function ytmp4(url) {
+async function yt(url) {
   try {
     const res = await fetch(
       `https://cdn59.savetube.su/info?url=${encodeURIComponent(url)}`
@@ -934,7 +935,7 @@ app.get('/api/ytmp4', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytmp4(url);
+    const response = await yt(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
