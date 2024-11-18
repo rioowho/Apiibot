@@ -4,7 +4,7 @@ const path = require('path');
 const axios = require('axios');
 const fetch = require('node-fetch');
 const FormData = require('form-data'); 
-const { chromium } = require('playwright');
+const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 
 const model = "70b";
@@ -46,47 +46,21 @@ async function removeBiji(image) {
   }
 }
 
+
 async function mediafire(url) {
- const hasParams = url.includes('dkey') && url.includes('r=');
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+    await page.goto(url);
 
- if (hasParams) {
- const strng = await chromium(url);
- return parseResultToJson(strng);
- } else {
- const firstResult = await chromium(url);
- const urlLink = extractDownloadLink(firstResult);
- const fetching = await chromium(urlLink);
- return parseResultToJson(fetching);
- }
-}
+    // Wait for the download button (update the selector as per MediaFire's structure)
+    const downloadSelector = 'a#downloadButton';
+    await page.waitForSelector(downloadSelector);
 
-function extractDownloadLink(result) {
- const regex = /downloadLink:\s*'([^']+)'/;
- const match = result.match(regex);
- return match ? match[1] : null;
-}
+    // Extract the href attribute
+    const downloadLink = await page.$eval(downloadSelector, el => el.href);
 
-function parseResultToJson(resultString) {
- const jsonResult = {};
- const fileNameRegex = /fileName:\s*'([^']+)'/;
- const downloadLinkRegex = /downloadLink:\s*'([^']+)'/;
- const fileSizeRegex = /fileSize:\s*'([^']+)'/;
-
- const fileNameMatch = resultString.match(fileNameRegex);
- const downloadLinkMatch = resultString.match(downloadLinkRegex);
- const fileSizeMatch = resultString.match(fileSizeRegex);
-
- if (fileNameMatch) {
- jsonResult.fileName = fileNameMatch[1];
- }
- if (downloadLinkMatch) {
- jsonResult.downloadLink = downloadLinkMatch[1];
- }
- if (fileSizeMatch) {
- jsonResult.fileSize = fileSizeMatch[1];
- }
-
- return jsonResult;
+    await browser.close();
+    return downloadLink;
 }
 
 
