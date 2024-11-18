@@ -16,42 +16,49 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
- async function mediafire(url, data) {
- const browser = await chromium.launch({ headless: true });
- const context = await browser.newContext({
- userAgent: 'Mozilla/5.0 (Linux; Android 6.0; iris50) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36'
- });
- const page = await context.newPage();
- try {
- await page.goto(url);
- const downloadInfo = await page.evaluate(() => {
- const fileNameElement = document.querySelector('.dl-btn-label');
- const fileName = fileNameElement ? fileNameElement.textContent.trim() : '';
- const downloadLinkElement = document.querySelector('#downloadButton');
- const downloadLink = downloadLinkElement ? downloadLinkElement.href : '';
- const fileSizeText = downloadLinkElement ? downloadLinkElement.textContent : '';
- const sizeMatch = fileSizeText.match(/\\$([^)]+)\\$/);
- const fileSize = sizeMatch ? sizeMatch[1] : '';
 
- return {
- fileName: fileName,
- downloadLink: downloadLink,
- fileSize: fileSize
- };
- });
 
- return downloadInfo;
- } catch (error) {
- console.error("Error:", error.response ? error.response.data : error.message);
- return { success: false, message: error.message };
- } finally {
- await browser.close();
+async function mediafire(url, data) {
+ const hasParams = url.includes('dkey') && url.includes('r=');
+
+ if (hasParams) {
+ const strng = await data(url);
+ return parseResultToJson(strng);
+ } else {
+ const firstResult = await data(url);
+ const urlLink = extractDownloadLink(firstResult);
+ const fetching = await data(urlLink);
+ return parseResultToJson(fetching);
  }
- }
- mediafire(\`${url}\`).then(a => console.log(a));`;
+}
 
- const start = await run('javascript', code);
- return start.result.output;
+function extractDownloadLink(result) {
+ const regex = /downloadLink:\s*'([^']+)'/;
+ const match = result.match(regex);
+ return match ? match[1] : null;
+}
+
+function parseResultToJson(resultString) {
+ const jsonResult = {};
+ const fileNameRegex = /fileName:\s*'([^']+)'/;
+ const downloadLinkRegex = /downloadLink:\s*'([^']+)'/;
+ const fileSizeRegex = /fileSize:\s*'([^']+)'/;
+
+ const fileNameMatch = resultString.match(fileNameRegex);
+ const downloadLinkMatch = resultString.match(downloadLinkRegex);
+ const fileSizeMatch = resultString.match(fileSizeRegex);
+
+ if (fileNameMatch) {
+ jsonResult.fileName = fileNameMatch[1];
+ }
+ if (downloadLinkMatch) {
+ jsonResult.downloadLink = downloadLinkMatch[1];
+ }
+ if (fileSizeMatch) {
+ jsonResult.fileSize = fileSizeMatch[1];
+ }
+
+ return jsonResult;
 }
 
 
