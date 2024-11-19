@@ -288,6 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const prompt = document.getElementById("prompt").value;
 
       try {
+      const fetch = require('node-fetch');
         const response = await fetch('/api/openai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
