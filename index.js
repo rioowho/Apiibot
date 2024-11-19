@@ -870,22 +870,6 @@ app.get('/api/search-tiktok', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/facebook', async (req, res) => {
-  try {
-    const url = req.query.url;
-    if (!url) {
-      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
-    }
-    const response = await facebook(url);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 app.get('/api/aio', async (req, res) => {
   try {
     const url = req.query.url;
@@ -956,7 +940,7 @@ app.get('/api/facebook', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await facebook(url);
+    const response = await fbdl(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
