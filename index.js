@@ -17,38 +17,152 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-async function removeBiji(image) {
+async function removebg(url) {
   try {
-    return await new Promise(async(resolve, reject) => {
-      if(!image) return reject("missing image input");
-      if(!Buffer.isBuffer(image)) return reject("invalid buffer input");
-      const form = new FormData();
-      form.append("image", image);
-      axios.post("https://remove.biji.my.id/api/remove-biji", form, {
-        headers: {
-          contentType: "application/json",
-          origin: "https://remove.biji.my.id",
-          referer: "https://remove.biji.my.id/"
-        }
-      }).then(res => {
-        const data = res.data;
-        if(!data.images) return reject(data.message);
-        return resolve({
-          success: true,
-          image: Buffer.from(data.images[0], "base64")
-        });
-      }).catch(reject);
+    if (!url) return { status: false, message: "undefined reading buffer" };
+    return await new Promise((resolve, reject) => {
+      const image = url.toString("base64");
+      axios
+        .post(
+          "https://us-central1-ai-apps-prod.cloudfunctions.net/restorePhoto",
+          {
+            image: `data:image/png;base64,${image}`,
+            model:
+              "fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003",
+          },
+        )
+        .then((res) => {
+          const data = res.data?.replace(`"`, "");
+          console.log(res.status, data);
+          if (!data) return reject("failed removebg image");
+          resolve({
+            status: true,
+            image: data,
+          });
+        })
+        .catch(reject);
     });
   } catch (e) {
-    return {
-      success: false,
-      errors: e
-    }
+    return { status: false, message: e };
   }
 }
 
 
+async function aio(
+  url,
+  options = {
+    audio: false,
+    aFormat: "mp3",
+    vCodec: "standar",
+    vReso: "720p",
+    mute: false,
+  },
+) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!url) return reject("Insert URL!");
 
+      // ? OPTIONS
+      let { audio, aFormat, vCodec, vReso, mute } = options;
+
+      const prop = {};
+      const data = {
+        url: url,
+        filenamePattern: "pretty",
+      };
+
+      // ? AUDIO
+      if (audio) {
+        const aFRegex = /best|mp3|ogg|wav|opus/gi;
+        if (!aFormat) aFormat = "mp3";
+        if (!aFRegex.test(aFormat)) aFormat = "mp3";
+        data.isAudioOnly = true;
+        data.aFormat = aFormat;
+        prop.type = "audio";
+        prop.mtype = aFormat;
+      }
+
+      // ? VIDEO
+      else {
+        // ? REGEXP
+        const vCRegex = /standar|high|medium/gi;
+        const vRRegex =
+          /max|8k\+?|4k|1440p?|1080p?|720p?|480p?|360p?|240p?|144p?/gi;
+
+        // ? IF
+        if (!vReso) vReso = "720p";
+        if (!vCodec) vCodec = "standar";
+        if (!vCRegex.test(vCRegex)) vCodec = "standar";
+        if (!vRRegex.test(vReso)) vReso = "720p";
+        if (!mute) mute = false;
+
+        // ? QUALITY
+        if (vReso === "8k+") vReso = "max";
+
+        // ? CODEC
+        switch (vCodec) {
+          case "standar": {
+            vCodec = "h246";
+            break;
+          }
+          case "high": {
+            vCodec = "av1";
+            break;
+          }
+          case "medium": {
+            vCodec = "vp9";
+            break;
+          }
+          default: {
+            vCodec: "h246";
+            break;
+          }
+        }
+
+        data.vCodec = vCodec;
+        data.vQuality = vReso;
+        data.isAudioOnly = false;
+        data.isAudioMuted = mute;
+        prop.type = "video";
+        prop.hd = /max|8k+?|4k|1440p?/gi.test(vReso);
+        prop.quality = vReso === "max" ? "8k+" : vReso;
+        prop.codec = vCodec;
+        prop.isMuted = mute;
+      }
+
+      // ? FETCHING
+      const BASE_URL = "https://cobalt.tools";
+      const BASE_API = "https://api.cobalt.tools/api";
+      await fetch(BASE_API + "/json", {
+        method: "OPTIONS",
+        headers: {
+          "access-control-request-method": "POST",
+          "access-control-request-headers": "content-type",
+          "user-agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+          origin: BASE_URL,
+          referer: BASE_URL,
+        },
+      }).then(async () => {
+        const res = await fetch(BASE_API + "/json", {
+          method: "POST",
+          headers: {
+            origin: BASE_URL,
+            referer: BASE_URL,
+            "user-agent": BASE_URL,
+            "content-type": "application/json",
+            accept: "application/json",
+          },
+          body: JSON.stringify(data),
+        }).then((v) => v.json());
+
+        return resolve({ ...res, ...prop });
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
 async function mediafiree(url) {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
@@ -64,23 +178,36 @@ async function mediafiree(url) {
     await browser.close();
     return downloadLink;
 }
-async function mediafire(url) {
-	let res = await axios.get(url)
-	let get = cheerio.load(res.data)
-	let urlFile = get('a#downloadButton').attr('href')
-	let sizeFile = get('a#downloadButton').text().replace('Download', '').replace('(', '').replace(')', '').replace('\n', '').replace('\n', '').replace('', '')
-	let split = urlFile.split('/')
-	let nameFile = split[5]
-	mime = nameFile.split('.')
-	mime = mime[1]
-	let result = {
-		title: nameFile,
-		size: sizeFile,
-		url: urlFile
-	}
-	return result
+async function MediaFireDl(url) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { data, status } = await axios.get(url);
+      const $ = cheerio.load(data);
+      let filename = $(".dl-info > div > div.filename").text();
+      let filetype = $(".dl-info > div > div.filetype").text();
+      let filesize = $("a#downloadButton").text().split("(")[1].split(")")[0];
+      let uploadAt = $("ul.details > li:nth-child(2)").text().split(": ")[1];
+      let link = $("#downloadButton").attr("href");
+      let desc = $("div.description > p.description-subheading").text();
+      if (typeof link === undefined)
+        return resolve({ status: false, msg: "No result found" });
+      let result = {
+        status: true,
+        filename: filename,
+        filetype: filetype,
+        filesize: filesize,
+        uploadAt: uploadAt,
+        link: link,
+        desc: desc,
+      };
+      console.log(result);
+      resolve(result);
+    } catch (err) {
+      console.error(err);
+      resolve({ status: false, msg: "No result found" });
+    }
+  });
 }
-
 
 async function ytdl(url) {
     const response = await fetch('https://shinoa.us.kg/api/download/ytdl', {
@@ -188,30 +315,38 @@ async function pinterest(message) {
     return data[~~(Math.random() * data.length)].images.orig.url;
 
 }
- async function facebook(link){
-	return new Promise((resolve,reject) => {
-	let config = {
-		'url': link
-		}
-	axios('https://www.getfvid.com/downloader',{
-			method: 'POST',
-			data: new URLSearchParams(Object.entries(config)),
-			headers: {
-				"content-type": "application/x-www-form-urlencoded",
-				"user-agent":  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-				"cookie": "_ga=GA1.2.1310699039.1624884412; _pbjs_userid_consent_data=3524755945110770; cto_bidid=rQH5Tl9NNm5IWFZsem00SVVuZGpEd21sWnp0WmhUeTZpRXdkWlRUOSUyQkYlMkJQQnJRSHVPZ3Fhb1R2UUFiTWJuVGlhVkN1TGM2anhDT1M1Qk0ydHlBb21LJTJGNkdCOWtZalRtZFlxJTJGa3FVTG1TaHlzdDRvJTNE; cto_bundle=g1Ka319NaThuSmh6UklyWm5vV2pkb3NYaUZMeWlHVUtDbVBmeldhNm5qVGVwWnJzSUElMkJXVDdORmU5VElvV2pXUTJhQ3owVWI5enE1WjJ4ZHR5NDZqd1hCZnVHVGZmOEd0eURzcSUyQkNDcHZsR0xJcTZaRFZEMDkzUk1xSmhYMlY0TTdUY0hpZm9NTk5GYXVxWjBJZTR0dE9rQmZ3JTNEJTNE; _gid=GA1.2.908874955.1625126838; __gads=ID=5be9d413ff899546-22e04a9e18ca0046:T=1625126836:RT=1625126836:S=ALNI_Ma0axY94aSdwMIg95hxZVZ-JGNT2w; cookieconsent_status=dismiss"
-			}
-		})
-	.then(async({ data }) => {
-		const $ = cheerio.load(data)	
-		resolve({
-			video_sd: $('body > div.page-content > div > div > div.col-lg-10.col-md-10.col-centered > div > div:nth-child(3) > div > div.col-md-4.btns-download > p:nth-child(1) > a').attr('href'),
-			video_hd: $('body > div.page-content > div > div > div.col-lg-10.col-md-10.col-centered > div > div:nth-child(3) > div > div.col-md-4.btns-download > p:nth-child(1) > a').attr('href'),
-			audio: $('body > div.page-content > div > div > div.col-lg-10.col-md-10.col-centered > div > div:nth-child(3) > div > div.col-md-4.btns-download > p:nth-child(2) > a').attr('href')
-			})
-		})
-	.catch(reject)
-	})
+ function fbdl(link) {
+  return new Promise((resolve, reject) => {
+    let config = {
+      url: link,
+    };
+    axios("https://www.getfvid.com/downloader", {
+      method: "POST",
+      data: new URLSearchParams(Object.entries(config)),
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+        "user-agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        cookie:
+          "_ga=GA1.2.1310699039.1624884412; _pbjs_userid_consent_data=3524755945110770; cto_bidid=rQH5Tl9NNm5IWFZsem00SVVuZGpEd21sWnp0WmhUeTZpRXdkWlRUOSUyQkYlMkJQQnJRSHVPZ3Fhb1R2UUFiTWJuVGlhVkN1TGM2anhDT1M1Qk0ydHlBb21LJTJGNkdCOWtZalRtZFlxJTJGa3FVTG1TaHlzdDRvJTNE; cto_bundle=g1Ka319NaThuSmh6UklyWm5vV2pkb3NYaUZMeWlHVUtDbVBmeldhNm5qVGVwWnJzSUElMkJXVDdORmU5VElvV2pXUTJhQ3owVWI5enE1WjJ4ZHR5NDZqd1hCZnVHVGZmOEd0eURzcSUyQkNDcHZsR0xJcTZaRFZEMDkzUk1xSmhYMlY0TTdUY0hpZm9NTk5GYXVxWjBJZTR0dE9rQmZ3JTNEJTNE; _gid=GA1.2.908874955.1625126838; __gads=ID=5be9d413ff899546-22e04a9e18ca0046:T=1625126836:RT=1625126836:S=ALNI_Ma0axY94aSdwMIg95hxZVZ-JGNT2w; cookieconsent_status=dismiss",
+      },
+    })
+      .then(async ({ data }) => {
+        const $ = cheerio.load(data);
+        resolve({
+          Normal_video: $(
+            "body > div.page-content > div > div > div.col-lg-10.col-md-10.col-centered > div > div:nth-child(3) > div > div.col-md-4.btns-download > p:nth-child(1) > a",
+          ).attr("href"),
+          HD: $(
+            "body > div.page-content > div > div > div.col-lg-10.col-md-10.col-centered > div > div:nth-child(3) > div > div.col-md-4.btns-download > p:nth-child(1) > a",
+          ).attr("href"),
+          audio: $(
+            "body > div.page-content > div > div > div.col-lg-10.col-md-10.col-centered > div > div:nth-child(3) > div > div.col-md-4.btns-download > p:nth-child(2) > a",
+          ).attr("href"),
+        });
+      })
+      .catch(reject);
+  });
 }
 async function tiktoks(message) {
   return new Promise(async (resolve, reject) => {
@@ -751,7 +886,22 @@ app.get('/api/facebook', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+app.get('/api/aio', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await aio(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 app.get('/api/search-pinterest', async (req, res) => {
   try {
     const message = req.query.message;
@@ -864,13 +1014,13 @@ app.get('/api/igdl', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/remove', async (req, res) => {
+app.get('/api/removebg', async (req, res) => {
   try {
-    const image = req.query.url;
-    if (!image) {
+    const url = req.query.url;
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "image" tidak ditemukan' });
     }
-    const response = await removeBiji(image);
+    const response = await removebg(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
