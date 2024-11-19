@@ -48,7 +48,8 @@ async function removeBiji(image) {
 }
 
 
-async function mediafire(url) {
+
+async function mediafiree(url) {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
     await page.goto(url);
@@ -63,91 +64,58 @@ async function mediafire(url) {
     await browser.close();
     return downloadLink;
 }
+async function mediafire(url) {
+	let res = await axios.get(url)
+	let get = cheerio.load(res.data)
+	let urlFile = get('a#downloadButton').attr('href')
+	let sizeFile = get('a#downloadButton').text().replace('Download', '').replace('(', '').replace(')', '').replace('\n', '').replace('\n', '').replace('', '')
+	let split = urlFile.split('/')
+	let nameFile = split[5]
+	mime = nameFile.split('.')
+	mime = mime[1]
+	let result = {
+		title: nameFile,
+		size: sizeFile,
+		url: urlFile
+	}
+	return result
+}
 
-async function ytmp3(id, format = "360p") {
-      const curlCommand = `curl 'https://solyptube.com/api/v1.1/findvideo' \
-      -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
-      -H 'Accept: application/json, text/javascript, */*; q=0.01' \
-      -H 'X-Requested-With: XMLHttpRequest' \
-      -H 'User-Agent: Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36' \
-      -H 'Referer: https://solyptube.com/?url=https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3D${id}#searchrResult' \
-      --data-raw 'url=https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3D${id}' \
-      --compressed`
-      
-      return new Promise((resolve, reject) => {
-        exec(curlCommand, (error, stdout) => {
-          if (error) return reject(error)
 
-          try {
-            const selected = JSON.parse(stdout)
-            const formatData = selected?.data?.formats?.find(v => v?.format_note === format) || selected?.data?.formats?.[0] || {}
-            resolve({
-              title: selected?.data?.title ?? "Unknown Title",
-              ...formatData
-            })
-          } catch (e) {
-            reject(e)
-          }
-        })
-      })
+async function ytdl(url) {
+    const response = await fetch('https://shinoa.us.kg/api/download/ytdl', {
+        method: 'POST',
+        headers: {
+            'Accept': '*/*',
+            'api_key': 'free',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: url }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
     }
-async function yt(url) {
-  try {
-    const res = await fetch(
-      `https://cdn59.savetube.su/info?url=${encodeURIComponent(url)}`
-    );
-    const data = (await res.json())?.data ?? null;
-    if (!data) return null;
-    return {
-      title: data.title,
-      url: data.url,
-      thumbnail: data.thumbnail,
-      duration: data.duration,
-      video_formats: data.video_formats,
-    };
-  } catch {
-    return null;
-  }
+
+    const data = await response.json();
+    return data;
 }
 
 async function igdl(url) {
-  return new Promise(async (resolve, reject) => {
-    const payload = new URLSearchParams(
-      Object.entries({
-        url: url,
-        host: "instagram"
-      })
-    )
-    await axios.request({
-      method: "POST",
-      baseURL: "https://saveinsta.io/core/ajax.php",
-      data: payload,
-      headers: {
-        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-        cookie: "PHPSESSID=rmer1p00mtkqv64ai0pa429d4o",
-        "user-agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
-      }
-    })
-    .then(( response ) => {      
-      const $ = cheerio.load(response.data)
-      const mediaURL = $("div.row > div.col-md-12 > div.row.story-container.mt-4.pb-4.border-bottom").map((_, el) => {
-        return "https://saveinsta.io/" + $(el).find("div.col-md-8.mx-auto > a").attr("href")
-      }).get()
-      const res = {
-        status: 200,
-        media: mediaURL
-      }
-      resolve(res)
-    })
-    .catch((e) => {
-      console.log(e)
-      throw {
-        status: 400,
-        message: "error",
-      }
-    })
-  })
+  const result = [];
+  const form = {
+    url: url,
+    submit: '',
+  };
+  const { data } = await axios.post('https://downloadgram.org/', form);
+  const $ = cheerio.load(data);
+  $('#downloadhere > a').each(function (a, b) {
+    const url = $(b).attr('href');
+    if (url) result.push(url);
+  });
+  return result;
 }
+
 async function tiktok(url) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -220,7 +188,31 @@ async function pinterest(message) {
     return data[~~(Math.random() * data.length)].images.orig.url;
 
 }
-
+ async function facebook(link){
+	return new Promise((resolve,reject) => {
+	let config = {
+		'url': link
+		}
+	axios('https://www.getfvid.com/downloader',{
+			method: 'POST',
+			data: new URLSearchParams(Object.entries(config)),
+			headers: {
+				"content-type": "application/x-www-form-urlencoded",
+				"user-agent":  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+				"cookie": "_ga=GA1.2.1310699039.1624884412; _pbjs_userid_consent_data=3524755945110770; cto_bidid=rQH5Tl9NNm5IWFZsem00SVVuZGpEd21sWnp0WmhUeTZpRXdkWlRUOSUyQkYlMkJQQnJRSHVPZ3Fhb1R2UUFiTWJuVGlhVkN1TGM2anhDT1M1Qk0ydHlBb21LJTJGNkdCOWtZalRtZFlxJTJGa3FVTG1TaHlzdDRvJTNE; cto_bundle=g1Ka319NaThuSmh6UklyWm5vV2pkb3NYaUZMeWlHVUtDbVBmeldhNm5qVGVwWnJzSUElMkJXVDdORmU5VElvV2pXUTJhQ3owVWI5enE1WjJ4ZHR5NDZqd1hCZnVHVGZmOEd0eURzcSUyQkNDcHZsR0xJcTZaRFZEMDkzUk1xSmhYMlY0TTdUY0hpZm9NTk5GYXVxWjBJZTR0dE9rQmZ3JTNEJTNE; _gid=GA1.2.908874955.1625126838; __gads=ID=5be9d413ff899546-22e04a9e18ca0046:T=1625126836:RT=1625126836:S=ALNI_Ma0axY94aSdwMIg95hxZVZ-JGNT2w; cookieconsent_status=dismiss"
+			}
+		})
+	.then(async({ data }) => {
+		const $ = cheerio.load(data)	
+		resolve({
+			video_sd: $('body > div.page-content > div > div > div.col-lg-10.col-md-10.col-centered > div > div:nth-child(3) > div > div.col-md-4.btns-download > p:nth-child(1) > a').attr('href'),
+			video_hd: $('body > div.page-content > div > div > div.col-lg-10.col-md-10.col-centered > div > div:nth-child(3) > div > div.col-md-4.btns-download > p:nth-child(1) > a').attr('href'),
+			audio: $('body > div.page-content > div > div > div.col-lg-10.col-md-10.col-centered > div > div:nth-child(3) > div > div.col-md-4.btns-download > p:nth-child(2) > a').attr('href')
+			})
+		})
+	.catch(reject)
+	})
+}
 async function tiktoks(message) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -361,33 +353,17 @@ async function YanzGPT(message) {
     });
 };
 async function gemini(message) {
-    const apiKey = 'AIzaSyD-BIXRyW2O3x4vLTFmfRWIk_pxnMc_SVs'; // Dapatkan apikey dari  https://aistudio.google.com/app/apikey
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
-    const body = JSON.stringify({
-        text: message
-    });
     try {
-        const response = await fetch(url, {
-            method: 'POST',
+        const { data  } = await axios.get(`https://hercai.onrender.com/gemini/hercai?question=${encodeURIComponent(message)}`, {
             headers: {
-                'Content-Type': 'application/json'
+                "content-type": "application/json",
             },
-            body: body
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            return data; 
-        } else {
-            throw new Error(data.error.message || 'Request failed');
-        }
-    } catch (error) {
-        console.error('Error:', error.message);
-        return null;
-    }
-};
-   
+        })
+        return data;
+    } catch (e) {
+    console.log(e)
+}
+}
 
 async function gpt3(message) {
     const url = 'https://shinoa.us.kg/api/gpt/gpt3';
@@ -759,13 +735,13 @@ app.get('/api/search-tiktok', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/ytmp3', async (req, res) => {
+app.get('/api/facebook', async (req, res) => {
   try {
     const url = req.query.url;
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytmp3(url);
+    const response = await facebook(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -775,22 +751,7 @@ app.get('/api/ytmp3', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/ytmp4', async (req, res) => {
-  try {
-    const url = req.query.url;
-    if (!url) {
-      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
-    }
-    const response = await yt(url);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+
 app.get('/api/search-pinterest', async (req, res) => {
   try {
     const message = req.query.message;
@@ -823,7 +784,38 @@ app.get('/api/search-apk', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+app.get('/api/ytdl', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await ytdl(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/facebook', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await facebook(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 app.get('/api/tiktok', async (req, res) => {
   try {
     const url = req.query.url;
