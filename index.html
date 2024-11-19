@@ -271,36 +271,39 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenAI with Vercel</title>
 </head>
 <body>
-    <h1>Chatgpt</h1>
-      <span class="section__subtitle">01</span>
-  <h2 class="centered-title">Chatgpt</h2>
-  
-    <div class="chat-container">
-        <div class="chat-header">Chatbot</div>
-        <div class="chat-messages" id="chatMessages"></div>
-        <div class="chat-input">
-            <input type="text" id="userInput" placeholder="Ketik pesan Anda...">
-            <button onclick="sendMessage()">Kirim</button>
-        </div>
-    </div>
+  <h1>OpenAI + Vercel</h1>
+  <textarea id="prompt" placeholder="Enter your prompt here" rows="5" cols="40"></textarea>
+  <button id="submit">Submit</button>
+  <h2>Response:</h2>
+  <pre id="response"></pre>
 
-    <script>
-        async function generateText() {
-            const input = document.getElementById("userInput").value;
-            const response = await fetch('https://rioorestapi.vercel.app/api/openai?message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ text: input })
-            });
-            const data = await response.json();
-            document.getElementById("onclick").innerText = data.result;
+  <script>
+    document.getElementById("submit").addEventListener("click", async () => {
+      const prompt = document.getElementById("prompt").value;
+
+      try {
+        const response = await fetch('/api/openai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById("response").innerText = data.result;
+        } else {
+          document.getElementById("response").innerText = `Error: ${data.error}`;
         }
-    </script>
-</body>
-</html>
+      } catch (err) {
+        document.getElementById("response").innerText = `Fetch error: ${err.message}`;
+      }
+    });
+  </script>
 </body>
 </html>
