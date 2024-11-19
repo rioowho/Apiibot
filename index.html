@@ -271,54 +271,29 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">Chatbot</div>
-        <div class="chat-messages" id="chatMessages"></div>
-        <div class="chat-input">
-            <input type="text" id="userInput" placeholder="Ketik pesan Anda...">
-            <button onclick="sendMessage()">Kirim</button>
-        </div>
-    </div>
+    <h1>Chatgpt</h1>
+    <textarea id="inputText" placeholder="Tulis teks di sini..."></textarea>
+    <button onclick="generateText()">Kirim</button>
+    <p id="output"></p>
 
     <script>
-        const messagesContainer = document.getElementById("chatMessages");
-
-        function sendMessage() {
-            const userInput = document.getElementById("userInput");
-            const message = userInput.value.trim();
-
-            if (message) {
-                addMessage(message, "user");
-                getBotResponse(message);
-                userInput.value = "";
-            }
-        }
-
-        function addMessage(message, sender) {
-            const messageDiv = document.createElement("div");
-            messageDiv.className = `message ${sender}`;
-            messageDiv.textContent = message;
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        function getBotResponse(message) {
-            const botResponse = generateBotResponse(message);
-            setTimeout(() => addMessage(botResponse, "bot"), 1000);
-        }
-
-        function generateBotResponse(message) {
-            // Respon otomatis sederhana
-            if (message.toLowerCase().includes("halo")) {
-                return "Halo! Ada yang bisa saya bantu?";
-            } else if (message.toLowerCase().includes("terima kasih")) {
-                return "Sama-sama! :)";
-            } else {
-                return "Maaf, saya belum mengerti. Bisa Anda jelaskan lebih lanjut?";
-            }
+        async function generateText() {
+            const input = document.getElementById("inputText").value;
+            const response = await fetch('http://localhost:5000/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: input })
+            });
+            const data = await response.json();
+            document.getElementById("output").innerText = data.result;
         }
     </script>
+</body>
+</html>
 </body>
 </html>
