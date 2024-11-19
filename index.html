@@ -182,7 +182,8 @@
                        <option value="/api/igdl?url=https://www.instagram.com/reel/DAp9_nPzHGH/?igsh=eWc2bzA0ZWdmdWpp">Igdl</option>
                        <option value="/api/ytdl?url=https://youtu.be/W-TE_Ys4iwM?si=eTGXyZ2NPjff307m">Ytdl</option>
                          <option value="/api/remove?url=https://files.catbox.moe/8dwt25.jpg">Remove</option>
-                         <option value="/api/facebook?url=https://www.facebook.com/share/r/19giUDckv6/">Ytdl</option>
+                         <option value="/api/facebook?url=https://www.facebook.com/share/r/19giUDckv6">Facebook</option>
+                         <option value="/api/aio?url=https://youtu.be/1dlww20UkzU?si=Rrrux03ewunDuyU4">Ytdl</option>
                       <option value="" selected disabled>--- SEARCH ---</option>
                      <option value="/api/search-tiktok?message=masihhatiku">Search Tiktok</option>
                      <option value="/api/search-pinterest?message=WindahBasudara">Search Pinterest</option>
@@ -271,40 +272,5 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OpenAI with Vercel</title>
-</head>
-<body>
-  <h1>OpenAI + Vercel</h1>
-  <textarea id="prompt" placeholder="Enter your prompt here" rows="5" cols="40"></textarea>
-  <button id="submit">Submit</button>
-  <h2>Response:</h2>
-  <pre id="response"></pre>
-
-  <script>
-    document.getElementById("submit").addEventListener("click", async () => {
-      const prompt = document.getElementById("prompt").value;
-
-      try {
-      const fetch = require('node-fetch');
-        const response = await fetch('/api/openai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
-        });
-        const data = await response.json();
-
-        if (response.ok) {
-          document.getElementById("response").innerText = data.result;
-        } else {
-          document.getElementById("response").innerText = `Error: ${data.error}`;
-        }
-      } catch (err) {
-        document.getElementById("response").innerText = `Fetch error: ${err.message}`;
-      }
-    });
-  </script>
 </body>
 </html>
