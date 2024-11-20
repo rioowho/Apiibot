@@ -9,7 +9,9 @@ const FormData = require('form-data');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 
-const model = "70b";
+const { youtube } = require('./lib/ytdl');
+
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -1117,11 +1119,11 @@ app.get('/api/search-apk', async (req, res) => {
 });
 app.get('/api/ytdl', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const videoUrl = req.query.url;
+    if (!videoUrl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await youtube(url);
+    const response = await youtube(videoUrl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
