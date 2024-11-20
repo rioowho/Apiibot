@@ -322,8 +322,7 @@ async function igdl(url) {
   })
   })
   }
-  if (!results.length) return resolve({ developer: '@dims.js - Im-Dims', status: false, msg: `Error` })
-  return resolve({ developer: '@RiooXdzz', status: true, data: results })
+  if (!results.length) return resolve({ developer: '@RiooXdzz', status: false, msg: `Error` })
   } catch (e) {
   return resolve({ developer: '@RiooXdzz', status: false, msg: e.message })
   }
