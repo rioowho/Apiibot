@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const axios = require('axios');
 const fetch = require('node-fetch');
+const got = require('got');
 const { exec } = require("child_process");
 const FormData = require('form-data'); 
 const puppeteer = require('puppeteer');
@@ -278,7 +279,7 @@ async function igdl(url) {
   function decryptSnapSave(data) {
   return getDecodedSnapSave(decodeSnapApp(getEncodedSnapApp(data)))
   }
-  const html = await axios.post('https://snapsave.app/action.php?lang=id', {
+  const html = await got.post('https://snapsave.app/action.php?lang=id', {
   headers: {
   'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
   'content-type': 'application/x-www-form-urlencoded','origin': 'https://snapsave.app',
