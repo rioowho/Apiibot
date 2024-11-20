@@ -322,9 +322,8 @@ async function igdl(url) {
   })
   })
   }
-  if (!results.length) return resolve({ developer: '@RiooXdzz', status: false, msg: `Error` })
   } catch (e) {
-  return resolve({ developer: '@RiooXdzz', status: false, msg: e.message })
+  m.reply(e)
   }
   })
 }
