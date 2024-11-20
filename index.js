@@ -319,6 +319,7 @@ async function youtube(url) {
  return error;
  }
 }
+}
 
 async function ytdl(url) {
     const response = await fetch('https://shinoa.us.kg/api/download/ytdl', {
