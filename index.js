@@ -211,8 +211,7 @@ async function MediaFireDl(url) {
 }
 
 const qs = require('qs');
-const youtube = {
- getData: async (url) => {
+async function youtube(url) {
  const config = {
  method: 'GET',
  url: `https://ytconvert.pro/button/?url=${encodeURIComponent(url)}`,
@@ -318,7 +317,6 @@ const youtube = {
  return data;
  } catch (error) {
  return error;
- }
  }
 }
 
