@@ -227,6 +227,7 @@ async function youtube(url) {
  'Priority': 'u=4',
  'Cookie': 'PHPSESSID=r1a0kjve8mq8tr4v9ik04cft8i; _ga_PQPFKL0J3L=GS1.1.1732027732.1.0.1732027732.0.0.0; _ga=GA1.1.1621456882.1732027733'
  }
+ }
  };
 
  try {
