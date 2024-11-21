@@ -181,7 +181,7 @@ async function mediafiree(url) {
     await browser.close();
     return downloadLink;
 }
-async function MediaFireDl(url) {
+async function mediafire(url) {
   return new Promise(async (resolve, reject) => {
     try {
       const { data, status } = await axios.get(url);
