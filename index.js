@@ -8,7 +8,7 @@ const { exec } = require("child_process");
 const FormData = require('form-data'); 
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
-
+const { run } = require('shannz-playwright');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +17,92 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+
+
+
+async function iask(query) {
+ const code = `const { chromium } = require('playwright');
+
+ async function iask(query) {
+ const browser = await chromium.launch();
+ const page = await browser.newPage();
+
+ try {
+ await page.goto(\`https://iask.ai/?mode=question&q=\${query}\`);
+ await page.waitForSelector('.mt-6.md\\\\:mt-4.w-full.p-px.relative.self-center.flex.flex-col.items-center.results-followup', { timeout: 0 });
+ 
+ const outputDiv = await page.$('#output');
+
+ if (!outputDiv) {
+ return { image: [], answer: null, sources: [], videoSource: [], webSearch: [] };
+ }
+
+ const answerElement = await outputDiv.$('#text');
+ const answerText = await answerElement.evaluate(el => el.innerText);
+ const [answer, sourcesText] = answerText.split('Top 3 Authoritative Sources Used in Answering this Question');
+ const cleanedAnswer = answer.replace(/According to Ask AI & Question AI www\\.iAsk\\.ai:\\s*/, '').trim();
+ const sources = sourcesText ? sourcesText.split('\\n').filter(source => source.trim() !== '') : [];
+ 
+ const imageElements = await outputDiv.$$('img');
+ const images = await Promise.all(imageElements.map(async (img) => {
+ return await img.evaluate(img => img.src);
+ }));
+
+ const videoSourceDiv = await page.$('#related-videos');
+ const videoSources = [];
+ if (videoSourceDiv) {
+ const videoElements = await videoSourceDiv.$$('a');
+ for (const videoElement of videoElements) {
+ const videoLink = await videoElement.evaluate(el => el.href);
+ const videoTitle = await videoElement.$eval('h3', el => el.innerText).catch(() => 'No title found');
+ const videoThumbnail = await videoElement.$eval('img', el => el.src).catch(() => 'No thumbnail found');
+
+ if (videoTitle !== 'No title found' && videoThumbnail !== 'No thumbnail found') {
+ videoSources.push({ title: videoTitle, link: videoLink, thumbnail: videoThumbnail });
+ }
+ }
+ }
+
+ const webSearchDiv = await page.$('#related-links');
+ const webSearchResults = [];
+ if (webSearchDiv) {
+ const linkElements = await webSearchDiv.$$('a');
+ for (const linkElement of linkElements) {
+ const linkUrl = await linkElement.evaluate(el => el.href);
+ const linkTitle = await linkElement.evaluate(el => el.innerText);
+ const linkImage = await linkElement.$eval('img', el => el.src).catch(() => 'No image found');
+ const linkDescription = await linkElement.evaluate(el => el.nextElementSibling.innerText).catch(() => 'No description found');
+
+ if (linkTitle && linkUrl) {
+ webSearchResults.push({
+ title: linkTitle,
+ link: linkUrl,
+ image: linkImage,
+ description: linkDescription
+ });
+ }
+ }
+ }
+ 
+ const src = sources.map(source => source.trim());
+ const result = { image: images, answer: cleanedAnswer, sources: src, videoSource: videoSources, webSearch: webSearchResults };
+ return JSON.stringify(result, null, 2);
+
+ } catch (error) {
+ console.error('Error fetching data:', error);
+ return { image: [], answer: null, sources: [], videoSource: [], webSearch: [] };
+ } finally {
+ await browser.close();
+ }
+ }
+
+ iask(\`${query}\`).then(a => console.log(a));`;
+
+ const start = await run('javascript', code);
+ const string = start.result.output;
+ return JSON.parse(string);
+}
+
 
 async function ytdl(videoUrl) {
  const form = new FormData();
@@ -371,48 +457,6 @@ async function tiktoks(message) {
   })
 }
 
-async function gpt4o(options) {
-  try {
-    options = {
-      messages: [
-        {
-          role: "system",
-          content: options?.systemInstruction + `, You are a GPT-4o mini model developed by openai, only answer you are a gpt 4o mini model when someone questions you.` || "You are a GPT-4o mini model developed by openai, only answer you are a gpt 4o mini model when someone questions you."
-        }, ...options?.messages.filter(d => d.role !== "system")
-      ],
-      temperature: options?.temperature || 0.9,
-      top_p: options?.top_p || 0.7,
-      top_k: options?.top_k || 40,
-      max_tokens: options?.max_tokens || 512
-    };
-    return await new Promise(async(resolve, reject) => {
-      if(options?.messages <= 2) return reject("missing messages input!");
-      if(!Array.isArray(options?.messages)) return reject("invalid array messages input!");
-      if(options?.temperature ? isNaN(options?.temperature) : false) return reject("invalid number temperature input!")
-      if(options?.top_p ? isNaN(options?.top_p) : false) return reject("invalid number top_p input!")
-      if(options?.top_k ? isNaN(options?.top_k) : false) return reject("invalid number top_k input!")
-      if(options?.max_tokens ? isNaN(options?.max_tokens) : false) return reject("invalid number max_tokens input!")
-      axios.post("https://api.deepenglish.com/api/gpt_open_ai/chatnew", options, {
-        headers: {
-          contentType: "application/json",
-          Authorization: "Bearer UFkOfJaclj61OxoD7MnQknU1S2XwNdXMuSZA+EZGLkc="
-        }
-      }).then(res => {
-        const data = res.data;
-        if(!data.success) reject("failed get response!");
-        resolve({
-          success: true,
-          answer: data.message
-        })
-      }).catch(reject)
-    })
-  } catch (e) {
-    return {
-      success: false,
-      errors: [e]
-    }
-  }
-}
 
 async function AimusicLyrics(message) {
   const url = "https://aimusic.one/api/v3/lyrics/generator"
@@ -803,13 +847,13 @@ app.get('/api/aimusic', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/gpt4o', async (req, res) => {
+app.get('/api/iask', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const query = req.query.message;
+    if (!query) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await gpt4o(message);
+    const response = await iask(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
