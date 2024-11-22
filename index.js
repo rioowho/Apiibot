@@ -294,24 +294,6 @@ async function mediafire(url) {
   });
 }
 
-async function ytdl(url) {
-    const response = await fetch('https://shinoa.us.kg/api/download/ytdl', {
-        method: 'POST',
-        headers: {
-            'Accept': '*/*',
-            'api_key': 'free',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: url }),
-    });
-
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
-    }
-
-    const data = await response.json();
-    return data;
-}
 async function igdl(url) {
   return new Promise(async (resolve) => {
   try {
@@ -1093,7 +1075,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!videoUrl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await y2mate(videoUrl);
+    const response = await ytdl(videoUrl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
