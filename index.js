@@ -236,7 +236,7 @@ async function aio(url) {
 
 
 
-async function data(url) {
+async function mediafire(url) {
  const code = `const { chromium } = require('playwright');
 
  async function mediafire(url) {
@@ -276,50 +276,6 @@ async function data(url) {
  const start = await run('javascript', code);
  return start.result.output;
 }
-
-async function mediafire(url) {
- const hasParams = url.includes('dkey') && url.includes('r=');
-
- if (hasParams) {
- const strng = await data(url);
- return parseResultToJson(strng);
- } else {
- const firstResult = await data(url);
- const urlLink = extractDownloadLink(firstResult);
- const fetching = await data(urlLink);
- return parseResultToJson(fetching);
- }
-}
-
-function extractDownloadLink(result) {
- const regex = /downloadLink:\s*'([^']+)'/;
- const match = result.match(regex);
- return match ? match[1] : null;
-}
-
-function parseResultToJson(resultString) {
- const jsonResult = {};
- const fileNameRegex = /fileName:\s*'([^']+)'/;
- const downloadLinkRegex = /downloadLink:\s*'([^']+)'/;
- const fileSizeRegex = /fileSize:\s*'([^']+)'/;
-
- const fileNameMatch = resultString.match(fileNameRegex);
- const downloadLinkMatch = resultString.match(downloadLinkRegex);
- const fileSizeMatch = resultString.match(fileSizeRegex);
-
- if (fileNameMatch) {
- jsonResult.fileName = fileNameMatch[1];
- }
- if (downloadLinkMatch) {
- jsonResult.downloadLink = downloadLinkMatch[1];
- }
- if (fileSizeMatch) {
- jsonResult.fileSize = fileSizeMatch[1];
- }
-
- return jsonResult;
-}
-
 
 async function igdl(url) {
   let res = await axios("https://indown.io/")
