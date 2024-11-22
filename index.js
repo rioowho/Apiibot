@@ -77,31 +77,50 @@ async function ytdl(videoUrl) {
  }
 }
 
-async function imagetohd(imageBuffer) {
-    try {
-        const formData = new FormData();
-        formData.append('image', imageBuffer, {
-            filename: 'upload.png',
-            contentType: 'image/png',
-        });
-
-        const response = await axios.post(
-            'https://www.videotok.app/api/free-restore-image',
-            formData,
-            {
-                headers: {
-                    ...formData.getHeaders(),
-                },
-            }
-        );
-
-        const { imageUrl } = response.data;
-        return imageUrl;
-    } catch (error) {
-        throw new Error('Failed to process image.');
-    }
+async function imagetohd(url, method) {
+  return new Promise(async (resolve, reject) => {
+    let Methods = ["enhance", "recolor", "dehaze"]
+    Methods.includes(method) ? (method = method): (method = Methods[0])
+    let buffer,
+    Form = new FormData(),
+    scheme = "https" + "://" + "inferenceengine" + ".vyro" + ".ai/" + method
+    Form.append("model_version", 1, {
+      "Content-Transfer-Encoding": "binary",
+      contentType: "multipart/form-data charset=uttf-8",
+    })
+    Form.append("image", Buffer.from(url), {
+      filename: "enhance_image_body.jpg",
+      contentType: "image/jpeg",
+    })
+    Form.submit(
+      {
+        url: scheme,
+        host: "inferenceengine" + ".vyro" + ".ai",
+        path: "/" + method,
+        protocol: "https:",
+        headers: {
+          "User-Agent": "okhttp/4.9.3",
+          Connection: "Keep-Alive",
+          "Accept-Encoding": "gzip",
+        },
+      },
+      function (err, res) {
+        if (err) reject()
+        let data = []
+        res
+        .on("data", function (chunk, resp) {
+          data.push(chunk)
+        })
+        .on("end", () => {
+          resolve(Buffer.concat(data))
+        })
+        res.on("error", (e) => {
+          reject()
+        })
+      }
+    )
+  })
 }
-
 async function aio(url) {
   try {
     return await new Promise(async (resolve, reject) => {
@@ -1016,11 +1035,11 @@ app.get('/api/igdl', async (req, res) => {
 });
 app.get('/api/remini', async (req, res) => {
   try {
-    const imageBuffer = req.query.url;
-    if (!imageBuffer) {
+    const url = req.query.url;
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "image" tidak ditemukan' });
     }
-    const response = await imagetohd(imageBuffer);
+    const response = await imagetohd(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
