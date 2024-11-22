@@ -102,167 +102,32 @@ async function imagetohd(imageBuffer) {
     }
 }
 
-async function removebg(url) {
+async function aio(url) {
   try {
-    if (!url) return { status: false, message: "undefined reading buffer" };
-    return await new Promise((resolve, reject) => {
-      const image = url.toString("base64");
+    return await new Promise(async (resolve, reject) => {
+      if (!url) return reject("Missing URL input");
+      
       axios
-        .post(
-          "https://us-central1-ai-apps-prod.cloudfunctions.net/restorePhoto",
-          {
-            image: `data:image/png;base64,${image}`,
-            model:
-              "fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003",
-          },
-        )
+        .post("https://cdn1.meow.gs/", { url })
         .then((res) => {
-          const data = res.data?.replace(`"`, "");
-          console.log(res.status, data);
-          if (!data) return reject("failed removebg image");
+          let data = res.data;
+          if (!data.url) return reject("Failed to fetch metadata");
+
           resolve({
-            status: true,
-            image: data,
+            success: true,
+            result: data,
           });
         })
         .catch(reject);
     });
   } catch (e) {
-    return { status: false, message: e };
+    return {
+      success: false,
+      error: e.message,
+    };
   }
 }
 
-
-async function aio(
-  url,
-  options = {
-    audio: false,
-    aFormat: "mp3",
-    vCodec: "standar",
-    vReso: "720p",
-    mute: false,
-  },
-) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      if (!url) return reject("Insert URL!");
-
-      // ? OPTIONS
-      let { audio, aFormat, vCodec, vReso, mute } = options;
-
-      const prop = {};
-      const data = {
-        url: url,
-        filenamePattern: "pretty",
-      };
-
-      // ? AUDIO
-      if (audio) {
-        const aFRegex = /best|mp3|ogg|wav|opus/gi;
-        if (!aFormat) aFormat = "mp3";
-        if (!aFRegex.test(aFormat)) aFormat = "mp3";
-        data.isAudioOnly = true;
-        data.aFormat = aFormat;
-        prop.type = "audio";
-        prop.mtype = aFormat;
-      }
-
-      // ? VIDEO
-      else {
-        // ? REGEXP
-        const vCRegex = /standar|high|medium/gi;
-        const vRRegex =
-          /max|8k\+?|4k|1440p?|1080p?|720p?|480p?|360p?|240p?|144p?/gi;
-
-        // ? IF
-        if (!vReso) vReso = "720p";
-        if (!vCodec) vCodec = "standar";
-        if (!vCRegex.test(vCRegex)) vCodec = "standar";
-        if (!vRRegex.test(vReso)) vReso = "720p";
-        if (!mute) mute = false;
-
-        // ? QUALITY
-        if (vReso === "8k+") vReso = "max";
-
-        // ? CODEC
-        switch (vCodec) {
-          case "standar": {
-            vCodec = "h246";
-            break;
-          }
-          case "high": {
-            vCodec = "av1";
-            break;
-          }
-          case "medium": {
-            vCodec = "vp9";
-            break;
-          }
-          default: {
-            vCodec: "h246";
-            break;
-          }
-        }
-
-        data.vCodec = vCodec;
-        data.vQuality = vReso;
-        data.isAudioOnly = false;
-        data.isAudioMuted = mute;
-        prop.type = "video";
-        prop.hd = /max|8k+?|4k|1440p?/gi.test(vReso);
-        prop.quality = vReso === "max" ? "8k+" : vReso;
-        prop.codec = vCodec;
-        prop.isMuted = mute;
-      }
-
-      // ? FETCHING
-      const BASE_URL = "https://cobalt.tools";
-      const BASE_API = "https://api.cobalt.tools/api";
-      await fetch(BASE_API + "/json", {
-        method: "OPTIONS",
-        headers: {
-          "access-control-request-method": "POST",
-          "access-control-request-headers": "content-type",
-          "user-agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-          origin: BASE_URL,
-          referer: BASE_URL,
-        },
-      }).then(async () => {
-        const res = await fetch(BASE_API + "/json", {
-          method: "POST",
-          headers: {
-            origin: BASE_URL,
-            referer: BASE_URL,
-            "user-agent": BASE_URL,
-            "content-type": "application/json",
-            accept: "application/json",
-          },
-          body: JSON.stringify(data),
-        }).then((v) => v.json());
-
-        return resolve({ ...res, ...prop });
-      });
-    } catch (e) {
-      reject(e);
-    }
-  });
-}
-async function mediafiree(url) {
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-    await page.goto(url);
-
-    // Wait for the download button (update the selector as per MediaFire's structure)
-    const downloadSelector = 'a#downloadButton';
-    await page.waitForSelector(downloadSelector);
-
-    // Extract the href attribute
-    const downloadLink = await page.$eval(downloadSelector, el => el.href);
-
-    await browser.close();
-    return downloadLink;
-}
 async function mediafire(url) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -1149,13 +1014,13 @@ app.get('/api/igdl', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/removebg', async (req, res) => {
+app.get('/api/remini', async (req, res) => {
   try {
     const url = req.query.url;
     if (!url) {
       return res.status(400).json({ error: 'Parameter "image" tidak ditemukan' });
     }
-    const response = await removebg(url);
+    const response = await imagetohd(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
