@@ -235,65 +235,91 @@ async function aio(url) {
 }
 
 
-async function mediafire(mediaFireUrl) {
-  // Launch a headless browser
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
 
-  try {
-    // Navigate to the MediaFire page
-    await page.goto(mediaFireUrl, { waitUntil: 'networkidle' });
+async function data(url) {
+ const code = `const { chromium } = require('playwright');
 
-    // Wait for the download button to appear
-    await page.waitForSelector('a[aria-label="Download file"]', { timeout: 10000 });
+ async function mediafire(url) {
+ const browser = await chromium.launch({ headless: true });
+ const context = await browser.newContext({
+ userAgent: 'Mozilla/5.0 (Linux; Android 6.0; iris50) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36'
+ });
+ const page = await context.newPage();
+ try {
+ await page.goto(url);
+ const downloadInfo = await page.evaluate(() => {
+ const fileNameElement = document.querySelector('.dl-btn-label');
+ const fileName = fileNameElement ? fileNameElement.textContent.trim() : '';
+ const downloadLinkElement = document.querySelector('#downloadButton');
+ const downloadLink = downloadLinkElement ? downloadLinkElement.href : '';
+ const fileSizeText = downloadLinkElement ? downloadLinkElement.textContent : '';
+ const sizeMatch = fileSizeText.match(/\\$([^)]+)\\$/);
+ const fileSize = sizeMatch ? sizeMatch[1] : '';
 
-    // Extract the href attribute of the download link
-    const downloadLink = await page.$eval('a[aria-label="Download file"]', link =>
-      link.href
-    );
+ return {
+ fileName: fileName,
+ downloadLink: downloadLink,
+ fileSize: fileSize
+ };
+ });
 
-    console.log("Download Link:", downloadLink);
+ return downloadInfo;
+ } catch (error) {
+ console.error("Error:", error.response ? error.response.data : error.message);
+ return { success: false, message: error.message };
+ } finally {
+ await browser.close();
+ }
+ }
+ mediafire(\`${url}\`).then(a => console.log(a));`;
 
-    return downloadLink;
-  } catch (error) {
-    console.error("Error:", error.message);
-    return null;
-  } finally {
-    // Close the browser
-    await browser.close();
-  }
+ const start = await run('javascript', code);
+ return start.result.output;
 }
 
-async function mediafiree(url) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const { data, status } = await axios.get(url);
-      const $ = cheerio.load(data);
-      let filename = $(".dl-info > div > div.filename").text();
-      let filetype = $(".dl-info > div > div.filetype").text();
-      let filesize = $("a#downloadButton").text().split("(")[1].split(")")[0];
-      let uploadAt = $("ul.details > li:nth-child(2)").text().split(": ")[1];
-      let link = $("#downloadButton").attr("href");
-      let desc = $("div.description > p.description-subheading").text();
-      if (typeof link === undefined)
-        return resolve({ status: false, msg: "No result found" });
-      let result = {
-        status: true,
-        filename: filename,
-        filetype: filetype,
-        filesize: filesize,
-        uploadAt: uploadAt,
-        link: link,
-        desc: desc,
-      };
-      console.log(result);
-      resolve(result);
-    } catch (err) {
-      console.error(err);
-      resolve({ status: false, msg: "No result found" });
-    }
-  });
+async function mediafire(url) {
+ const hasParams = url.includes('dkey') && url.includes('r=');
+
+ if (hasParams) {
+ const strng = await data(url);
+ return parseResultToJson(strng);
+ } else {
+ const firstResult = await data(url);
+ const urlLink = extractDownloadLink(firstResult);
+ const fetching = await data(urlLink);
+ return parseResultToJson(fetching);
+ }
 }
+
+function extractDownloadLink(result) {
+ const regex = /downloadLink:\s*'([^']+)'/;
+ const match = result.match(regex);
+ return match ? match[1] : null;
+}
+
+function parseResultToJson(resultString) {
+ const jsonResult = {};
+ const fileNameRegex = /fileName:\s*'([^']+)'/;
+ const downloadLinkRegex = /downloadLink:\s*'([^']+)'/;
+ const fileSizeRegex = /fileSize:\s*'([^']+)'/;
+
+ const fileNameMatch = resultString.match(fileNameRegex);
+ const downloadLinkMatch = resultString.match(downloadLinkRegex);
+ const fileSizeMatch = resultString.match(fileSizeRegex);
+
+ if (fileNameMatch) {
+ jsonResult.fileName = fileNameMatch[1];
+ }
+ if (downloadLinkMatch) {
+ jsonResult.downloadLink = downloadLinkMatch[1];
+ }
+ if (fileSizeMatch) {
+ jsonResult.fileSize = fileSizeMatch[1];
+ }
+
+ return jsonResult;
+}
+
 
 async function igdl(url) {
   let res = await axios("https://indown.io/")
@@ -1024,11 +1050,11 @@ app.get('/api/tiktok', async (req, res) => {
 });
 app.get('/api/mediafire', async (req, res) => {
   try {
-    const mediaFireUrl = req.query.url;
-    if (!mediaFireUrl) {
+    const url = req.query.url;
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await mediafire(mediaFireUrl);
+    const response = await mediafire(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
