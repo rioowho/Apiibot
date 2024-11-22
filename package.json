@@ -10,11 +10,12 @@
   "author": "",
   "license": "GPL-3.0-or-later",
   "dependencies": {
+  "shannz-playwright": "^1.0.8",
+  "playwright": "^1.49.0", 
   "got": "^11.8.6",
   "child_process": "^1.0.2",
   "puppeteer": "^23.8.0",
   "form-data": "^4.0.0",
-   "playwright": "^1.48.2",
     "axios": "^1.6.8",
     "qs": "^6.13.1",
     "cors": "^2.8.5",
