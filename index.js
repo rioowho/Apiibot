@@ -72,7 +72,7 @@ async function ytdl(videoUrl) {
  
  return results;
  } catch (error) {
- return { success: false, message: error.message };
+ return { success: false, url: error.message };
  console.log('Error:' + error);
  }
 }
@@ -1016,11 +1016,11 @@ app.get('/api/igdl', async (req, res) => {
 });
 app.get('/api/remini', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const imageBuffer = req.query.url;
+    if (!imageBuffer) {
       return res.status(400).json({ error: 'Parameter "image" tidak ditemukan' });
     }
-    const response = await imagetohd(url);
+    const response = await imagetohd(imageBuffer);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
