@@ -11,9 +11,6 @@ const cheerio = require('cheerio');
 const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 
-const { G4F } = require("g4f")
-let g4f = new G4F()
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -211,29 +208,26 @@ async function imagetohd(url, method) {
     )
   })
 }
-async function aio(url) {
+async function aiodl(url) {
   try {
-    return await new Promise(async (resolve, reject) => {
-      if (!url) return reject("Missing URL input");
-      
-      axios
-        .post("https://cdn1.meow.gs/", { url })
-        .then((res) => {
-          let data = res.data;
-          if (!data.url) return reject("Failed to fetch metadata");
-
-          resolve({
-            success: true,
-            result: data,
-          });
-        })
-        .catch(reject);
+    const response = await axios.post("https://aiovd.com/wp-json/aio-dl/video-data", {
+      url: url
+    }, 
+    {
+      headers: {
+        'Accept': '*/*',
+        'Content-Type': 'application/json'
+      }
     });
-  } catch (e) {
-    return {
-      success: false,
-      error: e.message,
+
+    const res = response.data;
+    const result = {
+      data: res.medias
     };
+    
+    return result;
+  } catch (e) {
+    console.log(e);
   }
 }
 
@@ -502,15 +496,36 @@ async function AimusicLyrics(message) {
     throw e
   }
 }
-async function gptlogic(prompt) {
-  const messages = [
-    { role: "system", content: "You are good component." },
-    { role: "asistant", content: "Halo! Saya adalah RiooXdzz, asisten AI yang dikembangkan oleh Rioo. Saya di sini untuk membantu Anda dengan berbagai pertanyaan dan memberikan informasi yang akurat. Apa yang bisa saya bantu hari ini? 😊." },
-    { role: "user", content: prompt }
-  ];
-  let res = await g4f.chatCompletion(messages)
-  return  res
+async function chatWithGPT(messages, q) {
+    try {
+        const nonceValue = JSON.parse(cheerio.load(await (await axios.get(
+            "https://zerogptai.org/"
+        )).data)('.mwai-chatbot-container').attr('data-system')).restNonce;
+
+        const {
+            data
+        } = await axios(
+            "https://zerogptai.org/wp-json/mwai-ui/v1/chats/submit", {
+                method: "post",
+                data: {
+                    botId: "default",
+                    messages,
+                    newMessage: q,
+                    stream: false,
+                },
+                headers: {
+                    "X-WP-Nonce": nonceValue,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+        return data.reply;
+    } catch (err) {
+        console.log(err.response.data);
+        return err.response.data.message;
+    }
 }
+
 async function YanzGPT(message) {
     return new Promise(async (resolve, reject) => {
         const response = await axios("https://yanzgpt.my.id/chat", {
@@ -889,11 +904,11 @@ app.get('/api/iask', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const prompt = req.query.message;
-    if (!prompt) {
+    const messages = req.query.message;
+    if (!messages) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await gptlogic(prompt);
+    const response = await chatWithGPT(messages);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -925,7 +940,7 @@ app.get('/api/aio', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await aio(url);
+    const response = await aiodl(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
