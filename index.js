@@ -9,7 +9,7 @@ const FormData = require('form-data');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 
-const { youtube } = require('./lib/ytdl');
+const { y2mate } = require('./lib/ytdl');
 
 
 const app = express();
@@ -1011,7 +1011,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!videoUrl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await youtube(videoUrl);
+    const response = await y2mate(videoUrl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
