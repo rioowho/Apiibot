@@ -11,6 +11,9 @@ const cheerio = require('cheerio');
 const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 
+const { G4F } = require("g4f")
+let g4f = new G4F()
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -499,7 +502,15 @@ async function AimusicLyrics(message) {
     throw e
   }
 }
-
+async function gptlogic(prompt) {
+  const messages = [
+    { role: "system", content: "You are good component." },
+    { role: "asistant", content: "Halo! Saya adalah RiooXdzz, asisten AI yang dikembangkan oleh Rioo. Saya di sini untuk membantu Anda dengan berbagai pertanyaan dan memberikan informasi yang akurat. Apa yang bisa saya bantu hari ini? 😊." },
+    { role: "user", content: prompt }
+  ];
+  let res = await g4f.chatCompletion(messages)
+  return  res
+}
 async function YanzGPT(message) {
     return new Promise(async (resolve, reject) => {
         const response = await axios("https://yanzgpt.my.id/chat", {
@@ -878,11 +889,11 @@ app.get('/api/iask', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const prompt = req.query.message;
+    if (!prompt) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await YanzGPT(message);
+    const response = await gptlogic(prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
