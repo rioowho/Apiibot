@@ -8,6 +8,7 @@ const { exec } = require("child_process");
 const FormData = require('form-data'); 
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
+const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 
 const app = express();
@@ -233,7 +234,37 @@ async function aio(url) {
   }
 }
 
-async function mediafire(url) {
+
+async function mediafire(mediaFireUrl) {
+  // Launch a headless browser
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+
+  try {
+    // Navigate to the MediaFire page
+    await page.goto(mediaFireUrl, { waitUntil: 'networkidle' });
+
+    // Wait for the download button to appear
+    await page.waitForSelector('a[aria-label="Download file"]', { timeout: 10000 });
+
+    // Extract the href attribute of the download link
+    const downloadLink = await page.$eval('a[aria-label="Download file"]', link =>
+      link.href
+    );
+
+    console.log("Download Link:", downloadLink);
+
+    return downloadLink;
+  } catch (error) {
+    console.error("Error:", error.message);
+    return null;
+  } finally {
+    // Close the browser
+    await browser.close();
+  }
+}
+
+async function mediafiree(url) {
   return new Promise(async (resolve, reject) => {
     try {
       const { data, status } = await axios.get(url);
@@ -993,11 +1024,11 @@ app.get('/api/tiktok', async (req, res) => {
 });
 app.get('/api/mediafire', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const mediaFireUrl = req.query.url;
+    if (!mediaFireUrl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await mediafire(url);
+    const response = await mediafire(mediaFireUrl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
