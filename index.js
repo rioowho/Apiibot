@@ -134,59 +134,19 @@ async function iask(query) {
  const string = start.result.output;
  return JSON.parse(string);
 }
+async function aio(url) {
+  if (!url) throw new Error('URL is required.');
 
-async function aio(config) {
+  const endpoint = `https://api.neastooid.xyz/api/downloader/aiodown?url=${encodeURIComponent(url)}`;
+  const response = await fetch(endpoint);
 
-/*
-  Created by https://github.com/ztrdiamond !
-  Source: https://whatsapp.com/channel/0029VagFeoY9cDDa9ulpwM0T
-  "Aku janji jika hapus watermark ini maka aku rela miskin hingga 7 turunan"
-*/
-
-  try {
-    return await new Promise(async (resolve, reject) => {
-      if (!(typeof config === "object")) return reject("invalid config input, config must be json object!");
-      config = {
-        url: config?.url || null,
-        videoQuality: config?.videoQuality || "720",
-        audioFormat: config?.audioFormat || "mp3",
-        audioBitrate: config?.audioBitrate || "128",
-        filenameStyle: config?.filenameStyle || "classic",
-        downloadMode: config?.downloadMode || "auto",
-        youtubeVideoCodec: config?.youtubeVideoCodec || "h264",
-        youtubeDubLang: config?.youtubeDubLang || "en",
-        alwaysProxy: config?.alwaysProxy || false,
-        disableMetadata: config?.disableMetadata || false,
-        tiktokFullAudio: config?.tiktokFullAudio || true,
-        tiktokH265: config?.tiktokH265 || true,
-        twitterGif: config?.twitterGif || true,
-        youtubeHLS: config?.youtubeHLS || false
-      };
-      if (!config.url) return reject("missing url input!");
-      axios.post("https://co.eepy.today/", config, {
-        headers: {
-          accept: "application/json",
-          contentType: "application/json"
-        }
-      }).then(res => {
-        const data = res.data;
-        if (data.status === "error") return reject("failed fetch content");
-        resolve({
-          success: true,
-          result: data
-        });
-      }).catch(e => {
-        if (e?.response?.data) return reject(e.response.data.error);
-        else return reject(e);
-      });
-    });
-  } catch (e) {
-    return {
-      success: false,
-      errors: e
-    };
+  if (!response.ok) {
+    throw new Error(`Failed to fetch: ${response.status}`);
   }
+
+  return response.json();
 }
+
 async function ytdl(videoUrl) {
  const form = new FormData();
  form.append('query', videoUrl);
@@ -1004,11 +964,11 @@ app.get('/api/ytdl', async (req, res) => {
 });
 app.get('/api/aio', async (req, res) => {
   try {
-    const config = req.query.url;
-    if (!config) {
+    const url = req.query.url;
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await aio(config);
+    const response = await aio(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
