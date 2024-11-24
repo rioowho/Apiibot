@@ -15,47 +15,7 @@
     <link href='/css/styles.css' rel='stylesheet'>
     <link href='/css/animate.css' rel='stylesheet'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
-<style>
-    /* Add your custom animations here */
-    
-    .loading-text {
-      animation: shake 2s infinite;
-    }
 
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-      20%, 40%, 60%, 80% { transform: translateX(10px); }
-    }
-
-  </style>
-</head>
-<body>
-<div class="pre-loader">
-			<div class="pre-loader-box">
-				<div class="loader-logo">
-					<img src="https://dropways.github.io/deskapp/vendors/images/deskapp-logo.svg" alt="" />
-				</div>
-				<div class="loader-progress" id="progress_div">
-					<div class="bar" id="bar1"></div>
-				</div>
-				<div class="percent" id="percent1">0%</div>
-				<div class="loading-text">Loading...</div>
-			</div>
-		</div>    
-		<header id="header" class="header fixed-top d-flex align-items-center" style="width:100%">
-<div class="d-flex align-items-center justify-content-between">
-<div class="toggles">
-<i id="toggle-icon" class="bi bi-list toggle-sidebar-btn"></i>
-</div>
-</div>
-<nav class="header-nav ms-auto">
-<ul class="d-flex align-items-center">
-<li class="nav-item d-block d-lg-none">
-<a class="nav-link nav-icon search-bar-toggle" style="margin-right: -15px;">
-<i class="fa fa-search faa-ring animated faa-slow"></i>
-</a>
-</li>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -174,6 +134,57 @@
     }
   }
 </style>
+    <!-- Navbar -->
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                SSA APIs
+            </a>
+            
+            <!-- Hamburger Menu -->
+            <div class="hamburger lg:hidden" id="hamburger">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden lg:flex space-x-8">
+                <a href="/tqto" class="hover:text-blue-400 transition-colors">Credits</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu fixed top-0 left-0 h-full w-64 bg-gray-900 z-40 p-6 lg:hidden">
+        <div class="flex flex-col space-y-6 mt-16">
+            <a href="/tqto" class="hover:text-blue-400 transition-colors">Credits</a>
+        </div>
+    </div>
+
+    <!-- Header with Logo -->
+    <header class="py-24 px-6 text-center animate__animated animate__fadeIn">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-center gap-8">
+            <!-- Logo/Image Container -->
+            <div class="logo-container w-32 h-32 md:w-48 md:h-48 relative">
+                <div class="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-purple-600 opacity-20 absolute animate-pulse"></div>
+                <div class="w-full h-full rounded-full bg-gradient-to-br from-blue-400 to-purple-500 opacity-30 absolute" style="transform: scale(0.9)"></div>
+                <img src="https://pomf2.lain.la/f/d3l8zx17.jpg" alt="RiooXdzz Logo" class="w-full h-full object-contain relative z-10"/>
+            </div>
+            
+            <!-- Title and Description -->
+            <div class="text-center md:text-left">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent">
+                  <div class="text">
+                    <span class="typing"></span>
+                  </div>
+                </h1>
+          
+                <p class="mt-4 text-gray-400">Welcome to SSA Rest APIs!</p>
+            </div>
+        </div>
+    </header>
+    
 </head>
 <body>
 <div class="container">
