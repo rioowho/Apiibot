@@ -19,7 +19,20 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-
+async function sfileSearch(query, page = 1) {
+  let res = await fetch(
+    `https://sfile.mobi/search.php?q=${query}&page=${page}`,
+  );
+  let $ = cheerio.load(await res.text());
+  let result = [];
+  $("div.list").each(function () {
+    let title = $(this).find("a").text();
+    let size = $(this).text().trim().split("(")[1];
+    let link = $(this).find("a").attr("href");
+    if (link) result.push({ title, size: size.replace(")", ""), link });
+  });
+  return result;
+}
 
 async function iask(query) {
  const code = `const { chromium } = require('playwright');
@@ -948,13 +961,13 @@ app.get('/api/search-pinterest', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/search-apk', async (req, res) => {
+app.get('/api/search-sfile', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const query = req.query.message;
+    if (!query) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await searchApp(message);
+    const response = await sfileSearch(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
