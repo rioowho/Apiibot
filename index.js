@@ -161,19 +161,20 @@ async function ytdl(videoUrl) {
  $(tab).find('tbody tr').each((i, element) => {
  const fileType = $(element).find('td').eq(0).text().trim();
  const fileSize = $(element).find('td').eq(1).text().trim();
- const downloadLink = $(element).find('a.dbtn').attr('href');
-
+ const mp4 = $(element).find('a.dbtn').attr('href');
+ const mp3 = $(element).find('a.dbtn').attr('href');
+ 
  if (tabTitle === 'tab-item-1') {
  results.video.push({
  fileType,
  fileSize,
- downloadLink
+ mp4
  });
  } else if (tabTitle === 'tab-item-2') {
  results.audio.push({
  fileType,
  fileSize,
- downloadLink
+ mp3
  });
  } else if (tabTitle === 'tab-item-3') {
  results.other.push({
