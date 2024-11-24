@@ -163,6 +163,7 @@ async function ytdl(videoUrl) {
  const fileSize = $(element).find('td').eq(1).text().trim();
  const mp4 = $(element).find('a.dbtn').attr('href');
  const mp3 = $(element).find('a.dbtn').attr('href');
+ const downloadLink = $(element).find('a.dbtn').attr('href');
  
  if (tabTitle === 'tab-item-1') {
  results.video.push({
