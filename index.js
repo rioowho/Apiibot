@@ -133,7 +133,7 @@ async function iask(query) {
  return JSON.parse(string);
 }
 
-async function ytdl(videoUrl) {
+async function ytdll(videoUrl) {
   return new Promise(async (resolve, reject) => {
     try {
       const searchParams = new URLSearchParams();
