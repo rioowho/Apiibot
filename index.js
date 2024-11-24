@@ -972,9 +972,9 @@ app.get('/api/ytdl', async (req, res) => {
     }
     const response = await ytdl(videoUrl);
     res.status(200).json({
-      status: true,
+      status: 200,
       creator: "RiooXdzz",
-      data: { results }
+      data: { response }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
