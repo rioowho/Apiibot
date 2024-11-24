@@ -1064,7 +1064,7 @@ app.get('/api/remini', async (req, res) => {
   }
 });
 
-router.get('/api/status', async (req, res) => {
+app.get('/api/status', async (req, res) => {
 function muptime(seconds) {
 	function pad(s) {
 		return (s < 10 ? "0" : "") + s;
