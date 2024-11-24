@@ -207,7 +207,9 @@
     <link href='/css/styles.css' rel='stylesheet'>
     <link href='/css/animate.css' rel='stylesheet'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
-
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -326,8 +328,37 @@
     }
   }
 </style>
-
+</head>
+<body class="text-gray-200">
+    <div id="stars"></div>
     
+    <!-- Navbar -->
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                SSA APIs
+            </a>
+            
+            <!-- Hamburger Menu -->
+            <div class="hamburger lg:hidden" id="hamburger">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </div>
+
+            <!-- Desktop Menu -->
+            <div class="hidden lg:flex space-x-8">
+                <a href="/tqto" class="hover:text-blue-400 transition-colors">Credits</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu fixed top-0 left-0 h-full w-64 bg-gray-900 z-40 p-6 lg:hidden">
+        <div class="flex flex-col space-y-6 mt-16">
+            <a href="/tqto" class="hover:text-blue-400 transition-colors">Credits</a>
+        </div>
+    </div>    
 </head>
 <body>
 <div class="container">
