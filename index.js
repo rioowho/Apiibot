@@ -500,34 +500,28 @@ async function AimusicLyrics(message) {
     throw e
   }
 }
-async function chatWithGPT(messages, q) {
-    try {
-        const nonceValue = JSON.parse(cheerio.load(await (await axios.get(
-            "https://zerogptai.org/"
-        )).data)('.mwai-chatbot-container').attr('data-system')).restNonce;
-
-        const {
-            data
-        } = await axios(
-            "https://zerogptai.org/wp-json/mwai-ui/v1/chats/submit", {
-                method: "post",
-                data: {
-                    botId: "default",
-                    messages,
-                    newMessage: q,
-                    stream: false,
-                },
+async function gptlogic(query) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios.post('https://api.yanzbotz.live/api/ai/gpt4', {
+                query: query,
+                prompt: "Saya adalah GptLogic asisten virtual yang canggih dan populer saat ini, saya di ciptakan oleh Rioo "
+            }, {
                 headers: {
-                    "X-WP-Nonce": nonceValue,
-                    "Content-Type": "application/json",
-                },
+                    'Content-Type': 'application/json'
+                }
+            });
+            const regex = /"answer":"([^"]*)"/g;
+            let match;
+            let result = '';
+            while ((match = regex.exec(response.data)) !== null) {
+                result += match[1];
             }
-        );
-        return data.reply;
-    } catch (err) {
-        console.log(err.response.data);
-        return err.response.data.message;
-    }
+            resolve(result.replace(/\\n/g, '\n').replace(/\\/g, '').replace(/\*\*/g, '*').replace(/###/g, '>'));
+        } catch (error) {
+            reject(error);
+        }
+    });
 }
 
 async function YanzGPT(message) {
@@ -891,11 +885,11 @@ app.get('/api/iask', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const messages = req.query.message;
-    if (!messages) {
+    const query = req.query.message;
+    if (!query) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await chatWithGPT(messages);
+    const response = await gptlogic(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
