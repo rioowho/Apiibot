@@ -161,92 +161,6 @@
   li {
     margin-bottom: 10px;
   }
-  .star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle 1.5s infinite ease-in-out;
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 0.8; }
-        }
-
-        .endpoint-card, .stats-card {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .endpoint-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            border-color: rgba(147, 197, 253, 0.5);
-        }
-
-        .stats-card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(147, 197, 253, 0.3);
-        }
-
-        .method-badge {
-            font-size: 0.8rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 0.3rem;
-            font-weight: 600;
-        }
-  .method-get { background: rgba(52, 211, 153, 0.2); color: #34D399; }
-        .method-post { background: rgba(251, 146, 60, 0.2); color: #FB923C; }
-        .method-put { background: rgba(147, 197, 253, 0.2); color: #93C5FD; }
-        .method-delete { background: rgba(252, 165, 165, 0.2); color: #FCA5A5; }
-        
-  .navbar {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
-        }
-
-        .mobile-menu {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .mobile-menu.active {
-            transform: translateX(0);
-        }
-
-        .hamburger {
-            cursor: pointer;
-            padding: 10px;
-        }
-
-        .hamburger-line {
-            display: block;
-            width: 24px;
-            height: 2px;
-            margin: 5px auto;
-            background-color: white;
-            transition: all 0.3s ease-in-out;
-        }
-        .hamburger.active .hamburger-line:nth-child(1) {
-            transform: translateY(7px) rotate(45deg);
-        }
-
-        .hamburger.active .hamburger-line:nth-child(2) {
-            opacity: 0;
-        }
-
-        .hamburger.active .hamburger-line:nth-child(3) {
-            transform: translateY(-7px) rotate(-45deg);
-        }
-
-        .stat-value {
-            background: linear-gradient(45deg, #60A5FA, #A78BFA);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
   pre {
     background-color: #191c31;
     padding: 10px;
@@ -328,38 +242,6 @@
     }
   }
 </style>
-</head>
-<body class="text-gray-200">
-    <div id="stars"></div>
-    
-    <!-- Navbar -->
-    <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="#" class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                Rioo Api's
-            </a>
-            
-            <!-- Hamburger Menu -->
-            <div class="hamburger lg:hidden" id="hamburger">
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
-            </div>
-
-            <!-- Desktop Menu -->
-            <div class="hidden lg:flex space-x-8">
-                <a href="/tqto" class="hover:text-blue-400 transition-colors">Credits</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Mobile Menu -->
-    <div class="mobile-menu fixed top-0 left-0 h-full w-64 bg-gray-900 z-40 p-6 lg:hidden">
-        <div class="flex flex-col space-y-6 mt-16">
-            <a href="/tqto" class="hover:text-blue-400 transition-colors">Credits</a>
-        </div>
-    </div>    
-
 </head>
 <body>
 <div class="container">
@@ -455,17 +337,6 @@
         <li>The owner can change the conditions on this website at any time, in order to maintain the quality of the website.</li>
         <li>All the features here are free and unlimited request.</li>
         <li>The owner is not responsible for what you do when using this website.</li>
-      </ol>
-    </div>
-  </div>
-</div>
-<h2 class="centered-title">Credits</h2>
-  <div class="work__card mix apps sites">
-    <div class="card-body mb-3">
-      <ol>
-        <li>Rioo</li>
-        <li>KyuuRzy.</li>
-        <li>All Creator WhatsApp.</li>
       </ol>
     </div>
   </div>
