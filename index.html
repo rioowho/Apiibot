@@ -15,7 +15,34 @@
     <link href='/css/styles.css' rel='stylesheet'>
     <link href='/css/animate.css' rel='stylesheet'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
+<style>
+    /* Add your custom animations here */
     
+    .loading-text {
+      animation: shake 2s infinite;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+      20%, 40%, 60%, 80% { transform: translateX(10px); }
+    }
+
+  </style>
+</head>
+<body>
+<div class="pre-loader">
+			<div class="pre-loader-box">
+				<div class="loader-logo">
+					<img src="https://dropways.github.io/deskapp/vendors/images/deskapp-logo.svg" alt="" />
+				</div>
+				<div class="loader-progress" id="progress_div">
+					<div class="bar" id="bar1"></div>
+				</div>
+				<div class="percent" id="percent1">0%</div>
+				<div class="loading-text">Loading...</div>
+			</div>
+		</div>    
 <style>
   body {
     font-family: Arial, sans-serif;
