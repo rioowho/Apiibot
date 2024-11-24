@@ -207,7 +207,7 @@
     <link href='/css/styles.css' rel='stylesheet'>
     <link href='/css/animate.css' rel='stylesheet'>
     <link href='https://fonts.googleapis.com/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <style>
@@ -247,6 +247,12 @@
   li {
     margin-bottom: 10px;
   }
+  
+  .method-get { background: rgba(52, 211, 153, 0.2); color: #34D399; }
+        .method-post { background: rgba(251, 146, 60, 0.2); color: #FB923C; }
+        .method-put { background: rgba(147, 197, 253, 0.2); color: #93C5FD; }
+        .method-delete { background: rgba(252, 165, 165, 0.2); color: #FCA5A5; }
+        
   .navbar {
             background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(10px);
@@ -291,39 +297,6 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-        }
-
-        .logo-container {
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-
-        .slider-container {
-        transform: translateX(0);
-    }
-    
-    .slide {
-        transition: opacity 0.5s ease-in-out;
-    }
-    
-    .slider-indicator.active {
-        background-opacity: 1;
-        width: 1rem;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-        @media (max-width: 768px) {
-            .endpoint-card {
-                margin: 1rem;
-            }
         }
   pre {
     background-color: #191c31;
