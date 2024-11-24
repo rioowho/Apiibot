@@ -135,7 +135,58 @@ async function iask(query) {
  return JSON.parse(string);
 }
 
+async function aio(config) {
 
+/*
+  Created by https://github.com/ztrdiamond !
+  Source: https://whatsapp.com/channel/0029VagFeoY9cDDa9ulpwM0T
+  "Aku janji jika hapus watermark ini maka aku rela miskin hingga 7 turunan"
+*/
+
+  try {
+    return await new Promise(async (resolve, reject) => {
+      if (!(typeof config === "object")) return reject("invalid config input, config must be json object!");
+      config = {
+        url: config?.url || null,
+        videoQuality: config?.videoQuality || "720",
+        audioFormat: config?.audioFormat || "mp3",
+        audioBitrate: config?.audioBitrate || "128",
+        filenameStyle: config?.filenameStyle || "classic",
+        downloadMode: config?.downloadMode || "auto",
+        youtubeVideoCodec: config?.youtubeVideoCodec || "h264",
+        youtubeDubLang: config?.youtubeDubLang || "en",
+        alwaysProxy: config?.alwaysProxy || false,
+        disableMetadata: config?.disableMetadata || false,
+        tiktokFullAudio: config?.tiktokFullAudio || true,
+        tiktokH265: config?.tiktokH265 || true,
+        twitterGif: config?.twitterGif || true,
+        youtubeHLS: config?.youtubeHLS || false
+      };
+      if (!config.url) return reject("missing url input!");
+      axios.post("https://co.eepy.today/", config, {
+        headers: {
+          accept: "application/json",
+          contentType: "application/json"
+        }
+      }).then(res => {
+        const data = res.data;
+        if (data.status === "error") return reject("failed fetch content");
+        resolve({
+          success: true,
+          result: data
+        });
+      }).catch(e => {
+        if (e?.response?.data) return reject(e.response.data.error);
+        else return reject(e);
+      });
+    });
+  } catch (e) {
+    return {
+      success: false,
+      errors: e
+    };
+  }
+}
 async function ytdl(videoUrl) {
  const form = new FormData();
  form.append('query', videoUrl);
@@ -400,39 +451,7 @@ async function pinterest(message) {
     return data[~~(Math.random() * data.length)].images.orig.url;
 
 }
- function fbdl(link) {
-  return new Promise((resolve, reject) => {
-    let config = {
-      url: link,
-    };
-    axios("https://www.getfvid.com/downloader", {
-      method: "POST",
-      data: new URLSearchParams(Object.entries(config)),
-      headers: {
-        "content-type": "application/x-www-form-urlencoded",
-        "user-agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        cookie:
-          "_ga=GA1.2.1310699039.1624884412; _pbjs_userid_consent_data=3524755945110770; cto_bidid=rQH5Tl9NNm5IWFZsem00SVVuZGpEd21sWnp0WmhUeTZpRXdkWlRUOSUyQkYlMkJQQnJRSHVPZ3Fhb1R2UUFiTWJuVGlhVkN1TGM2anhDT1M1Qk0ydHlBb21LJTJGNkdCOWtZalRtZFlxJTJGa3FVTG1TaHlzdDRvJTNE; cto_bundle=g1Ka319NaThuSmh6UklyWm5vV2pkb3NYaUZMeWlHVUtDbVBmeldhNm5qVGVwWnJzSUElMkJXVDdORmU5VElvV2pXUTJhQ3owVWI5enE1WjJ4ZHR5NDZqd1hCZnVHVGZmOEd0eURzcSUyQkNDcHZsR0xJcTZaRFZEMDkzUk1xSmhYMlY0TTdUY0hpZm9NTk5GYXVxWjBJZTR0dE9rQmZ3JTNEJTNE; _gid=GA1.2.908874955.1625126838; __gads=ID=5be9d413ff899546-22e04a9e18ca0046:T=1625126836:RT=1625126836:S=ALNI_Ma0axY94aSdwMIg95hxZVZ-JGNT2w; cookieconsent_status=dismiss",
-      },
-    })
-      .then(async ({ data }) => {
-        const $ = cheerio.load(data);
-        resolve({
-          Normal_video: $(
-            "body > div.page-content > div > div > div.col-lg-10.col-md-10.col-centered > div > div:nth-child(3) > div > div.col-md-4.btns-download > p:nth-child(1) > a",
-          ).attr("href"),
-          HD: $(
-            "body > div.page-content > div > div > div.col-lg-10.col-md-10.col-centered > div > div:nth-child(3) > div > div.col-md-4.btns-download > p:nth-child(1) > a",
-          ).attr("href"),
-          audio: $(
-            "body > div.page-content > div > div > div.col-lg-10.col-md-10.col-centered > div > div:nth-child(3) > div > div.col-md-4.btns-download > p:nth-child(2) > a",
-          ).attr("href"),
-        });
-      })
-      .catch(reject);
-  });
-}
+
 async function tiktoks(message) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -983,13 +1002,13 @@ app.get('/api/ytdl', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/facebook', async (req, res) => {
+app.get('/api/aio', async (req, res) => {
   try {
-    const link = req.query.url;
-    if (!link) {
+    const config = req.query.url;
+    if (!config) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await fbdl(link);
+    const response = await aio(config);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
