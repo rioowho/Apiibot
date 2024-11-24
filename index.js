@@ -119,7 +119,6 @@ async function ytdl(videoUrl) {
  const $ = cheerio.load(response.data);
 
  const results = {
- success: true,
  title: $('.vtitle').text().trim(),
  duration: $('.res_left p').text().replace('Duration: ', '').trim(),
  image: $('.ac img').attr('src'),
@@ -973,9 +972,9 @@ app.get('/api/ytdl', async (req, res) => {
     }
     const response = await ytdl(videoUrl);
     res.status(200).json({
-      status: 200,
+      status: true,
       creator: "RiooXdzz",
-      data: { response }
+      data: { results }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
