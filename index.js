@@ -10,11 +10,13 @@ const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
+var { performance } = require("perf_hooks");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
 app.set("json spaces", 2);
+
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
@@ -1061,6 +1063,48 @@ app.get('/api/remini', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+router.get('/api/status', async (req, res) => {
+function muptime(seconds) {
+	function pad(s) {
+		return (s < 10 ? "0" : "") + s;
+	}
+	var hours = Math.floor(seconds / (60 * 60));
+	var minutes = Math.floor((seconds % (60 * 60)) / 60);
+	var seconds = Math.floor(seconds % 60);
+
+	return pad(hours) + " : " + pad(minutes) + " : " + pad(seconds);
+}
+	var date = new Date();
+	var jam = date.getHours();
+	var menit = date.getMinutes();
+	var detik = date.getSeconds();
+	var old = performance.now();
+	var neww = performance.now();
+	var ram = `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(
+		2
+	)}MB / ${Math.round(require("os").totalmem / 1024 / 1024)}MB`;
+	var cpu = require("os").cpus();
+	var json = await (await fetch("https://api.ipify.org/?format=json")).json();
+	var port = process.env.PORT || 8080 || 5000 || 3000;
+	status = {
+		status: "online",
+		memory: ram,
+		cpu: cpu[0].model,
+		port: port,
+		ip: json.ip,
+		time: `${jam} : ${menit} : ${detik}`,
+		uptime: muptime(process.uptime()),
+		speed: `${neww - old}ms`,
+		info: {
+			owner: "RiooXdzz",
+			apikey: "Chat Owner: https://wa.me/6285691304150",
+		},
+	};
+	res.json(status);
+});
+
+
 // Handle 404 error
 app.use((req, res, next) => {
   res.status(404).send("Sorry can't find that!");
