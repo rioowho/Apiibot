@@ -292,51 +292,24 @@ async function mediafire(url) {
  const start = await run('javascript', code);
  return start.result.output;
 }
-
 async function igdl(url) {
-  let res = await axios("https://indown.io/")
-  let _$ = cheerio.load(res.data)
-  let referer = _$("input[name=referer]").val()
-  let locale = _$("input[name=locale]").val()
-  let _token = _$("input[name=_token]").val()
-  let {
-    data
-  } = await axios.post(
-    "https://indown.io/download",
-    new URLSearchParams({
-      link: url,
-      referer,
-      locale,
-      _token,
-    }),
-    {
-      headers: {
-        cookie: res.headers["set-cookie"].join(" "),
-      },
-    }
-  )
-  let $ = cheerio.load(data)
-  let result = []
-  let __$ = cheerio.load($("#result").html())
-  __$("video").each(function () {
-    let $$ = $(this)
-    result.push({
-      author: creator,
-      type: "video",
-      thumbnail: $$.attr("poster"),
-      url: $$.find("source").attr("src"),
-    })
-  })
-  __$("img").each(function () {
-    let $$ = $(this)
-    result.push({
-      author: global.creator,
-      type: "image",
-      url: $$.attr("src"),
-    })
-  })
+    try {
+        const apiUrl = `https://api.neastooid.xyz/api/downloader/igdl?url=${encodeURIComponent(url)}`;
+        const response = await fetch(apiUrl);
 
-  return result
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data; // Mengembalikan JSON langsung tanpa modifikasi
+    } catch (error) {
+        console.error('Error:', error.message);
+        return {
+            success: false,
+            error: 'Error dalam mendapatkan data dari API Instagram downloader',
+        };
+    }
 }
 
 async function tiktok(url) {
@@ -486,7 +459,7 @@ async function AimusicLyrics(message) {
 async function gptlogic(query) {
     return new Promise(async (resolve, reject) => {
         try {
-            const response = await axios.post('https://api.yanzbotz.live/api/ai/gpt4', {
+            const response = await axios.post('https://api.neastooid.xyz/api/ai/chatgpt', {
                 query: query,
                 prompt: "Saya adalah GptLogic asisten virtual yang canggih dan populer saat ini, saya di ciptakan oleh Rioo "
             }, {
