@@ -565,33 +565,16 @@ async function gemini(message) {
 }
 
 async function gpt3(message) {
-    const url = 'https://shinoa.us.kg/api/gpt/gpt3';
-    const headers = {
-        'accept': '*/*',
-        'api_key': 'kyuurzy',
-        'Content-Type': 'application/json'
-    };
-    const body = JSON.stringify({
-        text: message
-    });
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: headers,
-            body: body
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Request failed:', error);
-        throw error;
-    }
+   try {
+     var api = await axios.get(`https://hercai.onrender.com/turbo/hercai?question=${encodeURIComponent(message)}`, {
+         headers: {
+         "content-type": "application/json",
+         },
+        })
+      return api.data;
+    } catch (e) {
+    console.log(e)
+  }
 }
 
 async function LuminAI(message, model = "gpt-4o-mini") {
