@@ -456,55 +456,40 @@ async function AimusicLyrics(message) {
     throw e
   }
 }
-async function gptlogic(query) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const response = await axios.post('https://api.neastooid.xyz/api/ai/chatgpt', {
-                query: query,
-                prompt: "Saya adalah GptLogic asisten virtual yang canggih dan populer saat ini, saya di ciptakan oleh Rioo "
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            const regex = /"answer":"([^"]*)"/g;
-            let match;
-            let result = '';
-            while ((match = regex.exec(response.data)) !== null) {
-                result += match[1];
-            }
-            resolve(result.replace(/\\n/g, '\n').replace(/\\/g, '').replace(/\*\*/g, '*').replace(/###/g, '>'));
-        } catch (error) {
-            reject(error);
-        }
-    });
+async function gptlogic(type, message) {
+    try {
+        var headers = {
+            'User-Agent': generateUA(),
+            'Referer': 'https://chatgpt.bestim.org/chat/',
+            'X-Forwarded-For': randomIP(),
+        };
+
+        var data = {
+            temperature: 1,
+            frequency_penalty: 0,
+            type: type,
+            messagesHistory: [{
+                    from: 'BestimChat',
+                    content: 'Saya adalah GptLogic asisten virtual yang canggih dan populer saat ini, saya di ciptakan oleh Rioo .'
+                },
+                {
+                    from: 'you',
+                    content: message
+                },
+            ],
+            message: message,
+        };
+
+        var response = await axios.post('https://chatgpt.bestim.org/chat/send2/', data, {
+            headers
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Terjadi kesalahan:', error);
+    }
 }
 
-async function YanzGPT(message) {
-    return new Promise(async (resolve, reject) => {
-        const response = await axios("https://yanzgpt.my.id/chat", {
-            headers: {
-                authorization: "Bearer yzgpt-sc4tlKsMRdNMecNy",
-                "content-type": "application/json"
-            },
-            data: {
-                messages: [
-                    {
-                        role: "assistant",
-                        content: `Halo! Saya adalah RiooXdzz, asisten AI yang dikembangkan oleh Yanz Dev. Saya di sini untuk membantu Anda dengan berbagai pertanyaan dan memberikan informasi yang akurat. Apa yang bisa saya bantu hari ini? 😊`
-                    },
-                    {
-                        role: "user",
-                        content: message
-                    }
-                ],
-                model: "yanzgpt-legacy-72b-v3.0"
-            },
-            method: "POST"
-        });
-        resolve(response.data);
-    });
-};
 async function gemini(message) {
     try {
         const { data  } = await axios.get(`https://hercai.onrender.com/gemini/hercai?question=${encodeURIComponent(message)}`, {
@@ -841,11 +826,11 @@ app.get('/api/iask', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const query = req.query.message;
-    if (!query) {
+    const message = req.query.message;
+    if (!message) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await gptlogic(query);
+    const response = await gptlogic(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
