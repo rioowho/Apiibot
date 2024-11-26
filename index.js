@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
-
+const { ytMp4, ytMp3 } = require(__path + '/lib/y2mate')
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -687,21 +687,35 @@ async function llama3(message) {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
-app.get('/api/toanime', async (req, res) => {
-	let url = req.query.url
-	if (!url) return res.json(loghandler.noturl)
-	const { toanime } = require(__path + "/lib/scrape.js")
-	toanime(url)
-		.then(async data => {
-			res.json({
-				status: true,
-				code: 200,
-				result: data,
-				creator: creator
-			})
-		}).catch(e => {
-			console.error(e)
-		})
+app.get('/dowloader/ytdl2', async (req, res, next) => {
+	var url = req.query.url
+	if (!url) return res.json({ status: false, code: 503, creator: `${creator}`, message: "[!] enter url parameter!" })
+
+	var mp3 = await ytMp3(url)
+	var mp4 = await ytMp4(url)
+	if (!mp4 || !mp3) return res.json(loghandler.noturl)
+	res.json({
+		status: true,
+		code: 200,
+		creator: `${creator}`,
+		result: {
+			title: mp4.title,
+			desc: mp4.desc,
+			thum: mp4.thumb,
+			view: mp4.views,
+			channel: mp4.channel,
+			uploadDate: mp4.uploadDate,
+			mp4: {
+				result: mp4.result,
+				size: mp4.size,
+				quality: mp4.quality
+			},
+			mp3: {
+				result: mp3.result,
+				size: mp3.size
+			}
+		}
+	})
 })
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
@@ -955,11 +969,11 @@ app.get('/api/search-sfile', async (req, res) => {
 });
 app.get('/api/ytdl', async (req, res) => {
   try {
-    const link = req.query.url;
-    if (!link) {
+    const videoUrl = req.query.url;
+    if (!videoUrl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await youtube(link);
+    const response = await ytdl(videoUrl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
