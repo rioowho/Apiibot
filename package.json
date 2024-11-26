@@ -25,6 +25,8 @@
     "cheerio": "github:Tiooxy/cheerio",
     "node-cache": "^5.1.2",
     "jimp": "^0.22.10",
-    "jsdom": "^24.1.0"
+    "millify": "^6.1.0",
+    "jsdom": "^24.1.0",
+    "ytdl-core": "npm:@distube/ytdl-core@^4.15.1"
   }
 }
