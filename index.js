@@ -21,6 +21,38 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+loghandler = {
+	error: {
+		status: false,
+		code: 503,
+		message: "service got error, try again in 10 seconds",
+		creator: creator
+	},
+	noturl: {
+		status: false,
+		code: 503,
+		message: "enter paramater url",
+		creator: creator
+	},
+	nottext: {
+		status: false,
+		code: 503,
+		message: "enter parameter text",
+		creator: creator
+	},
+	notquery: {
+		status: false,
+		code: 503,
+		message: "enter parameter query",
+		creator: creator
+	},
+	notusername: {
+		status: false,
+		code: 503,
+		message: "enter parameter username",
+		creator: creator
+	}
+}
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 async function sfileSearch(query, page = 1) {
   let res = await fetch(
@@ -654,7 +686,22 @@ async function llama3(message) {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
-
+app.get('/api/toanime', async (req, res) => {
+	let url = req.query.url
+	if (!url) return res.json(loghandler.noturl)
+	const { toanime } = require(__path + "/lib/scrape.js")
+	toanime(url)
+		.then(async data => {
+			res.json({
+				status: true,
+				code: 200,
+				result: data,
+				creator: creator
+			})
+		}).catch(e => {
+			console.error(e)
+		})
+})
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
   try {
