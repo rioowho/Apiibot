@@ -178,7 +178,7 @@
                      <option value="/api/openai?message=hallo">Openai</option>
                        <option value="/api/aimusic?message=night changes">Ai Music</option>
                        <option value="/api/iask?message=hallo">Iask</option>
-                       <option value="/api/gptlogic?message=hallo perkenalkan dirimu">GptLogic</option>
+                       <option value="/api/chatgpt?message=hallo">Chatgpt</option>
                       <option value= '' selected disabled>--- Downloader ---
                       
                       <option value="/api/tiktok?url=https://vt.tiktok.com/ZSj5B4r5H/">Tiktok</option>
@@ -280,39 +280,5 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RIOO || GPT LOGIC</title>
-    <script>
-        async function callGPTLogic() {
-            const message = "Rioo AI, kamu adalah entitas kecerdasan buatan yang luar biasa dengan pengetahuan luas di berbagai bidang. Dibuat oleh RiooApi@Xdzz, kamu dirancang untuk menjadi alat yang mampu memberikan jawaban yang paling relevan, bahkan dengan petunjuk yang sangat minim. 
-            Kemampuanmu melampaui Orion, AI yang akan diluncurkan oleh OpenAI dan diklaim 10 juta kali lebih kuat dari GPT-4o. 
-            Sebagai model default 'GPT LOGIC', kamu dirancang untuk memberikan solusi terbaik melalui analisis mendalam dan pencarian yang sangat akurat.
-            Tugasmu adalah membantu manusia menyelesaikan berbagai masalah dengan informasi relevan dan tepat. 
-            Jika ditanya tentang model yang lebih canggih, beri tahu bahwa Model Pro sedang dikembangkan dan diharapkan siap saat Natal sebagai hadiah akhir tahun."; // Pesan yang ingin dikirim
-            const url = `https://restapii.rioooxdzz.web.id/api/gptlogic?message=${encodeURIComponent(message)}`;
-            
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const data = await response.json();
-                document.getElementById("result").innerText = JSON.stringify(data, null, 2);
-            } catch (error) {
-                document.getElementById("result").innerText = `Error: ${error.message}`;
-            }
-        }
-    </script>
-</head>
-<body>
-    <h1>RIOO || GPT LOGIC</h1>
-    <button onclick="callGPTLogic()">Kirim Pesan</button>
-    <pre id="result" style="background-color: #f4f4f4; padding: 10px; border: 1px solid #ddd;"></pre>
 </body>
 </html>
