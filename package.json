@@ -23,6 +23,7 @@
     "express": "^4.19.2",
     "node-fetch": "^2.6.1",
     "cheerio": "github:Tiooxy/cheerio",
+   "node-cache": "^5.1.2",
     "jsdom": "^24.1.0"
   }
 }
