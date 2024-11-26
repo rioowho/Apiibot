@@ -687,7 +687,7 @@ async function llama3(message) {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
-app.get('/dowloader/ytdl2', async (req, res, next) => {
+app.get('/api/ytdl2', async (req, res, next) => {
 	var url = req.query.url
 	if (!url) return res.json({ status: false, code: 503, creator: `${creator}`, message: "[!] enter url parameter!" })
 
