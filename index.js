@@ -13,7 +13,6 @@ const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
-const { ytMp4, ytMp3 } = require(__path + '/lib/y2mate')
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -703,6 +702,29 @@ async function blackboxAIChat(message) {
     throw error;
   }
 }
+
+async function gptlogic(prompt) {
+let postData = {
+    prompt: prompt,
+    sessionId: '-',
+    character: `Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja sma, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150`
+};
+
+try {
+    let response = await axios({
+        url: "https://elxyzgpt.xyz/api/chat",
+        method: 'POST',
+        data: new URLSearchParams(Object.entries(postData)),
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    });
+    return console.log(response.data);
+} catch (error) {
+    console.error("Error during chat request:", error);
+    return "An error occurred during the chat process.";
+}
+}
 		async function bard(query) {
     const COOKIE_KEY = "g.a000mwgL5JRw9IARGMYCihj5YvtGl7tz7BOQSlsQyEAHYA1KvbeO-vBerIBI5FcrtceDgrFr6gACgYKAUcSARYSFQHGX2MiQ4NYw4HGfFmoBkuy3Bg-RhoVAUF8yKqas8HgMOBNEddTflPWq2Ry0076";
     const psidCookie = '__Secure-1PSID=' + COOKIE_KEY;
@@ -905,6 +927,22 @@ app.get('/api/bard', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
     const response = await bard(query);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/gptlogic', async (req, res) => {
+  try {
+    const prompt = req.query.message;
+    if (!prompt) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await gptlogic(prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
