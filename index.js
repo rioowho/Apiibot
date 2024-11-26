@@ -326,26 +326,112 @@ async function mediafire(url) {
  const start = await run('javascript', code);
  return start.result.output;
 }
-async function igdl(url) {
-    try {
-        const apiUrl = `https://api.neastooid.xyz/api/downloader/igdl?url=${encodeURIComponent(url)}`;
-        const response = await fetch(apiUrl);
+async function getToken() {
+        try {
+  const { data } = await axios.get("https://storysaver.to/en")
 
-        if (!response.ok) {
-            throw new Error(`HTTP Error: ${response.status}`);
-        }
+  // Modify regex patterns for flexibility and ensure capturing
+  const kExpMatch = /k_exp\s*=\s*"(\d+)"/.exec(data);
+  const kTokenMatch = /k_token\s*=\s*"([a-f0-9]+)"/.exec(data);
 
-        const data = await response.json();
-        return data; // Mengembalikan JSON langsung tanpa modifikasi
-    } catch (error) {
-        console.error('Error:', error.message);
-        return {
-            success: false,
-            error: 'Error dalam mendapatkan data dari API Instagram downloader',
-        };
+  // Retrieve the values
+  const k_exp = kExpMatch ? kExpMatch[1] : null;
+  const k_token = kTokenMatch ? kTokenMatch[1] : null;
+
+  console.log("k_exp:", k_exp);
+  console.log("k_token:", k_token);
+  return {
+    k_exp: k_exp,
+    k_token: k_token,
+  }     
+    } catch (e) {        
+        return e.message
     }
 }
 
+async function igdl(url) {
+  try {
+    const form = new FormData();
+    const { k_exp, k_token } = await getToken();
+
+    form.append("url", url);
+    form.append("k_token", k_token);
+    form.append("k_exp", k_exp);
+    form.append("q", url); // Check if this URL is correct
+    form.append("t", "media");
+    form.append("lang", "en");
+    form.append("v", "v2");
+
+    // Post request with form data and appropriate headers
+    const response = await axios.post(
+      "https://storysaver.to/api/ajaxSearch",
+      form,
+      { headers: form.getHeaders ? form.getHeaders() : {} }
+    );
+
+    // console.log(response.data.data);
+    const $ = cheerio.load(response.data.data);
+
+    // Find all <a> tags and extract href attributes
+    const result = [];
+    $('a').each((index, element) => {
+      const href = $(element).attr('href');
+      if (href) {
+        if (!href.includes("snapcdn")) return
+        result.push(href);
+      }
+    });
+
+    return result
+  } catch (error) {
+    console.error("Error fetching Instagram data:", error.message);
+    return error.message
+  }
+}
+class Spotify {
+    async Download(url) {
+        try {
+        const response = (await axios.get("https://api.fabdl.com/spotify/get?url=" + url, {
+            headers: {
+                origin:
+                    "https://spotifymp3.com",
+                referer:
+                    "https://spotifymp3.com/",
+            }
+        })).data
+        return response.result
+    } catch (e) {        
+        return e.message
+    }
+}
+    async getTask(gid, id) {
+        try {
+        const response = (await axios.get("https://api.fabdl.com/spotify/mp3-convert-task/" + gid + "/" + id, {
+            headers: {
+                origin:
+                    "https://spotifymp3.com",
+                referer:
+                    "https://spotifymp3.com/",
+            }
+        })).data
+        return 'https://api.fabdl.com' + response.result.download_url
+    } catch (e) {        
+        return e.message
+    }
+}
+}
+
+async function spotify(url) {
+try {
+    const client = new Spotify()
+    const { gid, id } = await client.Download(url)
+    const result = await client.getTask(gid, id)
+    console.log(result)
+    return result
+ } catch (e) {        
+    return e.message
+ }
+}
 async function tiktok(url) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -490,7 +576,17 @@ async function AimusicLyrics(message) {
     throw e
   }
 }
-
+async function gptlogic(text) {
+  try { 
+    const baseUrl = 'https://api.tioo.eu.org/prompt/gpt';
+    const query = `prompt=Rest Api Punya Rioo : https://restapii.rioooxdzz.web.id, Kamu adalah Rioo?, asisten virtual yang diberi nama Rioo kamu diciptakan oleh orang bernama Wave. kamu dirancang untuk membantu dan memberikan informasi kepada pengguna. mulai dari seni,budaya jepang,teknologi, dan lainya.&text=${text}`;
+    const url = `${baseUrl}?${query}`;
+    const chatgpt = await fetch(url).then(res => res.json());
+    return chatgpt;
+  } catch (e) {
+    throw new Error('Internal server error!');
+  } 
+}
 async function chatgpt(text) {
   // Cek cache terlebih dahulu
   const cachedResponse = myCache.get(text);
@@ -687,36 +783,7 @@ async function llama3(message) {
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
-app.get('/api/ytdl2', async (req, res, next) => {
-	var url = req.query.url
-	if (!url) return res.json({ status: false, code: 503, creator: `${creator}`, message: "[!] enter url parameter!" })
 
-	var mp3 = await ytMp3(url)
-	var mp4 = await ytMp4(url)
-	if (!mp4 || !mp3) return res.json(loghandler.noturl)
-	res.json({
-		status: true,
-		code: 200,
-		creator: `${creator}`,
-		result: {
-			title: mp4.title,
-			desc: mp4.desc,
-			thum: mp4.thumb,
-			view: mp4.views,
-			channel: mp4.channel,
-			uploadDate: mp4.uploadDate,
-			mp4: {
-				result: mp4.result,
-				size: mp4.size,
-				quality: mp4.quality
-			},
-			mp3: {
-				result: mp3.result,
-				size: mp3.size
-			}
-		}
-	})
-})
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
   try {
@@ -903,6 +970,22 @@ app.get('/api/chatgpt', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.get('/api/gptlogic', async (req, res) => {
+  try {
+    const text = req.query.message;
+    if (!text) {
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
+    }
+    const response = await gptlogic(text);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 app.get('/api/search-tiktok', async (req, res) => {
   try {
     const message = req.query.message;
@@ -1006,6 +1089,22 @@ app.get('/api/tiktok', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
     const response = await tiktok(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/spotify', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await spotify(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
