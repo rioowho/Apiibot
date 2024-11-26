@@ -719,17 +719,9 @@ try {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     });
-    if (response.data) {
-      // Simpan respons ke cache
-      myCache.set(text, response.data);
-      return response.data;
-    } else {
-      console.error("Unexpected response structure:", JSON.stringify(response.data));
-      return fallbackResponse(prompt);
-    }
+    return response.data;
   } catch (error) {
-    console.error("Error in gptlogic:", error.message);
-    return fallbackResponse(prompt);
+    throw error;
   }
 }
 		async function bard(query) {
