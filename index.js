@@ -711,7 +711,7 @@ let postData = {
 };
 
 try {
-    let response = await axios({
+    const response = await axios({
         url: "https://elxyzgpt.xyz/api/chat",
         method: 'POST',
         data: new URLSearchParams(Object.entries(postData)),
@@ -719,11 +719,18 @@ try {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     });
-    return console.log(response.data);
-} catch (error) {
-    console.error("Error during chat request:", error);
-    return "An error occurred during the chat process.";
-}
+    if (response.data) {
+      // Simpan respons ke cache
+      myCache.set(text, response.data);
+      return response.data;
+    } else {
+      console.error("Unexpected response structure:", JSON.stringify(response.data));
+      return fallbackResponse(prompt);
+    }
+  } catch (error) {
+    console.error("Error in gptlogic:", error.message);
+    return fallbackResponse(prompt);
+  }
 }
 		async function bard(query) {
     const COOKIE_KEY = "g.a000mwgL5JRw9IARGMYCihj5YvtGl7tz7BOQSlsQyEAHYA1KvbeO-vBerIBI5FcrtceDgrFr6gACgYKAUcSARYSFQHGX2MiQ4NYw4HGfFmoBkuy3Bg-RhoVAUF8yKqas8HgMOBNEddTflPWq2Ry0076";
