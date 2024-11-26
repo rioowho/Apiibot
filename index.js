@@ -1,3 +1,4 @@
+__path = process.cwd()
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -26,31 +27,31 @@ loghandler = {
 		status: false,
 		code: 503,
 		message: "service got error, try again in 10 seconds",
-		creator: creator
+		creator: global.creator 
 	},
 	noturl: {
 		status: false,
 		code: 503,
 		message: "enter paramater url",
-		creator: creator
+		creator: global.creator 
 	},
 	nottext: {
 		status: false,
 		code: 503,
 		message: "enter parameter text",
-		creator: creator
+		creator: global.creator 
 	},
 	notquery: {
 		status: false,
 		code: 503,
 		message: "enter parameter query",
-		creator: creator
+		creator: global.creator 
 	},
 	notusername: {
 		status: false,
 		code: 503,
 		message: "enter parameter username",
-		creator: creator
+		creator: global.creator 
 	}
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
