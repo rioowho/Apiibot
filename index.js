@@ -576,17 +576,7 @@ async function AimusicLyrics(message) {
     throw e
   }
 }
-async function gptlogic(text) {
-  try { 
-    const baseUrl = 'https://api.tioo.eu.org/prompt/gpt';
-    const query = `prompt=Rest Api Punya Rioo : https://restapii.rioooxdzz.web.id, Kamu adalah Rioo?, asisten virtual yang diberi nama Rioo kamu diciptakan oleh orang bernama Wave. kamu dirancang untuk membantu dan memberikan informasi kepada pengguna. mulai dari seni,budaya jepang,teknologi, dan lainya.&text=${text}`;
-    const url = `${baseUrl}?${query}`;
-    const chatgpt = await fetch(url).then(res => res.json());
-    return chatgpt;
-  } catch (e) {
-    throw new Error('Internal server error!');
-  } 
-}
+
 async function chatgpt(text) {
   // Cek cache terlebih dahulu
   const cachedResponse = myCache.get(text);
@@ -713,7 +703,28 @@ async function blackboxAIChat(message) {
     throw error;
   }
 }
-
+		async function bard(query) {
+    const COOKIE_KEY = "g.a000mwgL5JRw9IARGMYCihj5YvtGl7tz7BOQSlsQyEAHYA1KvbeO-vBerIBI5FcrtceDgrFr6gACgYKAUcSARYSFQHGX2MiQ4NYw4HGfFmoBkuy3Bg-RhoVAUF8yKqas8HgMOBNEddTflPWq2Ry0076";
+    const psidCookie = '__Secure-1PSID=' + COOKIE_KEY;
+    const headers = {
+        "Host": "gemini.google.com",
+        "X-Same-Domain": "1",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        "Origin": "https://gemini.google.com",
+        "Referer": "https://gemini.google.com",
+        'Cookie': psidCookie
+    };
+    const bardRes = await fetch("https://gemini.google.com/", { method: 'get', headers });
+    const bardText = await bardRes.text();
+    const [snlM0e, blValue] = [bardText.match(/"SNlM0e":"(.*?)"/)?.[1], bardText.match(/"cfb2h":"(.*?)"/)?.[1]];
+    const bodyData = `f.req=[null,"[[\\"${encodeURIComponent(query)}\\"],null,[\\"\\",\\"\\",\\"\\"]]\"]&at=${snlM0e}`;
+    const response = await fetch(`https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?bl=${blValue}&_reqid=229189&rt=c`, { method: 'post', headers, body: bodyData });
+    const answer = JSON.parse(JSON.parse((await response.text()).split("\n").reduce((a, b) => (a.length > b.length ? a : b), ""))[0][2])[4][0][1];
+    
+    // Ubah hasil ke dalam bahasa Indonesia jika API mendukung parameter ini
+    return answer;
+}
 function openai(messages) {
     return new Promise(async (resolve, reject) => {
         try {
@@ -887,6 +898,22 @@ app.get('/api/openai', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.get('/api/bard', async (req, res) => {
+  try {
+    const query = req.query.message;
+    if (!query) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await bard(query);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 // Endpoint untuk smartContract
 app.get('/api/smartcontract', async (req, res) => {
   try {
@@ -970,22 +997,7 @@ app.get('/api/chatgpt', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/gptlogic', async (req, res) => {
-  try {
-    const text = req.query.message;
-    if (!text) {
-      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
-    }
-    const response = await gptlogic(text);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+
 app.get('/api/search-tiktok', async (req, res) => {
   try {
     const message = req.query.message;
