@@ -20,7 +20,85 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+function youtube(link){
+	return new Promise((resolve, reject) => {
+		const ytIdRegex = /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)([-_0-9A-Za-z]{11})/
+		if (ytIdRegex.test(link)) {
+		let url =  ytIdRegex.exec(link)
+		let config = {
+			'url': 'https://www.youtube.be/' + url,
+			'q_auto': 0,
+			'ajax': 1
+		}
+		let headerss = 	{
+			"sec-ch-ua": '" Not;A Brand";v="99", "Google Chrome";v="91", "Chromium";v="91"',
+			"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+			"Cookie": 'PHPSESSID=6jo2ggb63g5mjvgj45f612ogt7; _ga=GA1.2.405896420.1625200423; _gid=GA1.2.2135261581.1625200423; _PN_SBSCRBR_FALLBACK_DENIED=1625200785624; MarketGidStorage={"0":{},"C702514":{"page":5,"time":1625200846733}}'
+		}
+	axios('https://www.y2mate.com/mates/en68/analyze/ajax',{
+			method: 'POST',
+			data: new URLSearchParams(Object.entries(config)),
+			headers: headerss
+		})
+	.then(({ data }) => {
+		const $ = cheerio.load(data.result)
+		let img = $('div.thumbnail.cover > a > img').attr('src');
+		let title = $('div.thumbnail.cover > div > b').text();
+		let size = $('#mp4 > table > tbody > tr:nth-child(3) > td:nth-child(2)').text()
+		let size_mp3 = $('#audio > table > tbody > tr:nth-child(1) > td:nth-child(2)').text()
+		let id = /var k__id = "(.*?)"/.exec(data.result)[1]
+		let configs = {
+    type: 'youtube',
+    _id: id,
+    v_id: url[1],
+    ajax: '1',
+    token: '',
+    ftype: 'mp4',
+    fquality: 480
+  }
+	axios('https://www.y2mate.com/mates/en68/convert',{
+		method: 'POST',
+		data: new URLSearchParams(Object.entries(configs)),
+		headers: headerss 
+	})
+	.then(({data}) => {
+		const $ = cheerio.load(data.result)
+		let link = $('div > a').attr('href')
+	let configss = {
+    type: 'youtube',
+    _id: id,
+    v_id: url[1],
+    ajax: '1',
+    token: '',
+    ftype: 'mp3',
+    fquality: 128
+  }
+	axios('https://www.y2mate.com/mates/en68/convert',{
+		method: 'POST',
+		data: new URLSearchParams(Object.entries(configss)),
+		headers: headerss 
+	})
+	.then(({ data }) => {
+		const $ = cheerio.load(data.result)
+		let audio = $('div > a').attr('href')
+		resolve({
+			id: url[1],
+			title: title,
+			size: size,
+			quality: '480p',
+			thumb: img,
+			link: link,
+			size_mp3: size_mp3,
+			mp3: audio
+		})
 
+		})
+			})
+		})
+	.catch(reject)
+	}else reject('link invalid')
+	})
+}
 async function sfileSearch(query, page = 1) {
   let res = await fetch(
     `https://sfile.mobi/search.php?q=${query}&page=${page}`,
@@ -456,55 +534,40 @@ async function AimusicLyrics(message) {
     throw e
   }
 }
-function generateUA() {
-    var androidVersions = ['4.0.3', '4.1.1', '4.2.2', '4.3', '4.4', '5.0.2', '5.1', '6.0', '7.0', '8.0', '9.0', '10.0', '11.0'];
-    var deviceModels = ['M2004J19C', 'S2020X3', 'Xiaomi4S', 'RedmiNote9', 'SamsungS21', 'GooglePixel5'];
-    var buildVersions = ['RP1A.200720.011', 'RP1A.210505.003', 'RP1A.210812.016', 'QKQ1.200114.002', 'RQ2A.210505.003'];
-    var selectedModel = deviceModels[Math.floor(Math.random() * deviceModels.length)];
-    var selectedBuild = buildVersions[Math.floor(Math.random() * buildVersions.length)];
-    var chromeVersion = 'Chrome/' + (Math.floor(Math.random() * 80) + 1) + '.' + (Math.floor(Math.random() * 999) + 1) + '.' + (Math.floor(Math.random() * 9999) + 1);
-    var userAgent = `Mozilla/5.0 (Linux; Android ${androidVersions[Math.floor(Math.random() * androidVersions.length)]}; ${selectedModel} Build/${selectedBuild}) AppleWebKit/537.36 (KHTML, like Gecko) ${chromeVersion} Mobile Safari/537.36 WhatsApp/1.${Math.floor(Math.random() * 9) + 1}.${Math.floor(Math.random() * 9) + 1}`;
-    return userAgent;
-}
 
-function randomIP() {
-    var octet = () => Math.floor(Math.random() * 256);
-    return `${octet()}.${octet()}.${octet()}.${octet()}`;
-}
-async function gptlogic(type, message) {
-    try {
-        var headers = {
-            'User-Agent': generateUA(),
-            'Referer': 'https://chatgpt.bestim.org/chat/',
-            'X-Forwarded-For': randomIP(),
-        };
+async function chatgpt(text) {
+  // Cek cache terlebih dahulu
+  const cachedResponse = myCache.get(text);
+  if (cachedResponse) {
+    console.log("Returning cached response");
+    return cachedResponse;
+  }
 
-        var data = {
-            temperature: 1,
-            frequency_penalty: 0,
-            type: type,
-            messagesHistory: [{
-                    from: 'BestimChat',
-                    content: 'Saya adalah GptLogic asisten virtual yang canggih dan populer saat ini, saya di ciptakan oleh Rioo .'
-                },
-                {
-                    from: 'you',
-                    content: message
-                },
-            ],
-            message: message,
-        };
+  try {
+    console.log(`Attempting to connect to AI service...`);
+    const response = await axios.get('https://rest-api.aetherss.xyz/api/ai', {
+      params: { prompt: text },
+      headers: {
+        'User-Agent': 'AETHERz/1.0',
+      },
+      timeout: 30000
+    });
 
-        var response = await axios.post('https://chatgpt.bestim.org/chat/send2/', data, {
-            headers
-        });
-
-        return response.data;
-    } catch (error) {
-        console.error('Terjadi kesalahan:', error);
+    console.log("Response received:", response.status, response.statusText);
+    
+    if (response.data) {
+      // Simpan respons ke cache
+      myCache.set(text, response.data);
+      return response.data;
+    } else {
+      console.error("Unexpected response structure:", JSON.stringify(response.data));
+      return fallbackResponse(text);
     }
+  } catch (error) {
+    console.error("Error in aiChat:", error.message);
+    return fallbackResponse(text);
+  }
 }
-
 async function gemini(message) {
     try {
         const { data  } = await axios.get(`https://hercai.onrender.com/gemini/hercai?question=${encodeURIComponent(message)}`, {
@@ -839,13 +902,13 @@ app.get('/api/iask', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/gptlogic', async (req, res) => {
+app.get('/api/chatgpt', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const text = req.query.message;
+    if (!text) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await gptlogic(message);
+    const response = await chatgpt(text);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -921,11 +984,11 @@ app.get('/api/search-sfile', async (req, res) => {
 });
 app.get('/api/ytdl', async (req, res) => {
   try {
-    const videoUrl = req.query.url;
-    if (!videoUrl) {
+    const link = req.query.url;
+    if (!link) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytdl(videoUrl);
+    const response = await youtube(link);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
