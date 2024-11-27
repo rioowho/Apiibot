@@ -68,7 +68,7 @@ interface YouTubeResult {
     video: MediaInfo;
     audio: MediaInfo;
 }
-function youtube(url: string): Promise<YouTubeResult> {
+async function youtube(url) {
     return new Promise(async (resolve, reject) => {
         try {
             const form = new FormData();
@@ -78,7 +78,7 @@ function youtube(url: string): Promise<YouTubeResult> {
                 headers: form.getHeaders()
             });
 
-            const res: YouTubeResult = {
+            const res = {
                 title: data.title,
                 thumbnail: data.thumbnail,
                 duration: data.duration,
