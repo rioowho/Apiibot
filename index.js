@@ -1312,11 +1312,11 @@ app.get('/api/search-sfile', async (req, res) => {
 });
 app.get('/api/ytdl', async (req, res) => {
   try {
-    const input = req.query.url;
-    if (!input) {
+    const downloadMode = req.query.url;
+    if (!downloadMode) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await Cobalt(input);
+    const response = await DlCobalt(downloadMode);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
