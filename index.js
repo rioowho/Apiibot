@@ -56,41 +56,7 @@ loghandler = {
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
-async function youtube(url) {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const form = new FormData();
-            form.append("url", url);
 
-            const { data } = await axios.post("https://www.aiodownloader.in/wp-json/aio-dl/video-data/", form, {
-                headers: form.getHeaders()
-            });
-
-            const res = {
-                title: data.title,
-                thumbnail: data.thumbnail,
-                duration: data.duration,
-                video: {
-                    url: data.medias[0].url,
-                    size: data.medias[0].size,
-                    quality: data.medias[0].quality,
-                    formattedSize: data.medias[0].formattedSize
-                },
-                audio: {
-                    url: data.medias[5].url,
-                    size: data.medias[5].size,
-                    quality: data.medias[5].quality,
-                    formattedSize: data.medias[5].formattedSize
-                }
-            };
-
-            resolve(res);
-
-        } catch (error) {
-            reject(error);
-        }
-    });
-}
 async function body(url, body) {
     try {
         var response = await fetch(url, {
@@ -1348,11 +1314,11 @@ app.get('/api/search-sfile', async (req, res) => {
 });
 app.get('/api/ytdl', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const videoUrl = req.query.url;
+    if (!videoUrl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await youtube(url);
+    const response = await ytdl(videoUrl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
