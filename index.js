@@ -14,6 +14,7 @@ const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
 const { youtubedl } = require('./lib/ytdl');
+const { youtube } = require('./scrape-ytdl');
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -1312,11 +1313,11 @@ app.get('/api/search-sfile', async (req, res) => {
 });
 app.get('/api/ytdl', async (req, res) => {
   try {
-    const link = req.query.url;
-    if (!link) {
+    const data = req.query.url;
+    if (!data) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await youtubedl(link);
+    const response = await youtube(data);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
