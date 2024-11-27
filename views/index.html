@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rioo Api's Documentation</title>
+
+    <!-- Channel WhatsApp -->
+    <meta property="og:title" content="RiooXdzz" />
+    <meta property="og:url" content="https://whatsapp.com/channel/0029VakCLOL4NVicU7FeFa3J" />
+    <meta property="og:site_name" content="Rioo`Xdzz API" />
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="Website API Gratis." />
+    <!-- CSS -->
+    <link href='/css/styles.css' rel='stylesheet'>
+    <link href='/css/animate.css' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #000018;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    min-width: 5px;
+  }
+  .container {
+    width: 100%;
+    padding: 20px;
+    background-color: #000018;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  h1 {
+    color: #fff;
+    text-align: center;
+  }
+  h2 {
+    color: #fff;
+    margin-top: 20px;
+    text-align: center;
+  }
+  p {
+    line-height: 1.6;
+    color: #6c757d;
+  }
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    margin-bottom: 10px;
+  }
+  pre {
+    background-color: #191c31;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+  }
+  .btn-container {
+    margin-bottom: 20px;
+    background-color: #191c31;
+    border-radius: 1rem;
+    padding: 10px;
+  }
+  .work__card {
+    background-color: #191c31;
+    padding: 1rem;
+    border-radius: 1rem;
+    margin-top: 10px; /* Adjusted to be closer to Information heading */
+  }
+  .work__title {
+    font-size: var(--normal-font-size);
+    font-weight: var(--font-medium);
+    margin-bottom: .25rem;
+  }
+  .btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4px 0;
+    background-color: #191c31;
+    color: #fff;
+    border: none;
+    padding: 13px;
+    text-decoration: none;
+    font-size: 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .btn-text {
+    flex-grow: 1;
+    text-align: left;
+  }
+  .btn-link {
+    text-decoration: none;
+    color: #fff;
+    border: 1px solid #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  .section-spacing {
+    margin-top: 60px;
+  }
+  .large-spacing {
+    margin-top: 100px; /* Increased spacing */
+  }
+  .section__subtitle {
+    display: block;
+    font-size: 12px;
+    color: #fff;
+    text-align: center;
+    margin-top: 30px;
+  }
+  .centered-title {
+    text-align: center;
+  }
+
+  /* Media Queries */
+  @media (min-width: 768px) {
+    .container {
+      width: 75%;
+      margin: 0 auto;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      width: 50%;
+      margin: 0 auto;
+    }
+  }
+</style>
+</head>
+<body>
+    <h1>Api Documentation <span class="highlight">By RiooXdzz</span></h1>
+    <img src="https://pomf2.lain.la/f/d3l8zx17.jpg" alt="Profile" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
+<div class="container">
+  <p>Welcome to the API documentation for our service. Below you will find information about the available endpoints and how to use them.</p>
+    <span class="section__subtitle">01</span>
+  <h2 class="centered-title">Information</h2>
+  <div class="work__card mix apps sites">
+    <h3 class="work__title"><b>Your IP Address</b></h3>
+    <div class="h3 mb-0 font-weight-bold" id="ip"></div>
+    <br>
+    <h3 class="work__title"><b>Time</b></h3>
+    <div class="h3 mb-0 font-weight-bold" id="jam"></div>
+    <br>
+    <h3 class="work__title"><b>Date</b></h3>
+    <div class="h5 mb-0 font-weight-bold" id="tanggal"></div>
+    <br>
+    <h3 class="work__title"><b>Your Battery</b></h3>
+    <div class="h5 mb-0 font-weight-bold" id="batre"></div>
+  </div>
+  
+        <div class="description">
+            Website API Gratis.</a>
+        </div>
+        <div class="controls">
+            <form>
+                <div class="select">
+                    <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+                    <option value="/api/status">Status</option>
+                     <option value="" selected disabled>--- OPENAI ---</option>
+                     <option value="/api/luminai?message=hallo">Luminai</option>
+                      <option value="/api/gemini?message=hallo">Gemini</option>
+                     <option value="/api/degreeguru?message=hallo">Degreeguru</option>
+                       <option value="/api/gpt3?message=hallo">Gpt3</option>
+                    <option value="/api/toolsbot?message=buatkan saya code javascript">Toolsbot</option>
+                    
+                     <option value="/api/ai4chat?message=hallo">Ai4chat</option>
+                     <option value="/api/smartcontract?message=hallo">Smartcontract</option>
+                     <option value="/api/openai?message=hallo">Openai</option>
+                       <option value="/api/aimusic?message=night changes">Ai Music</option>
+                       <option value="/api/iask?message=hallo">Iask</option>
+                       <option value="/api/chatgpt?message=hallo">Chatgpt</option>
+                       <option value="/api/bard?message=hallo siapa dirimu?">Bard</option>
+                       <option value="/api/gptlogic?message=hallo siapa dirimu? dan siapa pembuat rest api ini">Gptlogic</option>
+                      <option value= '' selected disabled>--- Downloader ---
+                      
+                      <option value="/api/tiktok?url=https://vt.tiktok.com/ZSj5B4r5H/">Tiktok</option>
+                      <option value="/api/mediafire?url=https://www.mediafire.com/file/thddr8pltg4cn0a/Sc_Bot_Md_Pairing_Code.zip/file">MediaFire</option>
+                       <option value="/api/igdl?url=https://www.instagram.com/reel/DAp9_nPzHGH/?igsh=eWc2bzA0ZWdmdWpp">Igdl</option>
+                       <option value="/api/ytdl?url=https://youtu.be/syFZfO_wfMQ?si=nxQniiXRc1gojVae">Ytdl</option>
+                         <option value="/api/remini?url=https://files.catbox.moe/8dwt25.jpg">Remini</option>
+                         <option value="/api/aio?url=https://youtu.be/W-TE_Ys4iwM?si=eTGXyZ2NPjff307m">Aio</option>
+                         <option value="/api/sfiledl?url=https://sfile.mobi/5JVnpBOS9Gr">Sfiledl</option>
+                         <option value="/api/spotify?url=https://open.spotify.com/track/5O2P9iiztwhomNh8xkR9lJ?si=4Bjlzz61S4G6C76N5snRxw">Spotify</option>
+                      <option value="" selected disabled>--- SEARCH ---</option>
+                     <option value="/api/search-tiktok?message=masihhatiku">Search Tiktok</option>
+                     <option value="/api/search-pinterest?message=WindahBasudara">Search Pinterest</option>
+                     <option value="/api/search-sfile?message=baseorderkuotaUpdate">Search Sfile</option>
+                     <option value="/api/search-yts?message=story of my life">Search YouTube</option>
+                     <option value="/api/search-google?message=mark Zuckerberg">Search Google</option>
+                     <option value="/api/search-playstore?message=free fire max">Search Playstore</option>
+                  </select>
+                </div>
+                <button disabled style="color: red";>Inject</button>
+            </form>
+        </div>
+        <div class="links">
+            <a href="https://wa.me/6285691304150">Made by <b>Rioo Api's</b></a>
+            <span class="divider"></span>
+        </div>
+    </div>
+    <!-- Audio element -->
+    <audio autoplay loop>
+        <source src="/music/song.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+      <h2>Usage</h2>
+  <p>To use the endpoints, send a GET request to the desired endpoint with the following query parameter:</p>
+  <ul>
+    <li>message: Your message content</li>
+  </ul>
+
+  <h2>Response</h2>
+  <p>The response will be in JSON format with the following structure:</p>
+  <pre>
+  {
+    "status": 200,
+    "creator": "@RiooXdzz",
+    "data": {
+      "response": "Hallo Everyone 👋"
+    }
+  }
+  </pre>
+
+<h2 class="centered-title">Rules</h2>
+  <div class="work__card mix apps sites">
+    <div class="card-body mb-3">
+      <ol>
+        <li>Don't flooding request</li>
+        <li>The owner can change the conditions on this website at any time, in order to maintain the quality of the website.</li>
+        <li>All the features here are free and unlimited request.</li>
+        <li>The owner is not responsible for what you do when using this website.</li>
+      </ol>
+    </div>
+  </div>
+</div>
+ <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Fetch IP Address
+  fetch('https://api.ipify.org?format=json')
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('ip').textContent = data.ip;
+    });
+
+  // Update Time
+  function updateTime() {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const timeString = `${hours}:${minutes}:${seconds}`;
+    document.getElementById('jam').textContent = timeString;
+  }
+  setInterval(updateTime, 1000);
+  updateTime();
+
+  // Update Date
+  function updateDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const dateString = `${day}-${month}-${year}`;
+    document.getElementById('tanggal').textContent = dateString;
+  }
+  updateDate();
+
+  // Fetch Battery Status
+  navigator.getBattery().then(function(battery) {
+    function updateBatteryStatus() {
+      const level = Math.round(battery.level * 100) + '%';
+      document.getElementById('batre').textContent = level;
+    }
+    updateBatteryStatus();
+    battery.addEventListener('levelchange', updateBatteryStatus);
+  });
+});
+</script>
+</body>
+</html>
