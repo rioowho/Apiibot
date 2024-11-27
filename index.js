@@ -54,6 +54,117 @@ loghandler = {
 	}
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+async function body(url, body) {
+    try {
+        var response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body),
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Terjadi kesalahan:", error);
+    }
+}
+
+async function ToolbotAI(desire) {
+    try {
+        var data = await body("https://www.toolbot.ai/api/generate", {
+            desire
+        });
+        var {
+            description,
+            prompt
+        } = data.result[0];
+        var data2 = await body("https://www.toolbot.ai/api/query", {
+            toolDescription: description,
+            query: prompt,
+        });
+        return data2;
+    } catch (error) {
+        console.error("Terjadi kesalahan: ", error);
+    }
+}
+async function PlayStore(search) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { data, status } = await axios.get(
+          `https://play.google.com/store/search?q=${search}&c=apps`,
+        ),
+        hasil = [],
+        $ = cheerio.load(data);
+      if (
+        ($(
+          ".ULeU3b > .VfPpkd-WsjYwc.VfPpkd-WsjYwc-OWXEXe-INsAgc.KC1dQ.Usd1Ac.AaN0Dd.Y8RQXd > .VfPpkd-aGsRMb > .VfPpkd-EScbFb-JIbuQc.TAQqTe > a",
+        ).each((i, u) => {
+          const linkk = $(u).attr("href"),
+            nama = $(u).find(".j2FCNc > .cXFu1 > .ubGTjb > .DdYX5").text(),
+            developer = $(u)
+              .find(".j2FCNc > .cXFu1 > .ubGTjb > .wMUdtb")
+              .text(),
+            img = $(u).find(".j2FCNc > img").attr("src"),
+            rate = $(u)
+              .find(".j2FCNc > .cXFu1 > .ubGTjb > div")
+              .attr("aria-label"),
+            rate2 = $(u)
+              .find(".j2FCNc > .cXFu1 > .ubGTjb > div > span.w2kbF")
+              .text(),
+            link = `https://play.google.com${linkk}`;
+          hasil.push({
+            link: link,
+            nama: nama || "No name",
+            developer: developer || "No Developer",
+            img: img || "https://i.ibb.co/G7CrCwN/404.png",
+            rate: rate || "No Rate",
+            rate2: rate2 || "No Rate",
+            link_dev: `https://play.google.com/store/apps/developer?id=${developer.split(" ").join("+")}`,
+          });
+        }),
+        hasil.every((x) => void 0 === x))
+      )
+        return resolve({
+          message: "no result found",
+        });
+      resolve(hasil);
+    } catch (err) {
+      console.error(err);
+    }
+  });
+}
+async function google(query) {
+  try {
+    const response = await axios.get('https://www.google.com/search', {
+      params: { q: query },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7'
+      }
+    });
+
+    const $ = cheerio.load(response.data);
+    const results = [];
+
+    $('.Gx5Zad.xpd.EtOod.pkphOe').each((index, element) => {
+      const title = $(element).find('.vvjwJb.AP7Wnd').text().trim();
+      const link = $(element).find('a').first().attr('href');
+      const snippet = $(element).find('.s3v9rd.AP7Wnd').text().trim();
+
+      const extractedLink = link ? decodeURIComponent(link.match(/\/url\?q=([^&]+)/)?.[1] || '') : '';
+
+      if (title && extractedLink) {
+        results.push({ title, link: extractedLink, snippet });
+      }
+    });
+
+    return results;
+  } catch (error) {
+    console.error('Scraping error:', error.message);
+    return [];
+  }
+}
+
 var durationMultipliers = {
   1: { 0: 1 },
   2: { 0: 60, 1: 1 },
@@ -951,42 +1062,6 @@ function openai(messages) {
     });
 }
 
-async function llama3(message) {
-let model = '70b';
-
-  if (!["70b", "8b"].some((qq) => model == qq)) model = "70b"; //correct
-  try {
-    const BASE_URL = "https://llama3-enggan-ngoding.vercel.app/api/llama";
-    const payload = {
-      messages: [
-        {
-          role: "system",
-          content: `Kamu adalah Meta AI Berbahasa Indonesia yang di kembangkan oleh Meta Platforms Inc. dan Rioo, kamu bisa apa saja, kamu menggunakan Google sebagai search engine utamamu`,
-        },
-        {
-          role: "user",
-          content: message,
-        },
-      ],
-      model: "metallama-3-70B-Instruksi",
-    };
-    const response = await fetch(BASE_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "User-Agent":
-          "Mozilla/5.0 (iPhone; CPU iPhone OS 13_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.1 Mobile/15E148",
-      },
-      body: JSON.stringify(payload),
-    });
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    throw error;
-  }
-}
-
-
 // Endpoint untuk servis dokumen HTML
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -1063,13 +1138,13 @@ app.get('/api/gpt3', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/llama3', async (req, res) => {
+app.get('/api/toolsbot', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const desire = req.query.message;
+    if (!desire) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await llama3(message);
+    const response = await ToolbotAI(desire);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -1201,6 +1276,38 @@ app.get('/api/chatgpt', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
     const response = await chatgpt(text);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/search-playstore', async (req, res) => {
+  try {
+    const search = req.query.message;
+    if (!search) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await PlayStore(search);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/search-google', async (req, res) => {
+  try {
+    const query = req.query.message;
+    if (!query) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await google(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
