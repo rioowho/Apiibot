@@ -1007,10 +1007,10 @@ async function talkai(type, message) {
             headers
         });
 
-        return response.data;
-    } catch (error) {
-        console.error('Terjadi kesalahan:', error);
-    }
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 }
 async function gptlogic(prompt) {
 let postData = {
