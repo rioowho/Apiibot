@@ -960,47 +960,58 @@ async function smartContract(message) {
     throw error;
   }
 }
-async function blackboxAIChat(prompt, webSearchMode) {
-const logic = `Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150`;
+function generateRandomUserAgent() {
+    const androidVersions = ['4.0.3', '4.1.1', '4.2.2', '4.3', '4.4', '5.0.2', '5.1', '6.0', '7.0', '8.0', '9.0', '10.0', '11.0'];
+    const deviceModels = ['M2004J19C', 'S2020X3', 'Xiaomi4S', 'RedmiNote9', 'SamsungS21', 'GooglePixel5', 'Infinix Hot 10'];
+    const buildVersions = ['RP1A.200720.011', 'RP1A.210505.003', 'RP1A.210812.016', 'QKQ1.200114.002', 'RQ2A.210505.003'];
 
-			const body = {
-				messages: [
-					{
-						role: "assistant",
-						content: logic
-      },
-					{
-						role: "user",
-						content: prompt
-      }
-    ],
-				previewToken: null,
-				codeModelMode: true,
-				agentMode: {},
-				trendingAgentMode: {},
-				isMicMode: false,
-				isChromeExt: false,
-				githubToken: null,
-				webSearchMode: webSearchMode
-			};
-			const url = "https://www.blackbox.ai/api/chat";
-			try {
-				const response = await axios.post(url, body);
-				let result = response.data;
-				if (typeof result === 'string') {
-					result = result.replace(/\$@\$.+?\$@\$/gs, '').trim();
-					result = result.replace(/\$~~~\$.*?\$~~~\$/gs, '').trim();
-					result = result.replace(/\*\*/g, '*').trim();
-				}
-				if (webSearchMode && result.includes("Sources:")) {
-					result = formatWebSearchResult(result);
-				}
-				return result;
-			} catch (error) {
-				throw error;
-			}
-		}
+    const selectedModel = deviceModels[Math.floor(Math.random() * deviceModels.length)];
+    const selectedBuild = buildVersions[Math.floor(Math.random() * buildVersions.length)];
+    const chromeVersion = 'Chrome/' + (Math.floor(Math.random() * 80) + 1) + '.' + (Math.floor(Math.random() * 999) + 1) + '.' + (Math.floor(Math.random() * 9999) + 1);
 
+    const userAgent = `Mozilla/5.0 (Linux; Android ${androidVersions[Math.floor(Math.random() * androidVersions.length)]}; ${selectedModel} Build/${selectedBuild}) AppleWebKit/537.36 (KHTML, like Gecko) ${chromeVersion} Mobile Safari/537.36 WhatsApp/1.${Math.floor(Math.random() * 9) + 1}.${Math.floor(Math.random() * 9) + 1}`;
+
+    return userAgent;
+}
+
+function generateRandomIP() {
+    const octet = () => Math.floor(Math.random() * 256);
+    return `${octet()}.${octet()}.${octet()}.${octet()}`;
+}
+
+async function talkai(type, message) {
+    try {
+        const headers = {
+            'User-Agent': generateRandomUserAgent(),
+            'Referer': 'https://talkai.info/id/chat/',
+            'X-Forwarded-For': generateRandomIP(),
+        };
+
+        const data = {
+            temperature: 1,
+            frequency_penalty: 0,
+            type: type,
+            messagesHistory: [{
+                    from: 'chatGPT',
+                    content: 'Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150'
+                },
+                {
+                    from: 'you',
+                    content: message
+                },
+            ],
+            message: message,
+        };
+
+        const response = await axios.post('https://talkai.info/id/chat/send2/', data, {
+            headers
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Terjadi kesalahan:', error);
+    }
+}
 async function gptlogic(prompt) {
 let postData = {
     prompt: prompt,
@@ -1233,13 +1244,13 @@ app.get('/api/smartcontract', async (req, res) => {
 });
 
 // Endpoint untuk blackboxAIChat
-app.get('/api/blackboxAIChat', async (req, res) => {
+app.get('/api/talkai', async (req, res) => {
   try {
-    const prompt = req.query.message;
-    if (!prompt) {
+    const message = req.query.message;
+    if (!message) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await blackboxAIChat(prompt);
+    const response = await talkai(prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
