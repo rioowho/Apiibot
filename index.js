@@ -55,6 +55,54 @@ loghandler = {
 	}
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+interface MediaInfo {
+    url: string;
+    size: number;
+    quality: string;
+    formattedSize: string;
+}
+interface YouTubeResult {
+    title: string;
+    thumbnail: string;
+    duration: string;
+    video: MediaInfo;
+    audio: MediaInfo;
+}
+function youtube(url: string): Promise<YouTubeResult> {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const form = new FormData();
+            form.append("url", url);
+
+            const { data } = await axios.post("https://www.aiodownloader.in/wp-json/aio-dl/video-data/", form, {
+                headers: form.getHeaders()
+            });
+
+            const res: YouTubeResult = {
+                title: data.title,
+                thumbnail: data.thumbnail,
+                duration: data.duration,
+                video: {
+                    url: data.medias[0].url,
+                    size: data.medias[0].size,
+                    quality: data.medias[0].quality,
+                    formattedSize: data.medias[0].formattedSize
+                },
+                audio: {
+                    url: data.medias[5].url,
+                    size: data.medias[5].size,
+                    quality: data.medias[5].quality,
+                    formattedSize: data.medias[5].formattedSize
+                }
+            };
+
+            resolve(res);
+
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
 async function body(url, body) {
     try {
         var response = await fetch(url, {
@@ -1312,11 +1360,11 @@ app.get('/api/search-sfile', async (req, res) => {
 });
 app.get('/api/ytdl', async (req, res) => {
   try {
-    const link = req.query.url;
-    if (!link) {
+    const url = req.query.url;
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await youtubedl(link);
+    const response = await youtube(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
