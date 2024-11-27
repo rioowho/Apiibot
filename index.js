@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
-const { Cobalt, mp4, mp3 } = require('./lib/Cobalt');
+const { Cobalt, mp4, mp3, DlCobalt } = require('./lib/Cobalt');
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
