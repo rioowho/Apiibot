@@ -55,19 +55,7 @@ loghandler = {
 	}
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
-interface MediaInfo {
-    url: string;
-    size: number;
-    quality: string;
-    formattedSize: string;
-}
-interface YouTubeResult {
-    title: string;
-    thumbnail: string;
-    duration: string;
-    video: MediaInfo;
-    audio: MediaInfo;
-}
+
 async function youtube(url) {
     return new Promise(async (resolve, reject) => {
         try {
