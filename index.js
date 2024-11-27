@@ -55,7 +55,32 @@ loghandler = {
 	}
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+async function ChatGpt(query) {
+  const requestData = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Referer": "https://2chat.c3r.ink/",
+      "accept": "application/json, text/plain, */*"
+    },
+    body: JSON.stringify({
+      prompt: query,
+      options: {},
+      regenerate: false,
+      roomId: 1002,
+      uuid: Date.now(),
+      systemMessage: "Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150.",
+      top_p: 1,
+      temperature: 0.8
+    })
+  };
 
+  const response = await fetch("https://chatapicn.a3r.fun/api/chat-process", requestData);
+  const data = await response.text();
+  // Handle the response data here
+  let out = JSON.parse(data.split("\n").pop());
+  return out;
+}
 
 async function body(url, body) {
     try {
@@ -1186,11 +1211,11 @@ app.get('/api/iask', async (req, res) => {
 });
 app.get('/api/chatgpt', async (req, res) => {
   try {
-    const text = req.query.message;
-    if (!text) {
+    const query = req.query.message;
+    if (!query) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await chatgpt(text);
+    const response = await ChatGpt(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
