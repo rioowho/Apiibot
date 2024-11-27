@@ -211,7 +211,24 @@ async function youtubedl(link) {
     resultUrl
   };
 }
+async function download(id, k) {
+  const response = await fetch("https://www.yt1s.com/api/ajaxConvert/convert", {
+    method: "POST",
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0",
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Referer": "https://www.yt1s.com/",  // Menambahkan referer
+      "Origin": "https://www.yt1s.com",    // Menambahkan origin
+    },
+    body: new URLSearchParams({
+      vid: id,
+      k
+    })
+  });
 
+  const data = await response.json();
+  return data.dlink;
+}
 async function sfileSearch(query, page = 1) {
   let res = await fetch(
     `https://sfile.mobi/search.php?q=${query}&page=${page}`,
