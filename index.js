@@ -1312,11 +1312,11 @@ app.get('/api/search-sfile', async (req, res) => {
 });
 app.get('/api/ytdl', async (req, res) => {
   try {
-    const videoId = req.query.url;
-    if (!videoId) {
+    const input = req.query.url;
+    if (!input) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await mp4(videoId);
+    const response = await Cobalt(input);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
