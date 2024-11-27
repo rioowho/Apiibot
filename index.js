@@ -960,59 +960,30 @@ async function smartContract(message) {
     throw error;
   }
 }
-function generateRandomUserAgent() {
-    const androidVersions = ['4.0.3', '4.1.1', '4.2.2', '4.3', '4.4', '5.0.2', '5.1', '6.0', '7.0', '8.0', '9.0', '10.0', '11.0'];
-    const deviceModels = ['M2004J19C', 'S2020X3', 'Xiaomi4S', 'RedmiNote9', 'SamsungS21', 'GooglePixel5', 'Infinix Hot 10'];
-    const buildVersions = ['RP1A.200720.011', 'RP1A.210505.003', 'RP1A.210812.016', 'QKQ1.200114.002', 'RQ2A.210505.003'];
 
-    const selectedModel = deviceModels[Math.floor(Math.random() * deviceModels.length)];
-    const selectedBuild = buildVersions[Math.floor(Math.random() * buildVersions.length)];
-    const chromeVersion = 'Chrome/' + (Math.floor(Math.random() * 80) + 1) + '.' + (Math.floor(Math.random() * 999) + 1) + '.' + (Math.floor(Math.random() * 9999) + 1);
-
-    const userAgent = `Mozilla/5.0 (Linux; Android ${androidVersions[Math.floor(Math.random() * androidVersions.length)]}; ${selectedModel} Build/${selectedBuild}) AppleWebKit/537.36 (KHTML, like Gecko) ${chromeVersion} Mobile Safari/537.36 WhatsApp/1.${Math.floor(Math.random() * 9) + 1}.${Math.floor(Math.random() * 9) + 1}`;
-
-    return userAgent;
+function generateUserId() {
+  return 'user_' + Math.random().toString(36).substring(2, 12);
 }
 
-function generateRandomIP() {
-    const octet = () => Math.floor(Math.random() * 256);
-    return `${octet()}.${octet()}.${octet()}.${octet()}`;
-}
+async function ai4chat(prompt, text) {
+  const time = new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
+  const [hours, minutes] = [new Date(time).getHours(), new Date(time).getMinutes()];
+  const period = hours >= 6 && hours < 18 ? 'siang' : 'malam';
+  const today = new Date(time).toLocaleDateString('en-GB');
 
-async function geminipro(options) {
+  const apiUrl = `https://yw85opafq6.execute-api.us-east-1.amazonaws.com/default/boss_mode_15aug?text=Prompt: ${prompt}, sekarang jam ${hours.toString().padStart(2, '0')}.${minutes.toString().padStart(2, '0')} ${period}, tanggal ${today}, presiden Prabowo Subianto, wakil presiden Gibran Rakabuming. user: ${encodeURIComponent(text)}&country=Asia&user_id=${generateUserId()}`;
+  const proxyUrl = 'https://api.allorigins.win/raw?url=';
+
   try {
-    return await new Promise(async(resolve, reject) => {
-      options = {
-        model: "gemini-pro",
-        messages: options?.messages,
-        temperature: options?.temperature || 0.9,
-        top_p: options?.top_p || 0.7,
-        top_k: options?.top_p || 40,
-      }
-      if(!options?.messages) return reject("missing messages input payload!");
-      if(!Array.isArray(options?.messages)) return reject("invalid array in messages input payload!");
-      if(isNaN(options?.top_p)) return reject("invalid number in top_p payload!");
-      if(isNaN(options?.top_k)) return reject("invalid number in top_k payload!");
-      axios.post("https://api.acloudapp.com/v1/completions", options, {
-        headers: {
-          authorization: "sk-9jL26pavtzAHk9mdF0A5AeAfFcE1480b9b06737d9eC62c1e"
-        }
-      }).then(res => {
-        const data = res.data;
-        if(!data.choices[0].message.content) return reject("failed get response message!")
-        resolve({
-          sukses: true,
-          answer: data.choices[0].message.content
-        })
-      }).catch(reject)
-    })
-  } catch (e) {
-    return {
-      success: false,
-      errors: [e]
-    }
+    const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+    const data = response.ok ? await response.json() : { error: `Error: ${response.status}` };
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, data: error.message };
   }
 }
+
+
 async function gptlogic(prompt) {
 let postData = {
     prompt: prompt,
@@ -1244,13 +1215,13 @@ app.get('/api/smartcontract', async (req, res) => {
   }
 });
 
-app.get('/api/geminipro', async (req, res) => {
+app.get('/api/ai4chat', async (req, res) => {
   try {
-    const options = req.query.message;
-    if (!options) {
+    const text = req.query.message;
+    if (!text) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await geminipro(options);
+    const response = await ai4chat(text);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
