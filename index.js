@@ -1243,14 +1243,13 @@ app.get('/api/smartcontract', async (req, res) => {
   }
 });
 
-// Endpoint untuk blackboxAIChat
 app.get('/api/talkai', async (req, res) => {
   try {
     const message = req.query.message;
     if (!message) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await talkai(prompt);
+    const response = await talkai(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
