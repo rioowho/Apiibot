@@ -1010,7 +1010,9 @@ app.get('/', (req, res) => {
 app.get('/docs', (req, res) => {
 	res.sendFile(__path + "/views/index.html");
 });
-
+app.get('/chat', (req, res) => {
+	res.sendFile(__path + "/views/chatai.html");
+});
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
   try {
