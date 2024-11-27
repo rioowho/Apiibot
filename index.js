@@ -968,7 +968,7 @@ let model = '70b';
           content: message,
         },
       ],
-      model: "70b",
+      model: "metallama-3-70B-Instruksi",
     };
     const response = await fetch(BASE_URL, {
       method: "POST",
