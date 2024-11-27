@@ -960,34 +960,46 @@ async function smartContract(message) {
     throw error;
   }
 }
+async function blackboxAIChat(prompt, webSearchMode) {
+const logic = `Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150`;
 
-async function blackboxAIChat(message) {
-  try {
-    const response = await axios.post('https://www.blackbox.ai/api/chat', {
-      messages: [{ id: null, content: message, role: 'user' }],
-      id: null,
-      previewToken: null,
-      userId: null,
-      codeModelMode: true,
-      agentMode: {},
-      trendingAgentMode: {},
-      isMicMode: false,
-      isChromeExt: false,
-      githubToken: null,
-      webSearchMode: true,
-      userSystemPrompt: null,
-      mobileClient: false,
-      maxTokens: 100000,
-      playgroundTemperature: parseFloat(message.temperature) || 0.7,
-      playgroundTopP: 0.9,
-      validated: "69783381-2ce4-4dbd-ac78-35e9063feabc",
-    });
-
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-}
+			const body = {
+				messages: [
+					{
+						role: "assistant",
+						content: logic
+      },
+					{
+						role: "user",
+						content: prompt
+      }
+    ],
+				previewToken: null,
+				codeModelMode: true,
+				agentMode: {},
+				trendingAgentMode: {},
+				isMicMode: false,
+				isChromeExt: false,
+				githubToken: null,
+				webSearchMode: webSearchMode
+			};
+			const url = "https://www.blackbox.ai/api/chat";
+			try {
+				const response = await axios.post(url, body);
+				let result = response.data;
+				if (typeof result === 'string') {
+					result = result.replace(/\$@\$.+?\$@\$/gs, '').trim();
+					result = result.replace(/\$~~~\$.*?\$~~~\$/gs, '').trim();
+					result = result.replace(/\*\*/g, '*').trim();
+				}
+				if (webSearchMode && result.includes("Sources:")) {
+					result = formatWebSearchResult(result);
+				}
+				return result;
+			} catch (error) {
+				throw error;
+			}
+		}
 
 async function gptlogic(prompt) {
 let postData = {
@@ -1223,11 +1235,11 @@ app.get('/api/smartcontract', async (req, res) => {
 // Endpoint untuk blackboxAIChat
 app.get('/api/blackboxAIChat', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const prompt = req.query.message;
+    if (!prompt) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await blackboxAIChat(message);
+    const response = await blackboxAIChat(prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
