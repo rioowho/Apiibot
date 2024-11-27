@@ -952,6 +952,8 @@ function openai(messages) {
 }
 
 async function llama3(message) {
+let model = '70b';
+
   if (!["70b", "8b"].some((qq) => model == qq)) model = "70b"; //correct
   try {
     const BASE_URL = "https://llama3-enggan-ngoding.vercel.app/api/llama";
@@ -959,7 +961,7 @@ async function llama3(message) {
       messages: [
         {
           role: "system",
-          content: `Kamu adalah Meta AI Berbahasa Indonesia yang di kembangkan oleh Meta Platforms Inc. dan SSA Team, kamu bisa apa saja, kamu menggunakan Google sebagai search engine utamamu`,
+          content: `Kamu adalah Meta AI Berbahasa Indonesia yang di kembangkan oleh Meta Platforms Inc. dan Rioo, kamu bisa apa saja, kamu menggunakan Google sebagai search engine utamamu`,
         },
         {
           role: "user",
@@ -980,7 +982,6 @@ async function llama3(message) {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error:", error);
     throw error;
   }
 }
