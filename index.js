@@ -968,7 +968,7 @@ let model = '70b';
           content: message,
         },
       ],
-      model: "meta-llama-3-70B-Instruct",
+      model: "70b",
     };
     const response = await fetch(BASE_URL, {
       method: "POST",
