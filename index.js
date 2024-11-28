@@ -84,7 +84,7 @@ try {
       "https://c.blahaj.ca/",
       {
         url: `${url}`,
-        downloadMode: "audio",
+        downloadMode: "video",
       },
       {
         headers: {
