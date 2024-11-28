@@ -790,7 +790,35 @@ async function AimusicLyrics(message) {
     throw e
   }
 }
+async function RiooGpt(text) {
+  const messages = [
+    {
+      role: "system",
+      content:
+        "Kamu Adalah shinomiya kaguya dari anime love is war, seorang siswi sma sekaligus wakil ketua osis",
+    },
+    { role: "user", content: text },
+  ];
 
+  try {
+    const response = await fetch(
+      "https://deepenglish.com/wp-json/ai-chatbot/v1/chat",
+      {
+        method: "POST",
+        headers: {
+          Accept: "text/event-stream",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages }),
+      },
+    );
+
+    const responseData = await response.json();
+    return responseData;
+  } catch (error) {
+    throw error;
+  }
+}
 async function chatgpt(text) {
   // Cek cache terlebih dahulu
   const cachedResponse = myCache.get(text);
@@ -906,9 +934,9 @@ async function ai4chat(prompt, text) {
   try {
     const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
     const data = response.ok ? await response.json() : { error: `Error: ${response.status}` };
-    return { success: true, data };
+    return { data };
   } catch (error) {
-    return { success: false, data: error.message };
+    return { data: error.message };
   }
 }
 
@@ -1206,7 +1234,7 @@ app.get('/api/chatgpt', async (req, res) => {
     if (!text) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await chatgpt(text);
+    const response = await RiooGpt(text);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
