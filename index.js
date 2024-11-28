@@ -55,8 +55,29 @@ loghandler = {
 	}
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+async function ytmp3(url) {
+try {
+  const response = await axios
+    .post(
+      "https://c.blahaj.ca/",
+      {
+        url: `${url}`,
+        downloadMode: "audio",
+      },
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
 
-async function ytt(url) {
+async function ytmp4(url) {
 try {
   const response = await axios
     .post(
@@ -1341,13 +1362,29 @@ app.get('/api/search-sfile', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/ytdl', async (req, res) => {
+app.get('/api/ytmp4', async (req, res) => {
   try {
     const url = req.query.url;
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytt(url);
+    const response = await ytmp4(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/ytmp3', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await ytmp3(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
