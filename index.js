@@ -791,7 +791,8 @@ async function AimusicLyrics(message) {
   }
 }
 async function RiooGpt(text) {
-  const messages = [
+try {
+  let messages = [
     {
       role: "system",
       content:
@@ -799,8 +800,6 @@ async function RiooGpt(text) {
     },
     { role: "user", content: text },
   ];
-
-  try {
     const response = await fetch(
       "https://deepenglish.com/wp-json/ai-chatbot/v1/chat",
       {
