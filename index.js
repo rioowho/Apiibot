@@ -56,6 +56,27 @@ loghandler = {
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
+async function ytt(url) {
+try {
+  const response = await axios
+    .post(
+      "https://c.blahaj.ca/",
+      {
+        url: `${url}`,
+        downloadMode: "audio",
+      },
+      {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
 
 async function body(url, body) {
     try {
@@ -1322,11 +1343,11 @@ app.get('/api/search-sfile', async (req, res) => {
 });
 app.get('/api/ytdl', async (req, res) => {
   try {
-    const videoUrl = req.query.url;
-    if (!videoUrl) {
+    const url = req.query.url;
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytdl(videoUrl);
+    const response = await ytt(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
