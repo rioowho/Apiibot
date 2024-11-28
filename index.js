@@ -77,28 +77,6 @@ try {
   }
 }
 
-async function ytmp4(url) {
-try {
-  const response = await axios
-    .post(
-      "https://c.blahaj.ca/",
-      {
-        url: `${url}`,
-        downloadMode: "video",
-      },
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      }
-    )
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-}
-
 async function body(url, body) {
     try {
         var response = await fetch(url, {
@@ -465,18 +443,6 @@ async function ytdl(videoUrl) {
  fileType,
  fileSize,
  mp4
- });
- } else if (tabTitle === 'tab-item-2') {
- results.audio.push({
- fileType,
- fileSize,
- mp3
- });
- } else if (tabTitle === 'tab-item-3') {
- results.other.push({
- fileType,
- fileSize,
- downloadLink
  });
  }
  });
@@ -1364,11 +1330,11 @@ app.get('/api/search-sfile', async (req, res) => {
 });
 app.get('/api/ytmp4', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const videoUrl = req.query.url;
+    if (!videoUrl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytmp4(url);
+    const response = await ytdl(videoUrl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
