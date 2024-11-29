@@ -56,32 +56,6 @@ loghandler = {
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
-async function generateImage(prompt) {
-    const data = {
-        captionInput: prompt,
-        captionModel: "default"
-    };
-
-    const url = 'https://chat-gpt.pictures/api/generateImage';
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-// [ https://whatsapp.com/channel/0029VamzFetC6ZvcD1qde90Z ]
-            },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-        return result;
-    } catch (error) {
-        console.error("Error:", error);
-        throw error;
-    }
-}
-
 async function ytmp3(linkurl) {
 try {
   const response = await axios
@@ -95,15 +69,14 @@ try {
         headers: {
                 'Content-Type': 'application/json'
             },
-        body: JSON.stringify(ytmp3)
+        body: JSON.stringify(ytmp3),
       }
     )
     const response = await response.json();    
-return response.data;
-    } catch (error) {
-        console.error("Error:", error);
-        throw error;
-    }
+  return response.data;
+  } catch (error) {
+    throw error;
+  }
 }
 
 async function body(url, body) {
@@ -708,36 +681,7 @@ encodedParams.set('hd', '1');
   });
 }
 
-async function searchApp(message) {
-  try {
-    const url = 'https://m.playmods.net/id/search/' + message; // Ganti dengan URL sumber HTML
 
-    const response = await fetch(url);
-    const html = await response.text();
-
-    const $ = cheerio.load(html);
-
-    const dataArray = [];
-
-    $('a.beautify.ajax-a-1').each((index, element) => {
-      const $element = $(element);
-
-      const data = {
-        link: 'https://m.playmods.net' + $element.attr('href'),
-        title: $element.find('.common-exhibition-list-detail-name').text().trim(),
-        menu: $element.find('.common-exhibition-list-detail-menu').text().trim(),
-        detail: $element.find('.common-exhibition-list-detail-txt').text().trim(),
-        image: $element.find('.common-exhibition-list-icon img').attr('data-src'),
-        downloadText: $element.find('.common-exhibition-line-download').text().trim(),
-      };
-
-      dataArray.push(data);
-    });
-    return dataArray;
-  } catch (error) {
-    console.log(error);
-  }
-}
 async function pinterest(message) {
 
     let res = await fetch(`https://www.pinterest.com/resource/BaseSearchResource/get/?source_url=%2Fsearch%2Fpins%2F%3Fq%3D${message}&data=%7B%22options%22%3A%7B%22isPrefetch%22%3Afalse%2C%22query%22%3A%22${message}%22%2C%22scope%22%3A%22pins%22%2C%22no_fetch_context_on_resource%22%3Afalse%7D%2C%22context%22%3A%7B%7D%7D&_=1619980301559`);
