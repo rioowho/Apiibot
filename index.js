@@ -68,6 +68,7 @@ async function ytmp3(linkurl) {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
+          'User-Agent': 'axios/0.24.0'
         },
       }
     );
