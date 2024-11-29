@@ -976,9 +976,6 @@ app.get('/chatgpt', (req, res) => {
 app.get('/pro', (req, res) => {
 	res.sendFile(__path + "/views/pro.html");
 });
-app.get('/downloader/ytdl', (req, res) => {
-	res.sendFile(__path + "/views/ytdl.html");
-});
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
   try {
