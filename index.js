@@ -55,16 +55,10 @@ loghandler = {
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
-
 async function ytmp3(linkurl) {
-  try {
-    // Mengecek apakah URL valid dan mengarah ke platform yang benar
-    if (!linkurl || !linkurl.includes('youtube.com')) {
-      throw new Error('URL tidak valid atau bukan link YouTube');
-    }
-
     const response = await axios.post(
       "https://c.blahaj.ca/", // Pastikan endpoint ini valid
+      try {
       {
         url: linkurl,
         downloadMode: 'audio', // Pilihan mode download
@@ -73,7 +67,6 @@ async function ytmp3(linkurl) {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
-          'User-Agent': 'axios/0.24.0',
         },
       }
     );
