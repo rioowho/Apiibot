@@ -55,95 +55,29 @@ loghandler = {
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
-async function ytdlnew(videoUrl) {
-    try {
-        const searchParams = new URLSearchParams();
-        searchParams.append('query', videoUrl);
-        searchParams.append('vt', 'mp3');
+async function ytdlnew(url) {
+  try {
+    const res = await fetch(
+      `https://cdn59.savetube.su/info?url=${encodeURIComponent(url)}`
+    );
+    const data = (await res.json())?.data ?? null;
+    if (!data) return null;
 
-        const searchResponse = await axios.post(
-            'https://tomp3.cc/api/ajax/search',
-            searchParams.toString(),
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                    'Accept': '*/*',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }
-        );
+    // Filter out audio and video formats
+    const audioFormats = data.audio_formats ?? [];
+    const videoFormats = data.video_formats ?? [];
 
-        if (searchResponse.data.status !== 'ok') {
-            throw new Error('Failed to search for the video.');
-        }
-
-        const videoId = searchResponse.data.vid;
-        const videoTitle = searchResponse.data.title;
-        const mp4Options = searchResponse.data.links.mp4;
-        const mp3Options = searchResponse.data.links.mp3;
-
-        // Ensure these keys exist in the response data
-        const mediumQualityMp4Option = mp4Options && mp4Options[136];
-        const mp3Option = mp3Options && mp3Options['mp3128'];
-
-        if (!mediumQualityMp4Option || !mp3Option) {
-            throw new Error('Required MP4 or MP3 options not found.');
-        }
-
-        const mp4ConvertParams = new URLSearchParams();
-        mp4ConvertParams.append('vid', videoId);
-        mp4ConvertParams.append('k', mediumQualityMp4Option.k);
-
-        const mp4ConvertResponse = await axios.post(
-            'https://tomp3.cc/api/ajax/convert',
-            mp4ConvertParams.toString(),
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                    'Accept': '*/*',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }
-        );
-
-        if (mp4ConvertResponse.data.status !== 'ok') {
-            throw new Error('Failed to convert the video to MP4.');
-        }
-
-        const mp4DownloadLink = mp4ConvertResponse.data.dlink;
-
-        const mp3ConvertParams = new URLSearchParams();
-        mp3ConvertParams.append('vid', videoId);
-        mp3ConvertParams.append('k', mp3Option.k);
-
-        const mp3ConvertResponse = await axios.post(
-            'https://tomp3.cc/api/ajax/convert',
-            mp3ConvertParams.toString(),
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                    'Accept': '*/*',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }
-        );
-
-        if (mp3ConvertResponse.data.status !== 'ok') {
-            throw new Error('Failed to convert the video to MP3.');
-        }
-
-        const mp3DownloadLink = mp3ConvertResponse.data.dlink;
-
-        return {
-            title: videoTitle,
-            mp4DownloadLink,
-            mp3DownloadLink
-        };
-
-    } catch (error) {
-        console.error('Error:', error.message);
-        throw new Error('An error occurred: ' + error.message);
-    }
+    return {
+      title: data.title,
+      thumbnail: data.thumbnail,
+      duration: data.duration,
+      audio_formats: audioFormats,
+      video_formats: videoFormats,
+    };
+  } catch (error) {
+    console.error(error);  // Optionally log the error for debugging
+    return null;
+  }
 }
 async function ytmp3(linkurl) {
   try {
@@ -1438,11 +1372,11 @@ app.get('/api/ytmp4', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const videoUrl = req.query.url;
-    if (!videoUrl) {
+    const url = req.query.url;
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytdlnew(videoUrl);
+    const response = await ytdlnew(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
