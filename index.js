@@ -55,19 +55,44 @@ loghandler = {
 	}
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
-async function ytmp3(url) {
-try {
-  const response = await axios.post('https://c.blahaj.ca/', {
-        url: `${url}`,
-        downloadMode: 'audio',
-      },
-      {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      }
-    )
+
+async function generateImage(prompt) {
+    const data = {
+        captionInput: prompt,
+        captionModel: "default"
+    };
+
+    const url = 'https://chat-gpt.pictures/api/generateImage';
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+// [ https://whatsapp.com/channel/0029VamzFetC6ZvcD1qde90Z ]
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
+    }
+}
+async function ytmp3(linkurl) {
+const linkurl = `https://c.blahaj.ca/`;
+    try {
+        const response = await fetch(linkurl, {
+            url: `${linkurl}`,
+            downloadMode: 'audio',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
     return response.data;
   } catch (error) {
     throw error;
@@ -1370,11 +1395,11 @@ app.get('/api/ytmp4', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const linkurl = req.query.url;
+    if (!linkurl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytmp3(url);
+    const response = await ytmp3(linkurl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
