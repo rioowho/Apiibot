@@ -83,6 +83,7 @@ async function generateImage(prompt) {
 }
 
 async function ytmp3(linkurl) {
+try {
   const response = await axios
     .post(
       "https://c.blahaj.ca/",
