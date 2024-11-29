@@ -55,49 +55,33 @@ loghandler = {
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
-async function ytdlnew(url) {
-  try {
-    const res = await fetch(
-      `https://cdn59.savetube.su/info?url=${encodeURIComponent(url)}`
-    );
-    const data = (await res.json())?.data ?? null;
-    if (!data) return null;
 
-    // Filter out audio and video formats
-    const audioFormats = data.audio_formats ?? [];
-    const videoFormats = data.video_formats ?? [];
-
-    return {
-      title: data.title,
-      thumbnail: data.thumbnail,
-      duration: data.duration,
-      audio_formats: audioFormats,
-      video_formats: videoFormats,
-    };
-  } catch (error) {
-    console.error(error);  // Optionally log the error for debugging
-    return null;
-  }
-}
 async function ytmp3(linkurl) {
   try {
+    // Mengecek apakah URL valid dan mengarah ke platform yang benar
+    if (!linkurl || !linkurl.includes('youtube.com')) {
+      throw new Error('URL tidak valid atau bukan link YouTube');
+    }
+
     const response = await axios.post(
-      "https://c.blahaj.ca/",
+      "https://c.blahaj.ca/", // Pastikan endpoint ini valid
       {
         url: linkurl,
-        downloadMode: 'audio',
+        downloadMode: 'audio', // Pilihan mode download
       },
       {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
-          'User-Agent': 'axios/0.24.0'
+          'User-Agent': 'axios/0.24.0',
         },
       }
     );
 
-    return response.data; // Ambil data dari respons axios
+    // Mengembalikan response data yang didapatkan
+    return response.data; 
   } catch (error) {
+    console.error('Error:', error.message); // Log error untuk debugging
     throw error; // Lempar error jika ada
   }
 }
@@ -1372,11 +1356,11 @@ app.get('/api/ytmp4', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const linkurl = req.query.url;
+    if (!linkurl {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytdlnew(url);
+    const response = await ytmp3(linkurl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
