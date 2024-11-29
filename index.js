@@ -21,40 +21,30 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-loghandler = {
-	error: {
-		status: false,
-		code: 503,
-		message: "service got error, try again in 10 seconds",
-		creator: global.creator 
-	},
-	noturl: {
-		status: false,
-		code: 503,
-		message: "enter paramater url",
-		creator: global.creator 
-	},
-	nottext: {
-		status: false,
-		code: 503,
-		message: "enter parameter text",
-		creator: global.creator 
-	},
-	notquery: {
-		status: false,
-		code: 503,
-		message: "enter parameter query",
-		creator: global.creator 
-	},
-	notusername: {
-		status: false,
-		code: 503,
-		message: "enter parameter username",
-		creator: global.creator 
-	}
-}
-const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
+const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+async function ytmp3(linkurl) {
+  try {
+    const response = await axios.post(
+      "https://c.blahaj.ca/", // Pastikan endpoint ini valid
+      {
+        url: linkurl, // Menggunakan linkurl langsung
+        downloadMode: 'audio', // Pilihan mode download
+      },
+      {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    // Mengembalikan response data yang didapatkan
+    return response.data; 
+    } catch (error) {
+        console.error("Terjadi kesalahan:", error);
+    }
+}
 async function body(url, body) {
     try {
         var response = await fetch(url, {
@@ -1324,7 +1314,7 @@ app.get('/api/ytmp4', async (req, res) => {
 app.get('/api/ytmp3', async (req, res) => {
   try {
     const linkurl = req.query.url;
-    if (!linkurl {
+    if (!linkurl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
     const response = await ytmp3(linkurl);
