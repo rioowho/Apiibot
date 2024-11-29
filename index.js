@@ -57,21 +57,24 @@ const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
 class Ddownr {
     constructor(link) {
-        this.url = link; // Menggunakan parameter 'link' dengan benar
+        this.url = link; // Parameter 'link' untuk URL video
         this.video = ["360", "480", "720", "1080"];
+        this.audio = ["mp3", "aac", "wav"]; // Format audio yang didukung
     }
 
     async download(type) {
         if (!type) {
             return {
                 success: false,
-                list: this.video
+                list: { video: this.video, audio: this.audio }
             };
         }
-        if (!this.video.includes(type)) {
+
+        const allFormats = [...this.video, ...this.audio];
+        if (!allFormats.includes(type)) {
             return {
                 success: false,
-                list: this.video
+                list: { video: this.video, audio: this.audio }
             };
         }
 
@@ -101,7 +104,7 @@ class Ddownr {
             return {
                 success: false,
                 msg: "Kode Nya Turu min Besok lagi saja",
-                err: e
+                err: e.message
             };
         }
     }
@@ -114,10 +117,9 @@ async function ytdlnew(url, type) {
         console.log(result);
         return result;
     } catch (e) {
-        return { success: false, msg: e.message };
+        return { success: true, msg: e.message };
     }
 }
-
 async function ytmp3(linkurl) {
   try {
     const response = await axios.post(
