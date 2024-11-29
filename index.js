@@ -57,25 +57,23 @@ loghandler = {
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
 async function ytmp3(linkurl) {
-try {
-  const response = await axios
-    .post(
+  try {
+    const response = await axios.post(
       "https://c.blahaj.ca/",
       {
-        url: `${linkurl}`,
+        url: linkurl,
         downloadMode: "audio",
       },
       {
         headers: {
-                'Content-Type': 'application/json'
-            },
-        body: JSON.stringify(ytmp3),
+          'Content-Type': 'application/json',
+        },
       }
-    )
-    const response = await response.json();    
-  return response.data;
+    );
+
+    return response.data; // Ambil data dari respons axios
   } catch (error) {
-    throw error;
+    throw error; // Lempar error jika ada
   }
 }
 
