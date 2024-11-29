@@ -76,6 +76,7 @@ async function ytmp3(linkurl) {
         console.error("Terjadi kesalahan:", error);
     }
 }
+}
 async function body(url, body) {
     try {
         var response = await fetch(url, {
