@@ -83,6 +83,7 @@ async function generateImage(prompt) {
 }
 async function ytmp3(linkurl) {
 const linkurl = `https://c.blahaj.ca/`;
+
     try {
         const response = await fetch(linkurl, {
             url: `${linkurl}`,
@@ -91,12 +92,14 @@ const linkurl = `https://c.blahaj.ca/`;
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(ytmp3)
         });
+        
     return response.data;
-  } catch (error) {
-    throw error;
-  }
+    } catch (error) {
+        console.error("Error:", error);
+        throw error;
+    }
 }
 
 async function body(url, body) {
