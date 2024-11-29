@@ -54,13 +54,12 @@ loghandler = {
 	}
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
-
-async function ytmp3(linkurl) {    
-      try {
-      const response = await axios.post(
+async function ytmp3(linkurl) {
+  try {
+    const response = await axios.post(
       "https://c.blahaj.ca/", // Pastikan endpoint ini valid
       {
-        url: `${linkurl}`,
+        url: linkurl, // Menggunakan linkurl langsung
         downloadMode: 'audio', // Pilihan mode download
       },
       {
@@ -73,12 +72,10 @@ async function ytmp3(linkurl) {
 
     // Mengembalikan response data yang didapatkan
     return response.data; 
-  } catch (error) {
-    console.error('Error:', error.message); // Log error untuk debugging
-    throw error; // Lempar error jika ada
-  }
+    } catch (error) {
+        console.error("Terjadi kesalahan:", error);
+    }
 }
-
 async function body(url, body) {
     try {
         var response = await fetch(url, {
@@ -999,8 +996,8 @@ app.get('/chatgpt', (req, res) => {
 app.get('/pro', (req, res) => {
 	res.sendFile(__path + "/views/pro.html");
 });
-app.get('/downloader/ytmp3', (req, res) => {
-	res.sendFile(__path + "/views/ytmp3.html");
+app.get('/downloader/ytdl', (req, res) => {
+	res.sendFile(__path + "/views/ytdl.html");
 });
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
