@@ -55,6 +55,70 @@ loghandler = {
 	}
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+const axios = require('axios');
+
+class Ddownr {
+    constructor(link) {
+        this.url = link; // Menggunakan parameter 'link' dengan benar
+        this.video = ["360", "480", "720", "1080"];
+    }
+
+    async download(type) {
+        if (!type) {
+            return {
+                success: false,
+                list: this.video
+            };
+        }
+        if (!this.video.includes(type)) {
+            return {
+                success: false,
+                list: this.video
+            };
+        }
+
+        try {
+            const { data } = await axios.get(`https://p.oceansaver.in/ajax/download.php?copyright=0&format=${type}&url=${encodeURIComponent(this.url)}&api=dfcb6d76f2f6a9894gjkege8a4ab232222`);
+            let result = {};
+
+            while (true) {
+                const response = await axios.get(`https://p.oceansaver.in/ajax/progress.php?id=${data.id}`).catch(e => e.response);
+
+                if (response?.data?.download_url) {
+                    result = {
+                        type,
+                        download: response.data.download_url
+                    };
+                    break;
+                } else {
+                    console.log(`[ ! ] ${response?.data?.text || 'Unknown error'} : ${response?.data?.progress || 0}/1000`);
+                }
+
+                // Tunggu 1 detik sebelum mencoba lagi
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+            return { success: true, ...data.info, ...result };
+        } catch (e) {
+            return {
+                success: false,
+                msg: "Kode Nya Turu min Besok lagi saja",
+                err: e
+            };
+        }
+    }
+}
+
+async function ytdlnew(url, type) {
+    try {
+        const client = new Ddownr(url);
+        const result = await client.download(type);
+        console.log(result);
+        return result;
+    } catch (e) {
+        return { success: false, msg: e.message };
+    }
+}
 
 async function ytmp3(linkurl) {
   try {
@@ -1350,7 +1414,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await Ddownr(url);
+    const response = await ytdlnew(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
