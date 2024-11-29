@@ -81,21 +81,24 @@ async function generateImage(prompt) {
         throw error;
     }
 }
-async function ytmp3(linkurl) {
-const linkurl = `https://c.blahaj.ca/`;
 
-    try {
-        const response = await fetch(linkurl, {
-            url: `${linkurl}`,
-            downloadMode: 'audio',
-            method: 'POST',
-            headers: {
+async function ytmp3(linkurl) {
+  const response = await axios
+    .post(
+      "https://c.blahaj.ca/",
+      {
+        url: `${linkurl}`,
+        downloadMode: "audio",
+      },
+      {
+        headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(ytmp3)
-        });
-        
-    return response.data;
+        body: JSON.stringify(ytmp3)
+      }
+    )
+    const response = await response.json();    
+return response.data;
     } catch (error) {
         console.error("Error:", error);
         throw error;
