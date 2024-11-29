@@ -1370,11 +1370,11 @@ app.get('/api/ytmp4', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const link = req.query.url;
+    if (!link) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytmp3(url);
+    const response = await youtubedl(link);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
