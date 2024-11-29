@@ -54,7 +54,6 @@ loghandler = {
 	}
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
-const axios = require('axios');
 
 class Ddownr {
     constructor(link) {
