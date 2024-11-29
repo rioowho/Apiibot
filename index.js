@@ -59,7 +59,7 @@ async function ytmp3(url) {
 try {
   const response = await axios
     .post(
-      'https://co.eepy.today/',
+      'https://dl.khyernet.xyz/',
       {
         url: `${url}`,
         downloadMode: 'audio',
