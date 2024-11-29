@@ -55,69 +55,94 @@ loghandler = {
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
-class Ddownr {
-    constructor(link) {
-        this.url = link; // Parameter 'link' untuk URL video
-        this.video = ["360", "480", "720", "1080"];
-        this.audio = ["mp3", "aac", "wav"]; // Format audio yang didukung
-    }
-
-    async download(type) {
-        if (!type) {
-            return {
-                success: false,
-                list: { video: this.video, audio: this.audio }
-            };
-        }
-
-        const allFormats = [...this.video, ...this.audio];
-        if (!allFormats.includes(type)) {
-            return {
-                success: false,
-                list: { video: this.video, audio: this.audio }
-            };
-        }
-
-        try {
-            const { data } = await axios.get(`https://p.oceansaver.in/ajax/download.php?copyright=0&format=${type}&url=${encodeURIComponent(this.url)}&api=dfcb6d76f2f6a9894gjkege8a4ab232222`);
-            let result = {};
-
-            while (true) {
-                const response = await axios.get(`https://p.oceansaver.in/ajax/progress.php?id=${data.id}`).catch(e => e.response);
-
-                if (response?.data?.download_url) {
-                    result = {
-                        type,
-                        download: response.data.download_url
-                    };
-                    break;
-                } else {
-                    console.log(`[ ! ] ${response?.data?.text || 'Unknown error'} : ${response?.data?.progress || 0}/1000`);
-                }
-
-                // Tunggu 1 detik sebelum mencoba lagi
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-
-            return { success: true, ...data.info, ...result };
-        } catch (e) {
-            return {
-                success: false,
-                msg: "Kode Nya Turu min Besok lagi saja",
-                err: e.message
-            };
-        }
-    }
-}
-
-async function ytdlnew(url, type) {
+async function ytdlnew(videoUrl) {
     try {
-        const client = new Ddownr(url);
-        const result = await client.download(type);
-        console.log(result);
-        return result;
-    } catch (e) {
-        return { success: true, msg: e.message };
+        const searchParams = new URLSearchParams();
+        searchParams.append('query', videoUrl);
+        searchParams.append('vt', 'mp3');
+
+        const searchResponse = await axios.post(
+            'https://tomp3.cc/api/ajax/search',
+            searchParams.toString(),
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'Accept': '*/*',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }
+        );
+
+        if (searchResponse.data.status !== 'ok') {
+            throw new Error('Failed to search for the video.');
+        }
+
+        const videoId = searchResponse.data.vid;
+        const videoTitle = searchResponse.data.title;
+        const mp4Options = searchResponse.data.links.mp4;
+        const mp3Options = searchResponse.data.links.mp3;
+
+        // Ensure these keys exist in the response data
+        const mediumQualityMp4Option = mp4Options && mp4Options[136];
+        const mp3Option = mp3Options && mp3Options['mp3128'];
+
+        if (!mediumQualityMp4Option || !mp3Option) {
+            throw new Error('Required MP4 or MP3 options not found.');
+        }
+
+        const mp4ConvertParams = new URLSearchParams();
+        mp4ConvertParams.append('vid', videoId);
+        mp4ConvertParams.append('k', mediumQualityMp4Option.k);
+
+        const mp4ConvertResponse = await axios.post(
+            'https://tomp3.cc/api/ajax/convert',
+            mp4ConvertParams.toString(),
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'Accept': '*/*',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }
+        );
+
+        if (mp4ConvertResponse.data.status !== 'ok') {
+            throw new Error('Failed to convert the video to MP4.');
+        }
+
+        const mp4DownloadLink = mp4ConvertResponse.data.dlink;
+
+        const mp3ConvertParams = new URLSearchParams();
+        mp3ConvertParams.append('vid', videoId);
+        mp3ConvertParams.append('k', mp3Option.k);
+
+        const mp3ConvertResponse = await axios.post(
+            'https://tomp3.cc/api/ajax/convert',
+            mp3ConvertParams.toString(),
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'Accept': '*/*',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }
+        );
+
+        if (mp3ConvertResponse.data.status !== 'ok') {
+            throw new Error('Failed to convert the video to MP3.');
+        }
+
+        const mp3DownloadLink = mp3ConvertResponse.data.dlink;
+
+        return {
+            title: videoTitle,
+            mp4DownloadLink,
+            mp3DownloadLink
+        };
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        throw new Error('An error occurred: ' + error.message);
     }
 }
 async function ytmp3(linkurl) {
@@ -1413,11 +1438,11 @@ app.get('/api/ytmp4', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const videoUrl = req.query.url;
+    if (!videoUrl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytdlnew(url);
+    const response = await ytdlnew(videoUrl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
