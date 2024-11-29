@@ -57,10 +57,7 @@ loghandler = {
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 async function ytmp3(url) {
 try {
-  const response = await axios
-    .post(
-      'https://dl.khyernet.xyz/',
-      {
+  const response = await fetch('https://c.blahaj.ca/', {
         url: `${url}`,
         downloadMode: 'audio',
       },
