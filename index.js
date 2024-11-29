@@ -13,7 +13,7 @@ const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
-const { youtubedl } = require('./lib/ytdl');
+const { Cobalt } = require('./lib/Cobalt');
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -1370,11 +1370,11 @@ app.get('/api/ytmp4', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const link = req.query.url;
-    if (!link) {
+    const input = req.query.url;
+    if (!input) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await youtubedl(link);
+    const response = await Cobalt(input);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
