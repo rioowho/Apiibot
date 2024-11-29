@@ -55,12 +55,12 @@ loghandler = {
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
-async function ytmp3(linkurl) {
-    const response = await axios.post(
-      "https://c.blahaj.ca/", // Pastikan endpoint ini valid
+async function ytmp3(linkurl) {    
       try {
+      const response = await axios.post(
+      "https://c.blahaj.ca/", // Pastikan endpoint ini valid
       {
-        url: linkurl,
+        url: `${linkurl}`,
         downloadMode: 'audio', // Pilihan mode download
       },
       {
