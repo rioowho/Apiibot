@@ -54,6 +54,42 @@ loghandler = {
 	}
 }
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+async function ytmp3(linkurl) {
+  try {
+    const response = await axios.post(
+      "https://c.blahaj.ca/", // Pastikan endpoint ini valid
+      {
+        url: linkurl, // Menggunakan linkurl langsung
+        downloadMode: 'audio', // Pilihan mode download
+      },
+      {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    // Mengembalikan response data yang didapatkan
+    return response.data; 
+    } catch (error) {
+        console.error("Terjadi kesalahan:", error);
+    }
+}
+async function body(url, body) {
+    try {
+        var response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body),
+        });
+        return await response.json();
+    } catch (error) {
+        console.error("Terjadi kesalahan:", error);
+    }
+}
 
 
 async function ToolbotAI(desire) {
