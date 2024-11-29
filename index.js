@@ -62,10 +62,11 @@ async function ytmp3(linkurl) {
       "https://c.blahaj.ca/",
       {
         url: linkurl,
-        downloadMode: "audio",
+        downloadMode: 'audio',
       },
       {
         headers: {
+          Accept: 'application/json',
           'Content-Type': 'application/json',
         },
       }
