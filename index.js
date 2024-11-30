@@ -1501,7 +1501,7 @@ app.get('/api/remini', async (req, res) => {
 });
 app.get('/api/brat', async (req, res) => {
   try {
-    const { imageBuffer } = req.query.image;
+    const { imageBuffer } = req.query.url;
     if (!imageBuffer) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
