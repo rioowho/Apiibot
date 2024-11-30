@@ -34,7 +34,7 @@ const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 async function ytmp3(linkurl) {
     const response = await axios.post("https://tes.siputzx.my.id/", {
         linkurl,
-        downloadMode: "audio",
+        downloadMode: "auto",
     }, {
         headers: {
             "Content-Type": "application/json",
