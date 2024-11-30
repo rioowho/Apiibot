@@ -23,6 +23,66 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+async function chatWithGPT(your_qus) {
+    function generateRandomString(length) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        return Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
+    }
+
+    let _iam = generateRandomString(8);
+
+    try {
+        const response1 = await fetch("https://chat.aidutu.cn/api/cg/chatgpt/user/info?v=1.5", {
+            method: "POST",
+            headers: {
+                "accept": "*/*",
+                "referrer": "https://chat.aidutu.cn/",
+                "x-iam": _iam,
+                "Cookie": `_UHAO={"uid":"160941","school":"","time":1681704243,"ts":"2","name":"chat_q2Ac","head":"\/res\/head\/2ciyuan\/24.jpg","term":"201801","sign":"714653d141dac0e7709f31003b8df858"}; _UIP=0e98d94e599ef74c29fb40cb35971810`,
+                "content-type": "application/json",
+            },
+            body: JSON.stringify({ q: your_qus, iam: _iam }),
+        });
+
+        if (!response1.ok) {
+            throw new Error(`Failed to fetch user info: ${response1.status}`);
+        }
+
+        const data = await response1.json();
+        const xtoken = data.data.token;
+
+        const response2 = await fetch("https://chat.aidutu.cn/api/chat-process", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Referer": "https://chat.aidutu.cn/",
+                "Cookie": `_UHAO={"uid":"160941","school":"","time":1681704243,"ts":"2","name":"chat_q2Ac","head":"\/res\/head\/2ciyuan\/24.jpg","term":"201801","sign":"714653d141dac0e7709f31003b8df858"}; _UIP=0e98d94e599ef74c29fb40cb35971810`,
+                "accept": "application.json, text/plain, */*",
+                "x-token": xtoken,
+            },
+            body: JSON.stringify({
+                prompt: your_qus,
+                temperature: 0.8,
+                top_p: 1,
+                options: {},
+                systemMessage: "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
+            }),
+        });
+
+        if (!response2.ok) {
+            throw new Error(`Failed to process chat: ${response2.status}`);
+        }
+
+        const data2 = await response2.text();
+        const jsonArray = JSON.parse(`[${data2.split('\n').filter(Boolean).join(',')}]`); // Filter lines and join properly
+        const lastJsonObject = jsonArray[jsonArray.length - 1];
+        return lastJsonObject.text;
+
+    } catch (error) {
+        console.error("Error in chatWithGPT:", error);
+        throw error;
+    }
+}
 async function ytmp3(linkurl) {
   try {
     const response = await axios.post(
@@ -1161,6 +1221,22 @@ app.get('/api/iask', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
     const response = await iask(query);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/fastgpt', async (req, res) => {
+  try {
+    const your_qus = req.query.message;
+    if (!your_qus) {
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
+    }
+    const response = await chatWithGPT(your_qus);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
