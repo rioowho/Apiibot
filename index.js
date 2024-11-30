@@ -38,7 +38,11 @@ async function obfus(query) {
 						splitStrings: true,
 						stringArrayThreshold: 1
 					})
-					const result = { obfuscationResult.getObfuscatedCode() }
+					const result = {
+						status: 200,
+						author: `//RiooXdzz\n\n`,
+						result: obfuscationResult.getObfuscatedCode()
+					}
 					resolve(result)
 				} catch (e) {
 					reject(e)
