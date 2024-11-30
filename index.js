@@ -979,7 +979,7 @@ app.get('/pro', (req, res) => {
 app.get('/downloader/mp3', (req, res) => {
 	res.sendFile(__path + "/views/ytdl.html");
 });
-app.get('/api/brat', async (req, res) => {
+app.get('/brat', async (req, res) => {
     try {
         const browser = await chromium.launch({ headless: true });
         const context = await browser.newContext({
