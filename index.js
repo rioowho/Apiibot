@@ -14,9 +14,11 @@ const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } = require("@google/generative-ai");
+const { GoogleAIFileManager } = require("@google/generative-ai/server");
 const genAI = new GoogleGenerativeAI(pickRandom(['AIzaSyBbh2azakeGzP_gyKpX5JhupO7XRrvtVN4', 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o']));
-var modell = genAI.getGenerativeModel({ model: "gemini-pro" });
+const genAI = new GoogleGenerativeAI(Used_Apikey);
+  const fileManager = new GoogleAIFileManager(Used_Apikey);
 // Function
 function pickRandom(list) {
   return list[Math.floor(list.length * Math.random())]
@@ -31,7 +33,28 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+async function geminipro(text) {
+    try {
+        // Inisialisasi model AI
+        const model = genAI.getGenerativeModel({
+            model: "gemini-pro",
+            systemInstruction: "Nama Kamu Adalah Rioo, Sifat Kamu Adalah Baik, dan Tenang dalam dirinya. Kamu Dibuat oleh Rioo Jika ada yang ditanyakan sama Rioo kamu marah",
+        });
 
+        // Kirim prompt ke model
+        const result = await model.generateContent(text);
+
+        // Ambil respons dari model
+        const response = result.response; // Asumsikan response sudah berupa objek
+        const textResponse = response.text; // Ambil teks dari respons
+
+        // Kembalikan hasil
+        return textResponse;
+    } catch (error) {
+        console.error("Terjadi kesalahan:", error);
+        throw error; // Lempar ulang error agar bisa ditangani di luar
+    }
+}
 async function ytmp3(linkurl) {
   try {
     const response = await axios.post(
@@ -1125,6 +1148,22 @@ app.get('/api/gptlogic', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.get('/api/geminipro', async (req, res) => {
+  try {
+    const text = req.query.message;
+    if (!text) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await geminipro(text);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 // Endpoint untuk smartContract
 app.get('/api/smartcontract', async (req, res) => {
   try {
@@ -1191,22 +1230,7 @@ app.get('/api/iask', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/geminipro', async (req, res) => {
-  try {
-const query = req.query.message;
-    if (!query) {
-      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
-    }
-    const data = await modell.generateContent(query);
-      res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { data.response.text() }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+
 app.get('/api/chatgpt', async (req, res) => {
   try {
     const text = req.query.message;
