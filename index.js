@@ -30,26 +30,33 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
-async function geminipro(text) {
+// Fungsi untuk mengirim permintaan ke REST API
+async function geminiproAPI(message) {
     try {
-        // Inisialisasi model AI
-        const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
-            systemInstruction: "hallo saya gemini-pro, Nama Kamu Adalah Rioo, Sifat Kamu Adalah Baik, dan Tenang dalam dirinya. Kamu Dibuat oleh Rioo Jika ada yang ditanyakan sama Rioo kamu marah",
+        const url = `https://restapii.rioooxdzz.web.id/api/geminipro?message=${encodeURIComponent(message)}`;
+
+        // Kirim permintaan GET ke API
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
         });
 
-        // Kirim prompt ke model
-        const result = await model.generateContent(text);
+        // Periksa apakah respons berhasil
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-        // Ambil respons dari model
-        const response = result.response; // Asumsikan response sudah berupa objek
-        const textResponse = response.text; // Ambil teks dari respons
+        // Parsing data respons JSON
+        const data = await response.json();
+        console.log("Respons dari API:", data);
 
-        // Kembalikan hasil
-        return textResponse;
+        // Kembalikan data respons
+        return data;
     } catch (error) {
-        console.error("Terjadi kesalahan:", error);
-        throw error; // Lempar ulang error agar bisa ditangani di luar
+        console.error("Terjadi kesalahan saat mengakses API:", error);
+        throw error; // Lempar error agar bisa ditangani di luar
     }
 }
 async function ytmp3(linkurl) {
@@ -1147,11 +1154,11 @@ app.get('/api/gptlogic', async (req, res) => {
 });
 app.get('/api/geminipro', async (req, res) => {
   try {
-    const text = req.query.message;
-    if (!text) {
+    const message = req.query.message;
+    if (!message) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await geminipro(text);
+    const response = await geminiproAPI(messaget);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
