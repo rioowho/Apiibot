@@ -34,8 +34,8 @@ async function geminipro(text) {
     try {
         // Inisialisasi model AI
         const model = genAI.getGenerativeModel({
-            model: "gemini-pro",
-            systemInstruction: "Nama Kamu Adalah Rioo, Sifat Kamu Adalah Baik, dan Tenang dalam dirinya. Kamu Dibuat oleh Rioo Jika ada yang ditanyakan sama Rioo kamu marah",
+            model: "gemini-1.5-pro",
+            systemInstruction: "hallo saya gemini-pro, Nama Kamu Adalah Rioo, Sifat Kamu Adalah Baik, dan Tenang dalam dirinya. Kamu Dibuat oleh Rioo Jika ada yang ditanyakan sama Rioo kamu marah",
         });
 
         // Kirim prompt ke model
