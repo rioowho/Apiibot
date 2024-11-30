@@ -23,66 +23,7 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
-async function chatWithGPT(your_qus) {
-    function generateRandomString(length) {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        return Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
-    }
 
-    let _iam = generateRandomString(8);
-
-    try {
-        const response1 = await fetch("https://chat.aidutu.cn/api/cg/chatgpt/user/info?v=1.5", {
-            method: "POST",
-            headers: {
-                "accept": "*/*",
-                "referrer": "https://chat.aidutu.cn/",
-                "x-iam": _iam,
-                "Cookie": `_UHAO={"uid":"160941","school":"","time":1681704243,"ts":"2","name":"chat_q2Ac","head":"\/res\/head\/2ciyuan\/24.jpg","term":"201801","sign":"714653d141dac0e7709f31003b8df858"}; _UIP=0e98d94e599ef74c29fb40cb35971810`,
-                "content-type": "application/json",
-            },
-            body: JSON.stringify({ q: your_qus, iam: _iam }),
-        });
-
-        if (!response1.ok) {
-            throw new Error(`Failed to fetch user info: ${response1.status}`);
-        }
-
-        const data = await response1.json();
-        const xtoken = data.data.token;
-
-        const response2 = await fetch("https://chat.aidutu.cn/api/chat-process", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Referer": "https://chat.aidutu.cn/",
-                "Cookie": `_UHAO={"uid":"160941","school":"","time":1681704243,"ts":"2","name":"chat_q2Ac","head":"\/res\/head\/2ciyuan\/24.jpg","term":"201801","sign":"714653d141dac0e7709f31003b8df858"}; _UIP=0e98d94e599ef74c29fb40cb35971810`,
-                "accept": "application.json, text/plain, */*",
-                "x-token": xtoken,
-            },
-            body: JSON.stringify({
-                prompt: your_qus,
-                temperature: 0.8,
-                top_p: 1,
-                options: {},
-                systemMessage: "You are ChatGPT, a large language model trained by OpenAI. Follow the user's instructions carefully. Respond using markdown.",
-            }),
-        });
-
-        if (!response2.ok) {
-            throw new Error(`Failed to process chat: ${response2.status}`);
-        }
-
-        const data2 = await response2.text();
-        const jsonArray = JSON.parse(`[${data2.split('\n').filter(Boolean).join(',')}]`); // Filter lines and join properly
-        const lastJsonObject = jsonArray[jsonArray.length - 1];
-        return lastJsonObject.text;
-
-    } catch (error) {
-        console.error("Error in chatWithGPT:", error);
-        throw error;
-    }
-}
 async function ytmp3(linkurl) {
   try {
     const response = await axios.post(
@@ -937,30 +878,39 @@ async function ai4chat(prompt, text) {
   } catch (error) {
     return { data: error.message };
   }
-}
+}      	
 
+const model = [
+    "yanzgpt-revolution-25b-v3.0", // Default
+    "yanzgpt-legacy-72b-v3.0" // Pro
+];
 
-async function gptlogic(prompt) {
-let postData = {
-    prompt: prompt,
-    sessionId: '-',
-    character: `Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150`
+async function YanzGPT(query, prompt, model) {
+    return new Promise(async (resolve, reject) => {
+        const response = await axios("https://yanzgpt.my.id/chat", {
+            headers: {
+                authorization: "Bearer yzgpt-sc4tlKsMRdNMecNy",
+                "content-type": "application/json"
+            },
+            data: {
+                messages: [
+                    {
+                        role: "system",
+                        content: `Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150`
+                    },
+                    {
+                        role: "user",
+                        content: query
+                    }
+                ],
+                model: "yanzgpt-revolution-25b-v3.0"
+            },
+            method: "POST"
+        });
+        resolve(response.data);
+    });
 };
 
-try {
-    const response = await axios({
-        url: "https://elxyzgpt.xyz/api/chat",
-        method: 'POST',
-        data: new URLSearchParams(Object.entries(postData)),
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-}
 		async function bard(query) {
     const COOKIE_KEY = "g.a000mwgL5JRw9IARGMYCihj5YvtGl7tz7BOQSlsQyEAHYA1KvbeO-vBerIBI5FcrtceDgrFr6gACgYKAUcSARYSFQHGX2MiQ4NYw4HGfFmoBkuy3Bg-RhoVAUF8yKqas8HgMOBNEddTflPWq2Ry0076";
     const psidCookie = '__Secure-1PSID=' + COOKIE_KEY;
@@ -1150,11 +1100,11 @@ app.get('/api/bard', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const prompt = req.query.message;
-    if (!prompt) {
+    const query = req.query.message;
+    if (!query) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await gptlogic(prompt);
+    const response = await YanzGPT(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
