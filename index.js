@@ -16,7 +16,7 @@ var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(pickRandom(['AIzaSyBbh2azakeGzP_gyKpX5JhupO7XRrvtVN4', 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o']));
-var model = genAI.getGenerativeModel({ model: "gemini-pro" });
+var modell = genAI.getGenerativeModel({ model: "gemini-pro" });
 // Function
 function pickRandom(list) {
   return list[Math.floor(list.length * Math.random())]
@@ -1192,23 +1192,19 @@ app.get('/api/iask', async (req, res) => {
   }
 });
 app.get('/api/geminipro', async (req, res) => {
+  try {
 const query = req.query.message;
     if (!query) {
-      return res.json({ error: 'Parameter "query" tidak ditemukan' });
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-  try {
-    const data = await model.generateContent(query);
-    if (!data) {
-      return res.json({ status: false, message: msg.nodata });
-    }
-
-    res.json({
-      status: true,
-      author: 'RiooXdzz',
-      result: data.response.text()
+    const data = await modell.generateContent(query);
+      res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { data.response.text() }
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 app.get('/api/chatgpt', async (req, res) => {
