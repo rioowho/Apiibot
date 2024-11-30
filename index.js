@@ -14,12 +14,7 @@ const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
-const { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } = require("@google/generative-ai");
-const { GoogleAIFileManager } = require("@google/generative-ai/server");
-const Used_Apikey = "AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o"
-const genAI = new GoogleGenerativeAI(Used_Apikey);
-  const fileManager = new GoogleAIFileManager(Used_Apikey);
-
+const jsobfus = require('javascript-obfuscator')
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -30,7 +25,26 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
-
+async function obfus(query) {
+			return new Promise((resolve, reject) => {
+				try {
+					const obfuscationResult = jsobfus.obfuscate(query, {
+						compact: false,
+						controlFlowFlattening: true,
+						controlFlowFlatteningThreshold: 1,
+						numbersToExpressions: true,
+						simplify: true,
+						stringArrayShuffle: true,
+						splitStrings: true,
+						stringArrayThreshold: 1
+					})
+					const result = { obfuscationResult.getObfuscatedCode() }
+					resolve(result)
+				} catch (e) {
+					reject(e)
+				}
+			})
+		}
 async function ytmp3(linkurl) {
   try {
     const response = await axios.post(
@@ -1447,7 +1461,22 @@ app.get('/api/remini', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+app.get('/api/encrypt', async (req, res) => {
+  try {
+    const query = req.query.message;
+    if (!query) {
+      return res.status(400).json({ error: 'Parameter "image" tidak ditemukan' });
+    }
+    const response = await obfus(query);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 app.get('/api/status', async (req, res) => {
 function muptime(seconds) {
 	function pad(s) {
