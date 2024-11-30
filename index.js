@@ -979,6 +979,36 @@ app.get('/pro', (req, res) => {
 app.get('/downloader/mp3', (req, res) => {
 	res.sendFile(__path + "/views/ytdl.html");
 });
+app.get('/api/brat', async (req, res) => {
+    try {
+        const browser = await chromium.launch({ headless: true });
+        const context = await browser.newContext({
+            viewport: { width: 375, height: 812 },
+            userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
+        });
+        const page = await context.newPage();
+        await page.goto('https://www.bratgenerator.com/');
+        await page.evaluate(() => {
+            setupTheme('white');
+        });
+        await page.fill('#textInput', 'Hello! 👋 How can I assist you today?');
+        await page.click('#onetrust-accept-btn-handler');
+        await page.waitForTimeout(500);
+        const screenshotPath = './screenshot.png';
+        await page.screenshot({ path: screenshotPath });
+
+        // Read the screenshot and send as response
+        const imageBuffer = fs.readFileSync(screenshotPath);
+        res.setHeader('Content-Type', 'image/png');
+        res.send(imageBuffer);
+
+        await browser.close();
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send('An error occurred');
+    }
+});
+
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
   try {
