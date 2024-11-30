@@ -25,7 +25,7 @@ app.use(cors());
 
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
-async function brat(message, client) {
+async function brat(imageBuffer, client) {
     try {
         // 1. Konfigurasi browser
         const browser = await chromium.launch({ headless: true });
@@ -46,7 +46,7 @@ async function brat(message, client) {
         });
 
         // 4. Isi input teks
-        const inputText = `${message}`
+        const inputText = `hallo everyone`
         console.log(`Filling text input with: "${inputText}"`);
         await page.fill('#textInput', inputText);
 
@@ -1501,15 +1501,15 @@ app.get('/api/remini', async (req, res) => {
 });
 app.get('/api/brat', async (req, res) => {
   try {
-    const { message }= req.query;
-    if (!message) {
+    const { imageBuffer } = req.query.image;
+    if (!imageBuffer) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await brat(message);
+    const response = await brat(imageBuffer);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: { response }
+      result: { response }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
