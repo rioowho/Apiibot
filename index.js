@@ -31,32 +31,7 @@ app.use(cors());
 
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 // Fungsi untuk mengirim permintaan ke REST API
-async function geminiproAPI(message) {
-    try {
-        // Validasi input (contoh sederhana)
-        if (!message) {
-            throw new Error("Pesan tidak boleh kosong");
-        }
 
-        const url = `https://restapii.rioooxdzz.web.id/api/geminipro?message=${encodeURIComponent(message)}`;
-
-        // Kirim permintaan GET
-        const response = await fetch(url);
-
-        // Periksa status response
-        if (!response.ok) {
-            throw new Error(`Terjadi kesalahan saat menghubungi API: ${response.status} ${response.statusText}`);
-        }
-
-        // Parsing data JSON
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error("Terjadi kesalahan:", error);
-        // Lempar error dengan pesan yang lebih informatif
-        throw new Error("Gagal mengambil data dari API. Silahkan coba lagi nanti.");
-    }
-}
 async function ytmp3(linkurl) {
   try {
     const response = await axios.post(
@@ -840,7 +815,7 @@ async function gemini(message) {
 
 async function gpt3(message) {
    try {
-     var api = await axios.get(`https://hercai.onrender.com/turbo/hercai?question=${encodeURIComponent(message)}`, {
+     var api = await axios.get(`https://hercai.onrender.com/v3/hercai?question=${encodeURIComponent(message)}`, {
          headers: {
          "content-type": "application/json",
          },
@@ -912,7 +887,28 @@ async function ai4chat(prompt, text) {
     return { data: error.message };
   }
 }      	
-
+async function geminipro(message) {
+   try {
+     var ress = await axios.get(`https://hercai.onrender.com/turbo-16k/hercai?question`, {
+         headers: {
+         "content-type": "application/json",
+         },
+         messages: [
+                    {
+                        role: "system",
+                        content: `Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150`
+                    },
+                    {
+                        role: "user",
+                        content: message
+                    }
+                ],
+        })
+      return ress.data;
+    } catch (e) {
+    console.log(e)
+  }
+}
 const model = [
     "yanzgpt-revolution-25b-v3.0", // Default
     "yanzgpt-legacy-72b-v3.0" // Pro
@@ -1156,7 +1152,7 @@ app.get('/api/geminipro', async (req, res) => {
     if (!message) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await geminiproAPI(message);
+    const response = await geminipro(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
