@@ -30,9 +30,21 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
-// Fungsi untuk mengirim permintaan ke REST API
 
 async function ytmp3(linkurl) {
+    const response = await axios.post("https://tes.siputzx.my.id/", {
+        linkurl,
+        downloadMode: "audio",
+    }, {
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+    });
+    return response.data;
+}
+
+async function ytmp33(linkurl) {
   try {
     const response = await axios.post(
       "https://c.blahaj.ca/", // Pastikan endpoint ini valid
