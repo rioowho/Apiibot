@@ -16,13 +16,10 @@ var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
 const { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } = require("@google/generative-ai");
 const { GoogleAIFileManager } = require("@google/generative-ai/server");
-const genAI = new GoogleGenerativeAI(pickRandom(['AIzaSyBbh2azakeGzP_gyKpX5JhupO7XRrvtVN4', 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o']));
+const Used_Apikey = "AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o"
 const genAI = new GoogleGenerativeAI(Used_Apikey);
   const fileManager = new GoogleAIFileManager(Used_Apikey);
-// Function
-function pickRandom(list) {
-  return list[Math.floor(list.length * Math.random())]
-}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
