@@ -14,6 +14,13 @@ const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(pickRandom(['AIzaSyBbh2azakeGzP_gyKpX5JhupO7XRrvtVN4', 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o']));
+var model = genAI.getGenerativeModel({ model: "gemini-pro" });
+// Function
+function pickRandom(list) {
+  return list[Math.floor(list.length * Math.random())]
+}
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -24,65 +31,6 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
-
-async function brat(imageBuffer, client) {
-    try {
-        // 1. Konfigurasi browser
-        const browser = await chromium.launch({ headless: true });
-        const context = await browser.newContext({
-            viewport: { width: 375, height: 812 }, // Ukuran layar simulasi
-            userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
-        });
-        
-        // 2. Buka halaman baru
-        const page = await context.newPage();
-        console.log('Navigating to the target website...');
-        await page.goto('https://www.bratgenerator.com/');
-        
-        // 3. Atur tema halaman
-        console.log('Setting up the theme...');
-        await page.evaluate(() => {
-            setupTheme('white');
-        });
-
-        // 4. Isi input teks
-        const inputText = `hallo everyone`
-        console.log(`Filling text input with: "${inputText}"`);
-        await page.fill('#textInput', inputText);
-
-        // 5. Klik tombol persetujuan
-        console.log('Clicking accept button...');
-        await page.click('#onetrust-accept-btn-handler');
-
-        // 6. Tunggu beberapa saat
-        await page.waitForTimeout(500);
-
-        // 7. Ambil screenshot
-        const screenshotPath = './screenshot.png';
-        console.log('Taking screenshot...');
-        await page.screenshot({ path: screenshotPath });
-
-        // 8. Kirim screenshot
-        console.log('Sending screenshot...');
-        const imageBuffer = fs.readFileSync(screenshotPath);
-        client.sendMessage(
-            from,
-            {
-                image: imageBuffer,
-                mimetype: 'image/jpeg',
-                caption: 'Result'
-            },
-            { quoted: msg }
-        );
-
-        // 9. Tutup browser
-        console.log('Closing browser...');
-        await browser.close();
-        console.log('Scraping completed successfully!');
-    } catch (error) {
-        console.error('An error occurred during scraping:', error);
-    }
-}
 
 async function ytmp3(linkurl) {
   try {
@@ -1243,6 +1191,26 @@ app.get('/api/iask', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.get('/api/geminipro', async (req, res) => {
+const query = req.query.message;
+    if (!query) {
+      return res.json({ error: 'Parameter "query" tidak ditemukan' });
+    }
+  try {
+    const data = await model.generateContent(query);
+    if (!data) {
+      return res.json({ status: false, message: msg.nodata });
+    }
+
+    res.json({
+      status: true,
+      author: 'RiooXdzz',
+      result: data.response.text()
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 app.get('/api/chatgpt', async (req, res) => {
   try {
     const text = req.query.message;
@@ -1499,22 +1467,7 @@ app.get('/api/remini', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/brat', async (req, res) => {
-  try {
-    const { imageBuffer } = req.query.url;
-    if (!imageBuffer) {
-      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
-    }
-    const response = await brat(imageBuffer);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      result: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+
 app.get('/api/status', async (req, res) => {
 function muptime(seconds) {
 	function pad(s) {
