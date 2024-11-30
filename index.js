@@ -1,4 +1,5 @@
 __path = process.cwd()
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -23,6 +24,65 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
+
+async function brat(message, client) {
+    try {
+        // 1. Konfigurasi browser
+        const browser = await chromium.launch({ headless: true });
+        const context = await browser.newContext({
+            viewport: { width: 375, height: 812 }, // Ukuran layar simulasi
+            userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
+        });
+        
+        // 2. Buka halaman baru
+        const page = await context.newPage();
+        console.log('Navigating to the target website...');
+        await page.goto('https://www.bratgenerator.com/');
+        
+        // 3. Atur tema halaman
+        console.log('Setting up the theme...');
+        await page.evaluate(() => {
+            setupTheme('white');
+        });
+
+        // 4. Isi input teks
+        const inputText = `${message}`
+        console.log(`Filling text input with: "${inputText}"`);
+        await page.fill('#textInput', inputText);
+
+        // 5. Klik tombol persetujuan
+        console.log('Clicking accept button...');
+        await page.click('#onetrust-accept-btn-handler');
+
+        // 6. Tunggu beberapa saat
+        await page.waitForTimeout(500);
+
+        // 7. Ambil screenshot
+        const screenshotPath = './screenshot.png';
+        console.log('Taking screenshot...');
+        await page.screenshot({ path: screenshotPath });
+
+        // 8. Kirim screenshot
+        console.log('Sending screenshot...');
+        const imageBuffer = fs.readFileSync(screenshotPath);
+        client.sendMessage(
+            from,
+            {
+                image: imageBuffer,
+                mimetype: 'image/jpeg',
+                caption: 'Result'
+            },
+            { quoted: msg }
+        );
+
+        // 9. Tutup browser
+        console.log('Closing browser...');
+        await browser.close();
+        console.log('Scraping completed successfully!');
+    } catch (error) {
+        console.error('An error occurred during scraping:', error);
+    }
+}
 
 async function ytmp3(linkurl) {
   try {
@@ -979,35 +1039,8 @@ app.get('/pro', (req, res) => {
 app.get('/downloader/mp3', (req, res) => {
 	res.sendFile(__path + "/views/ytdl.html");
 });
-app.get('/brat', async (req, res) => {
-    try {
-        const browser = await chromium.launch({ headless: true });
-        const context = await browser.newContext({
-            viewport: { width: 375, height: 812 },
-            userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
-        });
-        const page = await context.newPage();
-        await page.goto('https://www.bratgenerator.com/');
-        await page.evaluate(() => {
-            setupTheme('white');
-        });
-        await page.fill('#textInput', 'Hello! 👋 How can I assist you today?');
-        await page.click('#onetrust-accept-btn-handler');
-        await page.waitForTimeout(500);
-        const screenshotPath = './screenshot.png';
-        await page.screenshot({ path: screenshotPath });
 
-        // Read the screenshot and send as response
-        const imageBuffer = fs.readFileSync(screenshotPath);
-        res.setHeader('Content-Type', 'image/png');
-        res.send(imageBuffer);
 
-        await browser.close();
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).send('An error occurred');
-    }
-});
 
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
@@ -1201,22 +1234,6 @@ app.get('/api/iask', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
     const response = await iask(query);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-app.get('/api/fastgpt', async (req, res) => {
-  try {
-    const your_qus = req.query.message;
-    if (!your_qus) {
-      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
-    }
-    const response = await chatWithGPT(your_qus);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -1482,7 +1499,22 @@ app.get('/api/remini', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+app.get('/api/brat', async (req, res) => {
+  try {
+    const { message }= req.query;
+    if (!message) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await brat(message);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 app.get('/api/status', async (req, res) => {
 function muptime(seconds) {
 	function pad(s) {
