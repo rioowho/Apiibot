@@ -901,7 +901,7 @@ async function ai4chat(prompt, text) {
 }      	
 async function turbo(message) {
    try {
-     var ress = await axios.get(`https://hercai.onrender.com/turbo-16k/hercai?question=${messages}`, {
+     var ress = await axios.get(`https://hercai.onrender.com/turbo-16k/hercai?question=${encodeURIComponent(message)}`, {
          headers: {
          "content-type": "application/json",
          },         
