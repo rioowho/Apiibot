@@ -899,17 +899,7 @@ async function ai4chat(prompt, text) {
     return { data: error.message };
   }
 }      	
-async function geminipro(message) {
-  let messages: [
-                    {
-                        role: "system",
-                        content: `Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150`
-                    },
-                    {
-                        role: "user",
-                        content: message
-                    }
-                ];
+async function turbo(message) {
    try {
      var ress = await axios.get(`https://hercai.onrender.com/turbo-16k/hercai?question=${messages}`, {
          headers: {
@@ -1158,13 +1148,13 @@ app.get('/api/gptlogic', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/geminipro', async (req, res) => {
+app.get('/api/turbo', async (req, res) => {
   try {
     const message = req.query.message;
     if (!message) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await geminipro(message);
+    const response = await turbo(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
