@@ -134,18 +134,10 @@
       width: 50%;
       margin: 0 auto;
     }
-  }
-  .nav-menu {
-    position: relative;
+  }  
 }
 </style>
-<div class="nav-menu">
-    <button class="menu-button" id="menuButton">Klick & Lainnya</button>
-    <div class="dropdown-menu" id="dropdownMenu">
-        <a href="/chatgpt" class="dropdown-item"><div>RiooGPT-biasa-10</div></a>
-    </div>
-</div>            
-</header>
+
 
 </head>
 <body>
@@ -177,6 +169,7 @@
                 <div class="select">
                     <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
                     <option value="/api/status">Status</option>
+                    <option value="/chatgpt">Chat Bot</option>
                      <option value="" selected disabled>--- OPENAI ---</option>
                      <option value="/api/luminai?message=hallo">Luminai</option>
                       <option value="/api/gemini?message=hallo">Gemini</option>
@@ -191,13 +184,15 @@
                        <option value="/api/iask?message=hallo">Iask</option>
                        <option value="/api/chatgpt?message=hallo">Chatgpt</option>
                        <option value="/api/bard?message=hallo siapa dirimu?">Bard</option>
-                       <option value="/api/gptlogic?message=hallo siapa dirimu? dan siapa pembuat rest api ini">Gptlogic</option>
+                       <option value="/api/gptlogic?message=hallo siapa dirimu? dan siapa pembuat rest api ini">
+                       <option value="/api/geminipro?message=hallo">GeminiPro</option>
                       <option value= '' selected disabled>--- Downloader ---
                       
                       <option value="/api/tiktok?url=https://vt.tiktok.com/ZSj5B4r5H/">Tiktok</option>
                       <option value="/api/mediafire?url=https://www.mediafire.com/file/thddr8pltg4cn0a/Sc_Bot_Md_Pairing_Code.zip/file">MediaFire</option>
                        <option value="/api/igdl?url=https://www.instagram.com/reel/DAp9_nPzHGH/?igsh=eWc2bzA0ZWdmdWpp">Igdl</option>
-                       <option value="/api/ytdl?url=https://youtu.be/syFZfO_wfMQ?si=nxQniiXRc1gojVae">Ytdl</option>
+                        <option value="/api/ytmp4?url=https://youtu.be/syFZfO_wfMQ?si=nxQniiXRc1gojVae">Ytmp4</option>
+                       <option value="/api/ytmp3?url=https://youtu.be/syFZfO_wfMQ?si=nxQniiXRc1gojVae">Ytmp3</option>
                          <option value="/api/remini?url=https://files.catbox.moe/8dwt25.jpg">Remini</option>
                          <option value="/api/aio?url=https://youtu.be/W-TE_Ys4iwM?si=eTGXyZ2NPjff307m">Aio</option>
                          <option value="/api/sfiledl?url=https://sfile.mobi/5JVnpBOS9Gr">Sfiledl</option>
@@ -209,7 +204,10 @@
                      <option value="/api/search-yts?message=story of my life">Search YouTube</option>
                      <option value="/api/search-google?message=mark Zuckerberg">Search Google</option>
                      <option value="/api/search-playstore?message=free fire max">Search Playstore</option>
-                  </select>
+
+                  <option value="" selected disabled>--- TOOLS ---</option>
+                  <option value="/api/brat">Brat</option>
+                   </select>
                 </div>
                 <button disabled style="color: red";>Inject</button>
             </form>
