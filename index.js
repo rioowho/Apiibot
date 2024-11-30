@@ -888,12 +888,7 @@ async function ai4chat(prompt, text) {
   }
 }      	
 async function geminipro(message) {
-   try {
-     var ress = await axios.get(`https://hercai.onrender.com/turbo-16k/hercai?question`, {
-         headers: {
-         "content-type": "application/json",
-         },
-         messages: [
+  let messages: [
                     {
                         role: "system",
                         content: `Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150`
@@ -902,7 +897,12 @@ async function geminipro(message) {
                         role: "user",
                         content: message
                     }
-                ],
+                ];
+   try {
+     var ress = await axios.get(`https://hercai.onrender.com/turbo-16k/hercai?question=${messages}`, {
+         headers: {
+         "content-type": "application/json",
+         },         
         })
       return ress.data;
     } catch (e) {
