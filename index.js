@@ -33,30 +33,28 @@ const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 // Fungsi untuk mengirim permintaan ke REST API
 async function geminiproAPI(message) {
     try {
-        const url = `https://restapii.rioooxdzz.web.id/api/geminipro?message=${encodeURIComponent(message)}`;
-
-        // Kirim permintaan GET ke API
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-
-        // Periksa apakah respons berhasil
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        // Validasi input (contoh sederhana)
+        if (!message) {
+            throw new Error("Pesan tidak boleh kosong");
         }
 
-        // Parsing data respons JSON
-        const data = await response.json();
-        console.log("Respons dari API:", data);
+        const url = `https://restapii.rioooxdzz.web.id/api/geminipro?message=${encodeURIComponent(message)}`;
 
-        // Kembalikan data respons
+        // Kirim permintaan GET
+        const response = await fetch(url);
+
+        // Periksa status response
+        if (!response.ok) {
+            throw new Error(`Terjadi kesalahan saat menghubungi API: ${response.status} ${response.statusText}`);
+        }
+
+        // Parsing data JSON
+        const data = await response.json();
         return data;
     } catch (error) {
-        console.error("Terjadi kesalahan saat mengakses API:", error);
-        throw error; // Lempar error agar bisa ditangani di luar
+        console.error("Terjadi kesalahan:", error);
+        // Lempar error dengan pesan yang lebih informatif
+        throw new Error("Gagal mengambil data dari API. Silahkan coba lagi nanti.");
     }
 }
 async function ytmp3(linkurl) {
