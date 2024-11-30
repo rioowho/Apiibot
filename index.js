@@ -32,19 +32,6 @@ app.use(cors());
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
 async function ytmp3(linkurl) {
-    const response = await axios.post("https://tes.siputzx.my.id/", {
-        linkurl,
-        downloadMode: "auto",
-    }, {
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-    });
-    return response.data;
-}
-
-async function ytmp33(linkurl) {
   try {
     const response = await axios.post(
       "https://c.blahaj.ca/", // Pastikan endpoint ini valid
@@ -54,8 +41,8 @@ async function ytmp33(linkurl) {
       },
       {
         headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
+           "Content-Type": "application/json",
+            "Accept": "application/json",
         },
       }
     );
@@ -751,34 +738,7 @@ async function AimusicLyrics(message) {
     throw e
   }
 }
-async function RiooGpt(text) {
-try {
-  let messages = [
-    {
-      role: "system",
-      content:
-        "Kamu Adalah shinomiya kaguya dari anime love is war, seorang siswi sma sekaligus wakil ketua osis",
-    },
-    { role: "user", content: text },
-  ];
-    const response = await fetch(
-      "https://deepenglish.com/wp-json/ai-chatbot/v1/chat",
-      {
-        method: "POST",
-        headers: {
-          Accept: "text/event-stream",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ messages }),
-      },
-    );
 
-    const responseData = await response.json();
-    return responseData;
-  } catch (error) {
-    throw error;
-  }
-}
 async function chatgpt(text) {
   // Cek cache terlebih dahulu
   const cachedResponse = myCache.get(text);
@@ -1237,7 +1197,7 @@ app.get('/api/chatgpt', async (req, res) => {
     if (!text) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await RiooGpt(text);
+    const response = await chatgpt(text);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
