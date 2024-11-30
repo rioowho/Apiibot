@@ -1158,7 +1158,7 @@ app.get('/api/geminipro', async (req, res) => {
     if (!message) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await geminiproAPI(messaget);
+    const response = await geminiproAPI(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
