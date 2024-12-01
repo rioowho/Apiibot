@@ -1241,7 +1241,7 @@ async function YanzGPT(query, prompt, model) {
     });
 };
 
-		async function bard(query) {
+	async function bard(query) {
     const COOKIE_KEY = "g.a000mwgL5JRw9IARGMYCihj5YvtGl7tz7BOQSlsQyEAHYA1KvbeO-vBerIBI5FcrtceDgrFr6gACgYKAUcSARYSFQHGX2MiQ4NYw4HGfFmoBkuy3Bg-RhoVAUF8yKqas8HgMOBNEddTflPWq2Ry0076";
     const psidCookie = '__Secure-1PSID=' + COOKIE_KEY;
     const headers = {
@@ -1255,11 +1255,25 @@ async function YanzGPT(query, prompt, model) {
     };
     const bardRes = await fetch("https://gemini.google.com/", { method: 'get', headers });
     const bardText = await bardRes.text();
-    const {snlM0e, blValue} = {bardText.match(/"SNlM0e":"(.*?)"/)?.[1], bardText.match(/"cfb2h":"(.*?)"/)?.[1]};
-    const bodyData = `f.req={null,"{{\\"${encodeURIComponent(query)}\\"}},null,{\\"\\",\\"\\",\\"\\"]}}]&at=${snlM0e}`;
-    const response = await fetch(`https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?bl=${blValue}&_reqid=229189&rt=c`, { method: 'post', headers, body: bodyData });
-    const answer = JSON.parse(JSON.parse((await response.text()).split("\n").reduce((a, b) => (a.length > b.length ? a : b), ""))[0][2])[4][0][1];
-    
+
+    // Perbaikan destrukturisasi data
+    const snlM0e = bardText.match(/"SNlM0e":"(.*?)"/)?.[1];
+    const blValue = bardText.match(/"cfb2h":"(.*?)"/)?.[1];
+
+    // Perbaikan bodyData (gunakan array untuk nilai f.req)
+    const bodyData = `f.req=[null,"[[\\"${encodeURIComponent(query)}\\"]]",null,["","",""]]&at=${snlM0e}`;
+    const response = await fetch(
+        `https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?bl=${blValue}&_reqid=229189&rt=c`,
+        { method: 'post', headers, body: bodyData }
+    );
+
+    // Perbaikan parsing JSON
+    const answer = JSON.parse(
+        JSON.parse(
+            (await response.text()).split("\n").reduce((a, b) => (a.length > b.length ? a : b), "")
+        )[0][2]
+    )[4][0][1];
+
     // Ubah hasil ke dalam bahasa Indonesia jika API mendukung parameter ini
     return answer;
 }
