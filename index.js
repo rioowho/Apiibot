@@ -15,7 +15,7 @@ const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
 const jsobfus = require('javascript-obfuscator')
-const SaveTube = require('./lib/SaveTube')
+const { ytdlnew } = require('./lib/SaveTube')
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -991,23 +991,6 @@ app.get('/downloader/tiktok', (req, res) => {
 	res.sendFile(__path + "/views/tiktok.html");
 });
 
-
-app.get('/api/ytdl', async (req, res) => {
-  try {
-    const { url } = req.query.url;
-    if (!url) {
-      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
-    }
-    const response = await SaveTube(url);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
   try {
@@ -1473,6 +1456,22 @@ app.get('/api/remini', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "image" tidak ditemukan' });
     }
     const response = await imagetohd(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/tiktok', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await ytdlnew(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
