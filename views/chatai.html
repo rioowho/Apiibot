@@ -292,7 +292,7 @@ if (message.toLowerCase().includes("image mem")) {
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         const data = await response.json();
-        return data.result || 'Maaf, saya tidak dapat memahami permintaan Anda.';
+        return data.response || 'Maaf, saya tidak dapat memahami permintaan Anda.';
     } catch (error) {
         console.error(error);
         return `Maaf, terjadi kesalahan saat memproses permintaan Anda. ${error.message}`;
