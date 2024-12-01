@@ -92,7 +92,6 @@ function ytdlnew(url, format = 'mp3') {
  
             const result = await progress(convert.progressURL, convert.downloadURL);
             resolve({
-                status: true,
                 title: result.title,
                 dl: result.dl
             })
@@ -1432,11 +1431,11 @@ app.get('/api/ytmp4', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const linkurl = req.query.url;
-    if (!linkurl) {
+    const url = req.query.url;
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytmp3(linkurl);
+    const response = await ytdlnew(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -1533,22 +1532,6 @@ app.get('/api/remini', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "image" tidak ditemukan' });
     }
     const response = await imagetohd(url);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-app.get('/api/ytdl', async (req, res) => {
-  try {
-    const url = req.query.url;
-    if (!url) {
-      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
-    }
-    const response = await ytdlnew(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
