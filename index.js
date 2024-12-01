@@ -54,7 +54,7 @@ async function ytmp3(linkurl) {
     const response = await axios.post(
       "https://c.blahaj.ca/", // Pastikan endpoint ini valid
       {
-        audio: linkurl, // Menggunakan linkurl langsung
+        url: linkurl, // Menggunakan linkurl langsung
         downloadMode: 'audio', // Pilihan mode download
       },
       {
