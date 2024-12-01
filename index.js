@@ -38,7 +38,7 @@ const extractData = (input) => {
     .join("")
     .trim();
 };
-async function gpt3turbo(prompt) => {
+async function gpt3turbo(prompt) {
   try {
     const response = await fetch("https://api.jeeves.ai/generate/v3/chat", {
       method: "POST",
