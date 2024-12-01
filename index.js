@@ -15,7 +15,7 @@ const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
 const jsobfus = require('javascript-obfuscator')
-const { ytdlnew } = require('./lib/SaveTube')
+const ytdlnew = require('./lib/SaveTube')
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
