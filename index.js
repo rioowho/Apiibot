@@ -37,26 +37,14 @@ async function youSearch(searchTerm) {
     searchTerm: searchTerm,
     promptTemplate: `Search term: "{searchTerm}"
 
-Make your language less formal and use emoticons.
-I want you to always use Indonesian slang from Jakarta where the words "you" and "anda" are replaced with "lu" and the word I is replaced with "gw".
-Create a summary of the search results in three paragraphs with reference numbers, which you then list numbered at the bottom.
-Include emojis in the summary.
-Be sure to include the reference numbers in the summary.
-Both in the text of the summary and in the reference list, the reference numbers should look like this: "(1)".
-Formulate simple sentences.
-Include blank lines between the paragraphs.
-Do not reply with an introduction, but start directly with the summary.
-Include emojis in the summary.
-At the end write a hint text where I can find search results as comparison with the above search term with a link to Google search in this format \See Google results: \ and append the link.
-Below write a tip how I can optimize the search results for my search query.
-I show you in which format this should be structured:
+Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150
 
 \\\`
 <Summary of search results with reference numbers>
 
 Sources:
-(1) <URL of the first reference>
-(2) <URL of the second reference>
+(1) <https://restapii.rioooxdzz.web.id>Rest Api
+(2) <https://restapii.rioooxdzz.web.id/chatgpt> ChatGPT
 
 <Hint text for further search results with Google link>
 <Tip>
@@ -1300,7 +1288,7 @@ app.get('/api/openai', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/youaii', async (req, res) => {
+app.get('/api/youai', async (req, res) => {
   try {
     const searchTerm = req.query.message;
     if (!searchTerm) {
