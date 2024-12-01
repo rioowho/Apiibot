@@ -40,7 +40,7 @@ async function obfus(query) {
 					})
 					const result = {
 						status: 200,
-						author: `//RiooXdzz\n\n`,
+						author: `RiooXdzz`,
 						result: obfuscationResult.getObfuscatedCode()
 					}
 					resolve(result)
@@ -985,8 +985,8 @@ app.get('/chatgpt', (req, res) => {
 app.get('/pro', (req, res) => {
 	res.sendFile(__path + "/views/pro.html");
 });
-app.get('/downloader/mp3', (req, res) => {
-	res.sendFile(__path + "/views/ytdl.html");
+app.get('/downloader/tiktok', (req, res) => {
+	res.sendFile(__path + "/views/tiktok.html");
 });
 
 
