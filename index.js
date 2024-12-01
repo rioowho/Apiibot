@@ -1465,7 +1465,7 @@ app.get('/api/remini', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/tiktok', async (req, res) => {
+app.get('/api/ytdl', async (req, res) => {
   try {
     const url = req.query.url;
     if (!url) {
