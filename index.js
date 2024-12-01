@@ -23,7 +23,49 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-
+const extractData = (input) => {
+  return input
+    .split("\n")
+    .filter((line) => line.startsWith("data: "))
+    .map((line) => {
+      try {
+        const json = JSON.parse(line.substring(6).trim());
+        return json.choices?.text || json.finalText || "";
+      } catch {
+        return "";
+      }
+    })
+    .join("")
+    .trim();
+};
+async function gpt3turbo(prompt) => {
+  try {
+    const response = await fetch("https://api.jeeves.ai/generate/v3/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer null",
+      },
+      body: JSON.stringify({
+        temperature: "0.75",
+        model: "gpt-3.5-turbo",
+        stream: "on",
+        presence_penalty: "0",
+        frequency_penalty: "0",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+      }),
+    });
+    return extractData(await response.text());
+  } catch (error) {
+    console.error("Error generating chat:", error);
+    return "Error generating chat.";
+  }
+};
 const myCache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 const website = axios.create({
   baseURL: "https://app.yoursearch.ai",
@@ -1279,6 +1321,22 @@ app.get('/api/openai', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
     const response = await openai(messages);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/gptturbo', async (req, res) => {
+  try {
+    const prompt = req.query.message;
+    if (!prompt) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await gpt3turbo(prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
