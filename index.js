@@ -58,9 +58,10 @@ const SaveTube = {
 
         try {
             const response = await axios.post(url, body, { headers });
-            return response.data;
+            if (response && response.data) return response.data;
+            throw new Error('❌ Data kosong dari server.');
         } catch (error) {
-            console.error(error);
+            console.error('❌ Gagal mengambil data:', error.message);
             throw error;
         }
     },
@@ -70,39 +71,66 @@ const SaveTube = {
     },
 
     async dl(link, qualityIndex, typeIndex) {
+        if (![1, 2].includes(typeIndex)) {
+            throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
+        }
+
         const type = typeIndex === 1 ? 'audio' : 'video';
-        const quality = SaveTube.qualities[type][qualityIndex];
-        if (!type) throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
-        SaveTube.checkQuality(type, qualityIndex);
-        const cdnNumber = SaveTube.cdn();
+        const quality = this.qualities[type][qualityIndex];
+
+        this.checkQuality(type, qualityIndex);
+
+        const cdnNumber = this.cdn();
         const cdnUrl = `cdn${cdnNumber}.savetube.su`;
 
-        const videoInfo = await SaveTube.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: link });
-        const body = {
-            downloadType: type,
-            quality: quality,
-            key: videoInfo.data.key
-        };
+        try {
+            const videoInfo = await this.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: link });
+            if (!videoInfo.data || !videoInfo.data.key) {
+                throw new Error('❌ Tidak dapat mengambil informasi video.');
+            }
 
-        const dlRes = await SaveTube.fetchData(SaveTube.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, body);
+            const body = {
+                downloadType: type,
+                quality: quality,
+                key: videoInfo.data.key
+            };
 
-        return {
-            link: dlRes.data.downloadUrl,
-            duration: videoInfo.data.duration,
-            durationLabel: videoInfo.data.durationLabel,
-            fromCache: videoInfo.data.fromCache,
-            id: videoInfo.data.id,
-            key: videoInfo.data.key,
-            thumbnail: videoInfo.data.thumbnail,
-            thumbnail_formats: videoInfo.data.thumbnail_formats,
-            title: videoInfo.data.title,
-            titleSlug: videoInfo.data.titleSlug,
-            videoUrl: videoInfo.data.url,
-            quality,
-            type
-        };
+            const dlRes = await this.fetchData(this.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, body);
+            if (!dlRes.data || !dlRes.data.downloadUrl) {
+                throw new Error('❌ Tidak dapat menghasilkan link unduhan.');
+            }
+
+            return {
+                link: dlRes.data.downloadUrl,
+                duration: videoInfo.data.duration,
+                durationLabel: videoInfo.data.durationLabel,
+                fromCache: videoInfo.data.fromCache,
+                id: videoInfo.data.id,
+                key: videoInfo.data.key,
+                thumbnail: videoInfo.data.thumbnail,
+                thumbnail_formats: videoInfo.data.thumbnail_formats,
+                title: videoInfo.data.title,
+                titleSlug: videoInfo.data.titleSlug,
+                videoUrl: videoInfo.data.url,
+                quality,
+                type
+            };
+        } catch (error) {
+            console.error('❌ Terjadi kesalahan:', error.message);
+            throw error;
+        }
     }
 };
+
+// Contoh Penggunaan
+async function ytdlnew(url) {
+    try {
+        const downloadInfo = await SaveTube.dl(`${url}`, 3, 1); // 4 = 480p, 2 = video type
+        console.log(downloadInfo);
+    } catch (error) {
+        console.error('Terjadi kesalahan:', error.message);
+    }
+})();
 
 
 
@@ -1072,18 +1100,20 @@ app.get('/downloader/tiktok', (req, res) => {
 
 
 app.get('/api/ytdl', async (req, res) => {
-    const { link, qualityIndex, typeIndex } = req.query.url;
-
-    if (!link || !qualityIndex || !typeIndex) {
-        return res.status(400).json({ error: '❌ Parameter link, qualityIndex, dan typeIndex diperlukan.' });
+  try {
+    const { url } = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-
-    try {
-        const result = await SaveTube.dl(link, qualityIndex, typeIndex);
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    const response = await ytdlnew(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
