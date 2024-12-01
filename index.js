@@ -1241,9 +1241,9 @@ async function YanzGPT(query, prompt, model) {
     });
 };
 
-	async function bard(query) {
+async function bard(query) {
     const COOKIE_KEY = "g.a000mwgL5JRw9IARGMYCihj5YvtGl7tz7BOQSlsQyEAHYA1KvbeO-vBerIBI5FcrtceDgrFr6gACgYKAUcSARYSFQHGX2MiQ4NYw4HGfFmoBkuy3Bg-RhoVAUF8yKqas8HgMOBNEddTflPWq2Ry0076";
-    const psidCookie = `__Secure-1PSID=${COOKIE_KEY}`;
+    const psidCookie = '__Secure-1PSID=' + COOKIE_KEY;
     const headers = {
         "Host": "gemini.google.com",
         "X-Same-Domain": "1",
@@ -1251,39 +1251,16 @@ async function YanzGPT(query, prompt, model) {
         "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
         "Origin": "https://gemini.google.com",
         "Referer": "https://gemini.google.com",
-        "Cookie": psidCookie,
+        'Cookie': psidCookie
     };
-
-    // Ambil data awal dari Bard
-    const bardRes = await fetch("https://gemini.google.com/", {
-        method: "GET",
-        headers,
-    });
+    const bardRes = await fetch("https://gemini.google.com/", { method: 'get', headers });
     const bardText = await bardRes.text();
-
-    // Ekstraksi data SNlM0e dan blValue
-    const snlM0e = bardText.match(/"SNlM0e":"(.*?)"/)?.[1];
-    const blValue = bardText.match(/"cfb2h":"(.*?)"/)?.[1];
-
-    // Format data untuk permintaan ke Bard
-    const bodyData = `f.req=[null,"[[\\"${encodeURIComponent(query)}\\"]]",null,["","",""]]&at=${snlM0e}`;
-    const response = await fetch(
-        `https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?bl=${blValue}&_reqid=229189&rt=c`,
-        {
-            method: "POST",
-            headers,
-            body: bodyData,
-        }
-    );
-
-    // Parsing respons JSON
-    const responseText = await response.text();
-    const longestLine = responseText
-        .split("\n")
-        .reduce((a, b) => (a.length > b.length ? a : b), "");
-    const parsedData = JSON.parse(JSON.parse(longestLine)[0][2]);
-    const answer = parsedData[4][0][1];
-
+    const [snlM0e, blValue] = [bardText.match(/"SNlM0e":"(.*?)"/)?.[1], bardText.match(/"cfb2h":"(.*?)"/)?.[1]];
+    const bodyData = `f.req=[null,"[[\\"${encodeURIComponent(query)}\\"],null,[\\"\\",\\"\\",\\"\\"]]\"]&at=${snlM0e}`;
+    const response = await fetch(`https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?bl=${blValue}&_reqid=229189&rt=c`, { method: 'post', headers, body: bodyData });
+    const answer = JSON.parse(JSON.parse((await response.text()).split("\n").reduce((a, b) => (a.length > b.length ? a : b), ""))[0][2])[4][0][1];
+    
+    // Ubah hasil ke dalam bahasa Indonesia jika API mendukung parameter ini
     return answer;
 }
 function openai(messages) {
