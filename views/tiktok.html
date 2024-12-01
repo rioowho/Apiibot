@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+        .container {
+            text-align: center;
+            max-width: 500px;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        .slider {
+            margin: 20px 0;
+        }
+        .slider label {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        .result {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input, button {
+            margin-top: 10px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TikTok Downloader</h1>
+        <input type="text" id="url" placeholder="Paste TikTok URL here" required>
+        <div class="slider">
+            <label>
+                <input type="radio" name="format" value="mp4" checked> MP4
+            </label>
+            <label>
+                <input type="radio" name="format" value="mp3"> MP3
+            </label>
+        </div>
+        <button id="download">Download</button>
+        <div class="result" id="result"></div>
+    </div>
+    
+    <script>
+        document.getElementById('download').addEventListener('click', async () => {
+            const url = document.getElementById('url').value;
+            const format = document.querySelector('input[name="format"]:checked').value;
+            const resultDiv = document.getElementById('result');
+
+            if (!url) {
+                alert('Please enter a TikTok URL');
+                return;
+            }
+
+            resultDiv.innerHTML = 'Loading...';
+
+            try {
+                const response = await fetch(`https://restapii.rioooxdzz.web.id/api/tiktok?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    const downloadUrl = format === 'mp4' ? data.result.video : data.result.audio;
+                    resultDiv.innerHTML = `
+                        <p>Click below to download:</p>
+                        <a href="${downloadUrl}" target="_blank" download>Download ${format.toUpperCase()}</a>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p>Error: ${data.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p>Error fetching data: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
