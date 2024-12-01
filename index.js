@@ -1256,7 +1256,7 @@ async function YanzGPT(query, prompt, model) {
     const bardRes = await fetch("https://gemini.google.com/", { method: 'get', headers });
     const bardText = await bardRes.text();
     const [snlM0e, blValue] = [bardText.match(/"SNlM0e":"(.*?)"/)?.[1], bardText.match(/"cfb2h":"(.*?)"/)?.[1]];
-    const bodyData = `f.req=[null,"[{\\"${encodeURIComponent(query)}\\"},null,{\\"\\",\\"\\",\\"\\"}]\"]&at=${snlM0e}`;
+    const bodyData = `f.req=[null,"[[\\"${encodeURIComponent(query)}\\"],null,[\\"\\",\\"\\",\\"\\"]]\"]&at=${snlM0e}`;
     const response = await fetch(`https://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?bl=${blValue}&_reqid=229189&rt=c`, { method: 'post', headers, body: bodyData });
     const answer = JSON.parse(JSON.parse((await response.text()).split("\n").reduce((a, b) => (a.length > b.length ? a : b), ""))[0][2])[4][0][1];
     
@@ -1452,7 +1452,7 @@ app.get('/api/bard', async (req, res) => {
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: { response }
+      result: response 
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
