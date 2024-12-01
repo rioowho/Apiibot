@@ -130,7 +130,7 @@ async function ytdlnew(url) {
     } catch (error) {
         console.error('Terjadi kesalahan:', error.message);
     }
-})();
+}
 
 
 
