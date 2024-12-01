@@ -1071,8 +1071,8 @@ app.get('/downloader/tiktok', (req, res) => {
 });
 
 
-app.post('/down/ytdl', async (req, res) => {
-    const { link, qualityIndex, typeIndex } = req.body;
+app.get('/down/ytdl', async (req, res) => {
+    const { link, qualityIndex, typeIndex } = req.query;
 
     if (!link || !qualityIndex || !typeIndex) {
         return res.status(400).json({ error: '❌ Parameter link, qualityIndex, dan typeIndex diperlukan.' });
