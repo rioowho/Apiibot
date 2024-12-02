@@ -28,24 +28,36 @@ async function bard(prompt) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
     
     const body = {
-        contents: [{ parts: [{ text: prompt }] }]
+        contents: [
+            {
+                parts: [
+                    { text: prompt }
+                ]
+            }
+        ]
     };
 
-    try {
+try {
         const response = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(body)
         });
 
-        if (!response.ok) throw new Error('Request failed');
+        const data = await response.json();
 
-        return await response.json();
+        if (response.ok) {
+            return data; 
+        } else {
+            throw new Error(data.error.message || 'Request failed');
+        }
     } catch (error) {
         console.error('Error:', error.message);
         return null;
     }
-}
+};
 
 async function terabox(url) {
   try {
