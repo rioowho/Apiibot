@@ -24,38 +24,28 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 async function bard(prompt) {
-    const apiKey = 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o'; // Dapatkan apikey dari  https://aistudio.google.com/app/apikey
+    const apiKey = 'YOUR_API_KEY'; // Masukkan API Key Anda
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    
     const body = {
-        contents: {
-            {
-                parts: {
-                    { text: prompt }
-                }
-            }
-        }
+        contents: [{ parts: [{ text: prompt }] }]
     };
+
     try {
         const response = await fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
 
-        const data = await response.json();
+        if (!response.ok) throw new Error('Request failed');
 
-        if (response.ok) {
-            return data; 
-        } else {
-            throw new Error(data.error.message || 'Request failed');
-        }
+        return await response.json();
     } catch (error) {
         console.error('Error:', error.message);
         return null;
     }
-};
+}
 
 async function terabox(url) {
   try {
