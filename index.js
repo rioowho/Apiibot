@@ -23,6 +23,41 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+async function bard(prompt) {
+const prompt = `Nama kamu adalah Riooi, kamu adalah assisten virtual yang dikembangkan langsung dari google.`;
+    const apiKey = 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o'; // Dapatkan apikey dari  https://aistudio.google.com/app/apikey
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    const body = {
+        contents: [
+            {
+                parts: [
+                    { text: prompt }
+                ]
+            }
+        ]
+    };
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            return data; 
+        } else {
+            throw new Error(data.error.message || 'Request failed');
+        }
+    } catch (error) {
+        console.error('Error:', error.message);
+        return null;
+    }
+};
+
 async function terabox(url) {
   try {
     // Fungsi untuk mengambil ID dari URL
@@ -1241,7 +1276,7 @@ async function YanzGPT(query, prompt, model) {
     });
 };
 
-async function bard(query) {
+async function bardd(query) {
     const COOKIE_KEY = "g.a000mwgL5JRw9IARGMYCihj5YvtGl7tz7BOQSlsQyEAHYA1KvbeO-vBerIBI5FcrtceDgrFr6gACgYKAUcSARYSFQHGX2MiQ4NYw4HGfFmoBkuy3Bg-RhoVAUF8yKqas8HgMOBNEddTflPWq2Ry0076";
     const psidCookie = '__Secure-1PSID=' + COOKIE_KEY;
     const headers = {
@@ -1444,11 +1479,11 @@ app.get('/api/youai', async (req, res) => {
 });
 app.get('/api/bard', async (req, res) => {
   try {
-    const query = req.query.message;
-    if (!query) {
+    const prompt = req.query.message;
+    if (!prompt) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await bard(query);
+    const response = await bard(prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
