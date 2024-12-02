@@ -27,14 +27,8 @@ async function bard(prompt) {
     const apiKey = 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o'; // Dapatkan apikey dari  https://aistudio.google.com/app/apikey
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
     const body = {
-        contents: [
-            {
-                parts: [
-                    { text: prompt }
-                ]
-            }
-        ]
-    };
+                text: prompt
+            };
     try {
         const response = await fetch(url, {
             method: 'POST',
