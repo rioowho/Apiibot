@@ -131,10 +131,10 @@
               videoPlayer.classList.remove('hidden');
               videoPlayer.style.width = '100%';
 
-              downloadButton.href = data.data.nowm;
+              downloadButton.href = data.data.response.no_watermark;
               downloadButton.setAttribute('download', '');
 
-              downloadAudioButton.href = data.data.audio;
+              downloadAudioButton.href = data.data.response.music;
               downloadAudioButton.setAttribute('download', '');
 
               document.querySelector('.resultsContainer').classList.remove('hidden');
