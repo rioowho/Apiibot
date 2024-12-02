@@ -24,7 +24,6 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 async function bard(prompt) {
-const prompt = `Nama kamu adalah Riooi, kamu adalah assisten virtual yang dikembangkan langsung dari google.`;
     const apiKey = 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o'; // Dapatkan apikey dari  https://aistudio.google.com/app/apikey
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
     const body = {
