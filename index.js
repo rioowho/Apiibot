@@ -154,7 +154,7 @@ async function gpt3turbo(prompt) {
         Authorization: "Bearer null",
       },
       body: JSON.stringify({
-        temperature: "0.75",
+        temperature: "0",
         model: "gpt-3.5-turbo",
         stream: "on",
         presence_penalty: "0",
@@ -232,7 +232,7 @@ function ytdlnew(url, format = 'mp3') {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
-            'Referer': 'https://id.ytmp3.mobi/',
+            'Referer': 'https://id.ytmp3.mobi/v1/',
         }
  
         const init = await axios.get(`https://d.ymcdn.org/api/v1/init?p=y&23=1llum1n471&_=${Math.random()}`, {
