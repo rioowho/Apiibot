@@ -47,105 +47,38 @@ async function bard(prompt) {
         return null;
     }
 }
-
 async function terabox(url) {
-  try {
-    // Fungsi untuk mengambil ID dari URL
-    function getIdFromUrl(url) {
-      const urlParts = url.split("/");
-      return urlParts[urlParts.length - 1];
-    }
-
-    // Ambil ID dari URL
-    const id = getIdFromUrl(url);
-
-    // Panggil API pertama untuk mendapatkan informasi file
-    let response = await fetch(
-      `https://terabox.hnn.workers.dev/api/get-info?shorturl=${id}&pwd=`,
-    );
-
-    // Periksa apakah respons sukses
-    if (!response.ok) {
-      throw new Error("Network response was not ok " + response.statusText);
-    }
-
-    // Parse respons JSON
-    let data = await response.json();
-
-    // Cek dan tampilkan informasi spesifik dari respons JSON
-    if (data.ok) {
-      let { shareid, uk, sign, timestamp, list } = data;
-      let downloadUrls = [];
-
-      // Loop melalui setiap file dan panggil API kedua untuk mendapatkan URL download
-      for (let file of list) {
-        try {
-          let downloadResponse = await fetch(
-            "https://terabox.hnn.workers.dev/api/get-download",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "User-Agent":
-                  "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36",
-                Referer: "https://terabox.hnn.workers.dev/",
-              },
-              body: JSON.stringify({
-                shareid: shareid,
-                uk: uk,
-                sign: sign,
-                timestamp: timestamp,
-                fs_id: file.fs_id,
-              }),
-            },
-          );
-
-          // Parse respons JSON dari API kedua
-          let downloadData = await downloadResponse.json();
-
-          if (downloadData.ok) {
-            let downloadUrl = downloadData.downloadLink;
-            downloadUrls.push({
-              name: file.filename,
-              url: downloadUrl,
-            });
-          } else {
-            console.error(
-              `Error retrieving download URL for ${file.filename}: ${downloadData.msg}`,
-            );
-          }
-        } catch (error) {
-          console.error(
-            `Error retrieving download URL for ${file.filename}: ${error.message}`,
-          );
-        }
+return new Promise(async(resolve, reject) => {
+await axios.post('https://teradl-api.dapuntaratya.com/generate_file', {
+   mode: 1,
+   url: url
+}).then(async(a) => {
+const array = []
+for (let x of a.data.list) {
+let dl = await axios.post('https://teradl-api.dapuntaratya.com/generate_link', {
+       js_token: a.data.js_token,
+       cookie: a.data.cookie,
+       sign: a.data.sign,
+       timestamp: a.data.timestamp,
+       shareid: a.data.shareid,
+       uk: a.data.uk,
+       fs_id: x.fs_id
+     }).then(i => i.data).catch(e => e.response)
+;
+  if (!dl.download_link) return
+    array.push({
+           fileName: x.name,
+          type: x.type,
+          thumb: x.image,
+          ...dl.download_link
+         });
       }
-
-      return downloadUrls;
-    } else {
-      throw new Error("Error: " + data.msg);
-    }
-  } catch (error) {
-    // Tangani kesalahan jika ada
-    console.error("There has been a problem with your fetch operation:", error);
-    return error;
-  }
+      resolve(array);
+    }).catch(e => reject(e.response.data));
+ })
 }
-const extractData = (input) => {
-  return input
-    .split("\n")
-    .filter((line) => line.startsWith("data: "))
-    .map((line) => {
-      try {
-        const json = JSON.parse(line.substring(6).trim());
-        return json.choices?.text || json.finalText || "";
-      } catch {
-        return "";
-      }
-    })
-    .join("")
-    .trim();
-};
+
+
 async function gpt3turbo(prompt) {
   try {
     const response = await fetch("https://api.jeeves.ai/generate/v3/chat", {
@@ -735,18 +668,23 @@ async function iask(query) {
  const string = start.result.output;
  return JSON.parse(string);
 }
-async function aio(url) {
-  if (!url) throw new Error('URL is required.');
-
-  const endpoint = `https://api.neastooid.xyz/api/downloader/aiodown?url=${encodeURIComponent(url)}`;
-  const response = await fetch(endpoint);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch: ${response.status}`);
-  }
-
-  return response.json();
-}
+const dwrun = {
+    dl: async (link) => {
+        try {
+            const { data: api } = await axios.get('https://downloader.run');
+            const token = cheerio.load(api)('#token').val();
+            const { data } = await axios.post('https://downloader.run/wp-json/aio-dl/video-data/', new URLSearchParams({ url: link, token }), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': 'Postify/1.0.0'
+                }
+            });
+            return data;
+        } catch (error) {
+            return { error: error.response?.data || error.message };
+        }
+    }
+};
 
 async function ytdl(videoUrl) {
  const form = new FormData();
@@ -1762,11 +1700,11 @@ app.get('/api/ytdl', async (req, res) => {
 });
 app.get('/api/aio', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const link = req.query.url;
+    if (!link) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await aio(url);
+    const response = await dwrun.dl(link);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
