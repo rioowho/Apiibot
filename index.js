@@ -1890,11 +1890,14 @@ app.get('/api/brat', async (req, res) => {
   ctx.filter = 'none';
 
   const buffer = canvas.toBuffer('image/png');
-
-  // Mengirimkan gambar sebagai respons
   res.setHeader('Content-Type', 'image/png');
   res.send(buffer);
-});
+  // Mengirimkan gambar sebagai respons
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { text }
+    });
 app.get('/api/status', async (req, res) => {
 function muptime(seconds) {
 	function pad(s) {
