@@ -92,35 +92,6 @@ async function LetmeGpt(query) {
     throw error;
   }
 };
-async function gpt4(text, logic) { // Membuat fungsi openai untuk dipanggil
-    let response = await axios.post("https://chateverywhere.app/api/chat/", {
-        "model": {
-            "id": "gpt-4",
-            "name": "GPT-4",
-            "maxLength": 32000,  // Sesuaikan token limit jika diperlukan
-            "tokenLimit": 8000,  // Sesuaikan token limit untuk model GPT-4
-            "completionTokenLimit": 5000,  // Sesuaikan jika diperlukan
-            "deploymentName": "gpt-4"
-        },
-        "messages": [
-            {
-                "pluginId": null,
-                "content": text, 
-                "role": "user"
-            }
-        ],
-        "prompt": logic, 
-        "temperature": 0.5
-    }, { 
-        headers: {
-            "Accept": "/*/",
-            "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
-        }
-    });
-    
-    let result = response.data;
-    return result;
-}
 
 async function gpt3turbo(prompt) {
   try {
@@ -1162,6 +1133,25 @@ async function LuminAI(message, model = "gpt-4o-mini") {
                     throw new Error("Gagal mendapatkan respons dari AI.");
                 }
             }
+async function stoicai(message) {
+  try {
+    const response = await fetch("https://app.stoiccord.com/api/completion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: "Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150" },
+          { role: "user", content: message },
+        ],
+      }),
+    });
+    if (!response.ok) throw new Error("Network response was not ok");
+    return await response.text();
+  } catch (error) {
+    console.error("Error calling stoic API:", error.message);
+    throw error;
+  }
+};
 
 // Fungsi untuk degreeGuru
 async function degreeGuru(message, prompt) {
@@ -1474,11 +1464,11 @@ app.get('/api/bard', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const query = req.query.message;
-    if (!query) {
+    const message = req.query.message;
+    if (!message) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await YanzGPT(query);
+    const response = await stoicai(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -1876,70 +1866,6 @@ app.get('/api/encrypt', async (req, res) => {
   }
 });
 
-// Endpoint untuk menghasilkan gambar
-app.get('/api/brat', async (req, res) => {
-  const { text } = req.query;
-
-  if (!text) {
-    return res.status(400).json({ error: 'Text is required' });
-  }
-
-  const width = 500;
-  const height = 500;
-  const canvas = createCanvas(width, height);
-  const ctx = canvas.getContext('2d');
-
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, width, height);
-
-  ctx.filter = 'blur(20px)';
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, width, height);
-  ctx.filter = 'none';
-
-  ctx.font = '120px Arial';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  ctx.fillStyle = 'black';
-  ctx.lineWidth = 6;
-
-  const maxWidth = width - 20;
-  const words = text.split(' ');
-  let x = 20;
-  let y = 20;
-  let lineHeight = 140;
-  let line = '';
-
-  words.forEach((word, index) => {
-    const testLine = line + word + ' ';
-    const testWidth = ctx.measureText(testLine).width;
-
-    if (testWidth > maxWidth) {
-      ctx.filter = 'blur(30px)';
-      ctx.strokeText(line, x, y);
-      ctx.fillText(line, x, y);
-      ctx.filter = 'none';
-
-      line = word + '      ';
-      y += lineHeight;
-    } else {
-      line = testLine;
-    }
-
-    if (index < words.length - 1) {
-      x += ctx.measureText(word + ' ').width + 20;
-    }
-  });
-
-  ctx.filter = 'blur(30px)';
-  ctx.strokeText(line, x, y);
-  ctx.fillText(line, x, y);
-  ctx.filter = 'none';
-
-  const buffer = canvas.toBuffer('image/png');
-  res.setHeader('Content-Type', 'image/png');
-  res.send(buffer);
-    });
 app.get('/api/status', async (req, res) => {
 function muptime(seconds) {
 	function pad(s) {
