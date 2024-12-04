@@ -1,4 +1,5 @@
 __path = process.cwd()
+const { createCanvas } = require('canvas');
 const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
@@ -24,6 +25,64 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+
+async function BratGenerator(text, m, rioo) {
+  const tempPath = `brat_image_${Date.now()}.png`;
+  const width = 500;
+  const height = 500;
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.filter = 'blur(20px)';
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, width, height);
+  ctx.filter = 'none';
+
+  ctx.font = '120px Arial';
+  ctx.textAlign = 'left';  
+  ctx.textBaseline = 'top';  
+  ctx.fillStyle = 'black';
+  ctx.lineWidth = 6;  
+
+  const maxWidth = width - 20;
+  const words = text.split(' ');
+  let x = 20;  
+  let y = 20;  
+  let lineHeight = 140;
+  let line = '';
+
+  words.forEach((word, index) => {
+    const testLine = line + word + ' ';
+    const testWidth = ctx.measureText(testLine).width;
+
+    if (testWidth > maxWidth) {
+      ctx.filter = 'blur(30px)';
+      ctx.strokeText(line, x, y);  
+      ctx.fillText(line, x, y);    
+      ctx.filter = 'none'; 
+
+      line = word + '      ';
+      y += lineHeight;
+    } else {
+      line = testLine;
+    }
+
+    if (index < words.length - 1) {
+      x += ctx.measureText(word + ' ').width + 20;
+    }
+  });
+
+  ctx.filter = 'blur(30px)';
+  ctx.strokeText(line, x, y);
+  ctx.fillText(line, x, y);
+  ctx.filter = 'none';
+
+  const buffer = canvas.toBuffer('image/png');
+  await rioo.sendMessage(m.chat, { image: buffer, caption: "" }, { quoted: m });
+}
 async function bard(prompt) {
     const apiKey = 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o'; // Masukkan API Key Anda
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
@@ -1826,6 +1885,22 @@ app.get('/api/encrypt', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.get('/api/brat', async (req, res) => {
+  try {
+    const text = req.query.message;
+    if (!text) {
+      return res.status(400).json({ error: 'Parameter "image" tidak ditemukan' });
+    }
+    const response = await BratGenerator(text);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 app.get('/api/status', async (req, res) => {
 function muptime(seconds) {
 	function pad(s) {
@@ -1860,7 +1935,6 @@ function muptime(seconds) {
 		speed: `${neww - old}ms`,
 		info: {
 			owner: "RiooXdzz",
-			apikey: "Chat Owner: https://wa.me/6285691304150",
 		},
 	};
 	res.json(status);
