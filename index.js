@@ -1831,7 +1831,7 @@ app.get('/api/encrypt', async (req, res) => {
 
 // Endpoint untuk menghasilkan gambar
 app.get('/api/brat', async (req, res) => {
-  const { text } = req.body;
+  const { text } = req.query;
 
   if (!text) {
     return res.status(400).json({ error: 'Text is required' });
