@@ -26,7 +26,7 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-async function BratGenerator(text, m, rioo) {
+async function BratGenerator(text, m, rioo, sendMessage) {
   const tempPath = `brat_image_${Date.now()}.png`;
   const width = 500;
   const height = 500;
