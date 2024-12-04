@@ -80,6 +80,35 @@ let dl = await axios.post('https://teradl-api.dapuntaratya.com/generate_link', {
  })
 }
 
+async function gpt4(text, logic) { // Membuat fungsi openai untuk dipanggil
+    let response = await axios.post("https://chateverywhere.app/api/chat/", {
+        "model": {
+            "id": "gpt-4",
+            "name": "GPT-4",
+            "maxLength": 32000,  // Sesuaikan token limit jika diperlukan
+            "tokenLimit": 8000,  // Sesuaikan token limit untuk model GPT-4
+            "completionTokenLimit": 5000,  // Sesuaikan jika diperlukan
+            "deploymentName": "gpt-4"
+        },
+        "messages": [
+            {
+                "pluginId": null,
+                "content": text, 
+                "role": "user"
+            }
+        ],
+        "prompt": logic, 
+        "temperature": 0.5
+    }, { 
+        headers: {
+            "Accept": "/*/",
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+        }
+    });
+    
+    let result = response.data;
+    return result;
+}
 
 async function gpt3turbo(prompt) {
   try {
@@ -673,9 +702,9 @@ async function iask(query) {
 const dwrun = {
     dl: async (link) => {
         try {
-            const { data: api } = await axios.get('https://downloader.run');
+            const { data: api } = await axios.get('https://aiodown.com');
             const token = cheerio.load(api)('#token').val();
-            const { data } = await axios.post('https://downloader.run/wp-json/aio-dl/video-data/', new URLSearchParams({ url: link, token }), {
+            const { data } = await axios.post('https://aiodown.com/wp-json/aio-dl/video-data/', new URLSearchParams({ url: link, token }), {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'User-Agent': 'Postify/1.0.0'
@@ -1377,13 +1406,13 @@ app.get('/api/openai', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/gptturbo', async (req, res) => {
+app.get('/api/gpt4', async (req, res) => {
   try {
-    const prompt = req.query.message;
-    if (!prompt) {
+    const text = req.query.message;
+    if (!text) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await gpt3turbo(prompt);
+    const response = await gpt4(text);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -1831,9 +1860,9 @@ app.get('/api/encrypt', async (req, res) => {
 
 // Endpoint untuk menghasilkan gambar
 app.get('/api/brat', async (req, res) => {
-  const { message } = req.query;
+  const { text } = req.query;
 
-  if (!message) {
+  if (!text) {
     return res.status(400).json({ error: 'Text is required' });
   }
 
