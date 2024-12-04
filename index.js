@@ -79,7 +79,19 @@ let dl = await axios.post('https://teradl-api.dapuntaratya.com/generate_link', {
     }).catch(e => reject(e.response.data));
  })
 }
+async function LetmeGpt(query) {
+  const encodedQuery = encodeURIComponent(query);
+  const url = `https://letmegpt.com/search?q=${encodedQuery}`;
 
+  try {
+    const response = await axios.get(url);
+    const $ = cheerio.load(response.data);
+    return $("#gptans").text() || null;
+  } catch (error) {
+    console.error("Error fetching LetmeGpt data:", error);
+    throw error;
+  }
+};
 async function gpt4(text, logic) { // Membuat fungsi openai untuk dipanggil
     let response = await axios.post("https://chateverywhere.app/api/chat/", {
         "model": {
@@ -699,23 +711,29 @@ async function iask(query) {
  const string = start.result.output;
  return JSON.parse(string);
 }
-const dwrun = {
-    dl: async (link) => {
-        try {
-            const { data: api } = await axios.get('https://aiodown.com');
-            const token = cheerio.load(api)('#token').val();
-            const { data } = await axios.post('https://aiodown.com/wp-json/aio-dl/video-data/', new URLSearchParams({ url: link, token }), {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'User-Agent': 'Postify/1.0.0'
-                }
-            });
-            return data;
-        } catch (error) {
-            return { error: error.response?.data || error.message };
-        }
+function aio(link) {
+  return new Promise(async (e, a) => {
+    try {
+      let a = {
+          headers: {
+            Referer: "https://snapsave.app/",
+            "Referrer-Policy": "strict-origin-when-cross-origin",
+          },
+        },
+        i = new URLSearchParams();
+      i.append("url", link);
+      let o = await fetch("https://snapsave.app/action.php", {
+        method: "POST",
+        body: i,
+        ...a,
+      });
+      if (!o.ok) return e({ status: !1 });
+      e(await o.json());
+    } catch (link) {
+      return console.log(link), e({ status: !1 });
     }
-};
+  });
+}
 
 async function ytdl(videoUrl) {
  const form = new FormData();
@@ -1406,13 +1424,13 @@ app.get('/api/openai', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/gpt4', async (req, res) => {
+app.get('/api/aisearch', async (req, res) => {
   try {
-    const text = req.query.message;
-    if (!text) {
+    const query = req.query.message;
+    if (!query) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await gpt4(text);
+    const response = await LetmeGpt(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -1735,7 +1753,7 @@ app.get('/api/aio', async (req, res) => {
     if (!link) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await dwrun.dl(link);
+    const response = await aio(link);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
