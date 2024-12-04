@@ -1831,9 +1831,9 @@ app.get('/api/encrypt', async (req, res) => {
 
 // Endpoint untuk menghasilkan gambar
 app.get('/api/brat', async (req, res) => {
-  const { text } = req.query;
+  const { message } = req.query;
 
-  if (!text) {
+  if (!message) {
     return res.status(400).json({ error: 'Text is required' });
   }
 
@@ -1892,11 +1892,6 @@ app.get('/api/brat', async (req, res) => {
   const buffer = canvas.toBuffer('image/png');
   res.setHeader('Content-Type', 'image/png');
   res.send(buffer);
-  // Mengirimkan gambar sebagai respons
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { text }
     });
 app.get('/api/status', async (req, res) => {
 function muptime(seconds) {
