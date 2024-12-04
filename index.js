@@ -1830,7 +1830,7 @@ app.get('/api/encrypt', async (req, res) => {
 });
 
 // Endpoint untuk menghasilkan gambar
-app.post('/api/brat', async (req, res) => {
+app.get('/api/brat', async (req, res) => {
   const { text } = req.body;
 
   if (!text) {
