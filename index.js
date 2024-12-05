@@ -34,7 +34,6 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-const axios = require('axios');
 
 async function youdl(url) {
   try {
@@ -63,7 +62,6 @@ async function youdl(url) {
     const mp3DownloadUrl = mp3ApiResponse.data.download_url;
 
     return Promise.resolve({
-    success: true,
       videoInfo: {
         title: videoData.title,
         thumbnail: videoData.info.image,
@@ -80,8 +78,6 @@ async function youdl(url) {
     });
   }
 }
-
-module.exports = youdl
 async function bard(prompt) {
     const apiKey = 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o'; // Masukkan API Key Anda
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
