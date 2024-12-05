@@ -33,22 +33,7 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-async function getInfo() {
-    const url = 'https://chatgptt.me';
 
-    try {
-        const html = await (await fetch(url)).text();
-        const $ = cheerio.load(html);
-
-        const chatData = $('.wpaicg-chat-shortcode').map((index, element) => {
-            return Object.fromEntries(Object.entries(element.attribs));
-        }).get();
-
-        return chatData;
-    } catch (error) {
-        throw new Error('Error:', error.message);
-    }
-}
 async function gptturbo(message) {
     try {
         const info = await getInfo();
@@ -68,6 +53,22 @@ async function gptturbo(message) {
     } catch (error) {
         console.error('An error occurred:', error.message);
         throw error;
+    }
+}
+async function getInfo() {
+    const url = 'https://chatgptt.me';
+
+    try {
+        const html = await (await fetch(url)).text();
+        const $ = cheerio.load(html);
+
+        const chatData = $('.wpaicg-chat-shortcode').map((index, element) => {
+            return Object.fromEntries(Object.entries(element.attribs));
+        }).get();
+
+        return chatData;
+    } catch (error) {
+        throw new Error('Error:', error.message);
     }
 }
 const SaveTube = {
