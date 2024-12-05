@@ -35,50 +35,7 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-async function youdl(url) {
-  try {
-    const apiKey = 'dfcb6d76f2f6a9894gjkege8a4ab232222';
-    const firstApiUrl = `https://p.oceansaver.in/ajax/download.php?copyright=0&format=720&url=${encodeURIComponent(url)}&api=${apiKey}`;
-    const firstApiResponse = await axios.get(firstApiUrl);
 
-    if (!firstApiResponse.data.success) {
-      throw new Error('Failed to fetch video details');
-    }
-
-    const videoData = firstApiResponse.data;
-    const videoId = videoData.id;
-
-    const mp4ApiUrl = `https://p.oceansaver.in/ajax/progress.php?id=${videoId}`;
-    const mp4ApiResponse = await axios.get(mp4ApiUrl);
-    const mp4DownloadUrl = mp4ApiResponse.data.download_url;
-
-    const secondApiUrl = `https://p.oceansaver.in/ajax/download.php?copyright=0&format=mp3&url=${encodeURIComponent(url)}&api=${apiKey}`;
-    const secondApiResponse = await axios.get(secondApiUrl);
-    const mp3Data = secondApiResponse.data;
-    const mp3Id = mp3Data.id;
-
-    const mp3ApiUrl = `https://p.oceansaver.in/ajax/progress.php?id=${mp3Id}`;
-    const mp3ApiResponse = await axios.get(mp3ApiUrl);
-    const mp3DownloadUrl = mp3ApiResponse.data.download_url;
-
-    return Promise.resolve({
-    success: true,
-      videoInfo: {
-        title: videoData.title,
-        thumbnail: videoData.info.image,
-      },
-      downloadUrls: {
-        mp4: mp4DownloadUrl,
-        mp3: mp3DownloadUrl,
-      },
-    });
-  } catch (error) {
-    return Promise.reject({
-      success: false,
-      message: error.message || 'An error occurred',
-    });
-  }
-}
 async function bard(prompt) {
     const apiKey = 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o'; // Masukkan API Key Anda
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
@@ -1809,7 +1766,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await youdl(url);
+    const response = await SaveTube.dl(url, 8);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
