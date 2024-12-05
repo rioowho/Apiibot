@@ -16,7 +16,6 @@ const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
 const jsobfus = require('javascript-obfuscator')
-const jsobfus = require('javascript-obfuscator')
 const d = new Date(new Date() + 3600000);
 const locale = 'id';
 const jam = new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
@@ -34,7 +33,27 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+async function gptturbo(message) {
+    try {
+        const info = await getInfo();
+        const data = new FormData();
+        data.append('_wpnonce', info[0]['data-nonce']);
+        data.append('post_id', info[0]['data-post-id']);
+        data.append('action', 'wpaicg_chatbox_message');
+        data.append('message', message);
+        const response = await fetch('https://chatgptt.me/wp-admin/admin-ajax.php', {
+            method: 'POST',
+            body: data
+        });
 
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        return await response.json();
+    } catch (error) {
+        console.error('An error occurred:', error.message);
+        throw error;
+    }
+}
 const SaveTube = {
     qualities: {
         audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
@@ -1530,6 +1549,22 @@ app.get('/api/openai', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
     const response = await openai(messages);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/gptturbo', async (req, res) => {
+  try {
+    const message = req.query.message;
+    if (!message) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await gptturbo(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
