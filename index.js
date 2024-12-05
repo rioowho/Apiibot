@@ -63,6 +63,7 @@ async function youdl(url) {
     const mp3DownloadUrl = mp3ApiResponse.data.download_url;
 
     return Promise.resolve({
+    success: true,
       videoInfo: {
         title: videoData.title,
         thumbnail: videoData.info.image,
