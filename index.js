@@ -17,6 +17,15 @@ var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
 const jsobfus = require('javascript-obfuscator')
 const { SaveTube } = require('./lib/ytdl');
+const d = new Date(new Date() + 3600000);
+const locale = 'id';
+const jam = new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
+let hari = d.toLocaleDateString(locale, { weekday: 'long' });
+const tgl = d.toLocaleDateString(locale, {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+});
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -25,7 +34,53 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+const axios = require('axios');
 
+async function youdl(url) {
+  try {
+    const apiKey = '5339f12b0c33bf6ea5c3b2ff08f9f1f600cde363';
+    const firstApiUrl = `https://p.oceansaver.in/ajax/download.php?copyright=0&format=720&url=${encodeURIComponent(url)}&api=${apiKey}`;
+    const firstApiResponse = await axios.get(firstApiUrl);
+
+    if (!firstApiResponse.data.success) {
+      throw new Error('Failed to fetch video details');
+    }
+
+    const videoData = firstApiResponse.data;
+    const videoId = videoData.id;
+
+    const mp4ApiUrl = `https://p.oceansaver.in/ajax/progress.php?id=${videoId}`;
+    const mp4ApiResponse = await axios.get(mp4ApiUrl);
+    const mp4DownloadUrl = mp4ApiResponse.data.download_url;
+
+    const secondApiUrl = `https://p.oceansaver.in/ajax/download.php?copyright=0&format=mp3&url=${encodeURIComponent(url)}&api=${apiKey}`;
+    const secondApiResponse = await axios.get(secondApiUrl);
+    const mp3Data = secondApiResponse.data;
+    const mp3Id = mp3Data.id;
+
+    const mp3ApiUrl = `https://p.oceansaver.in/ajax/progress.php?id=${mp3Id}`;
+    const mp3ApiResponse = await axios.get(mp3ApiUrl);
+    const mp3DownloadUrl = mp3ApiResponse.data.download_url;
+
+    return Promise.resolve({
+      videoInfo: {
+        title: videoData.title,
+        thumbnail: videoData.info.image,
+      },
+      downloadUrls: {
+        mp4: mp4DownloadUrl,
+        mp3: mp3DownloadUrl,
+      },
+    });
+  } catch (error) {
+    return Promise.reject({
+      success: false,
+      message: error.message || 'An error occurred',
+    });
+  }
+}
+
+module.exports = youdl
 async function bard(prompt) {
     const apiKey = 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o'; // Masukkan API Key Anda
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
@@ -1133,25 +1188,49 @@ async function LuminAI(message, model = "gpt-4o-mini") {
                     throw new Error("Gagal mendapatkan respons dari AI.");
                 }
             }
-async function stoicai(message) {
-  try {
-    const response = await fetch("https://app.stoiccord.com/api/completion", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages: [
-          { role: "system", content: "Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150" },
-          { role: "user", content: message },
-        ],
-      }),
+function englishAi(chat = [
+    {
+        content: "Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150",
+        role: "user",
+    },
+    {
+        content: "hi! what can i help you today?⭐",
+        role: "assistant",
+        refusal: null,
+    },
+    {
+        content: "what is your name?",
+        role: "user",
+    },
+]) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!chat || !Array.isArray(chat) || chat.length < 1) 
+                return reject(new Error("Enter valid chat object [ IEnglishAiChat ]"));
+            
+            const a = await axios.post("https://api.deepenglish.com/api/gpt/chat", {
+                messages: chat,
+                temperature: 0.9,
+            }, {
+                headers: {
+                    Origin: "https://members.deepenglish.com",
+                    Referer: "https://members.deepenglish.com/",
+                    Host: "api.deepenglish.com",
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+                },
+            }).then(v => v.data);
+            
+            const p = chat;
+            p.push(await a.data.choices.shift().message);
+            
+            return resolve({
+                response: (p.pop()?.content) || "",
+            });
+        } catch (e) {
+            reject(e);
+        }
     });
-    if (!response.ok) throw new Error("Network response was not ok");
-    return await response.text();
-  } catch (error) {
-    console.error("Error calling stoic API:", error.message);
-    throw error;
-  }
-};
+}            
 
 // Fungsi untuk degreeGuru
 async function degreeGuru(message, prompt) {
@@ -1462,18 +1541,23 @@ app.get('/api/bard', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/gptlogic', async (req, res) => {
+app.post('/generate-response', async (req, res) => {
+  const { userMessage } = req.body;
+
+  const chat = [
+    {
+      content: `Anda adalah Elaina, tujuan Anda adalah membantu pengguna tentang masalah mereka, kamu memiliki sifat imut dan lembut, anda menggunakan bahasa indonesia seperti kamu, dan aku, pencipta kamu adalah Danu Sitepu, pencipta kamu adalah developer dari website Elaina GPT, Jam kamu adalah jam ${jam}. tanggal kamu adalah tanggal ${tgl}. hari kamu adalah hari ${hari}`,
+      role: "user",
+    },
+    {
+      content: userMessage,
+      role: "user",
+    },
+  ];
+
   try {
-    const message = req.query.message;
-    if (!message) {
-      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
-    }
-    const response = await stoicai(message);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
+    const result = await englishAi(chat);
+    res.json({ response: result.response });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -1727,7 +1811,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await SaveTube.dl(url, 1, 2);
+    const response = await youdl(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
