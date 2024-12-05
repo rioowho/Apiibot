@@ -16,6 +16,7 @@ const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
 const jsobfus = require('javascript-obfuscator')
+const jsobfus = require('javascript-obfuscator')
 const d = new Date(new Date() + 3600000);
 const locale = 'id';
 const jam = new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
