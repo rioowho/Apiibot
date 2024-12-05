@@ -39,60 +39,75 @@ const SaveTube = {
         audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
         video: { 1: '144', 2: '240', 3: '360', 4: '480', 5: '720', 6: '1080', 7: '1440', 8: '2160' }
     },
-    
+
     headers: {
-        'accept': '*/*',
-        'referer': 'https://ytshorts.savetube.me/',
-        'origin': 'https://ytshorts.savetube.me/',
+        accept: '*/*',
+        referer: 'https://ytshorts.savetube.me/',
+        origin: 'https://ytshorts.savetube.me/',
         'user-agent': 'Postify/1.0.0',
         'Content-Type': 'application/json'
     },
-    
+
     cdn() {
         return Math.floor(Math.random() * 11) + 51;
     },
-    
+
     checkQuality(type, qualityIndex) {
-        if (!(qualityIndex in this.qualities[type])) {
+        if (!this.qualities[type] || !(qualityIndex in this.qualities[type])) {
             throw new Error(`❌ Kualitas ${type} tidak valid. Pilih salah satu: ${Object.keys(this.qualities[type]).join(', ')}`);
         }
     },
-    
+
     async fetchData(url, cdn, body = {}) {
         const headers = {
             ...this.headers,
-            'authority': `cdn${cdn}.savetube.su`
+            authority: `cdn${cdn}.savetube.su`
         };
 
         try {
             const response = await axios.post(url, body, { headers });
-            return response.data;
+            if (response && response.data) {
+                return response.data;
+            } else {
+                throw new Error('Respon API tidak valid.');
+            }
         } catch (error) {
-            console.error(error);
+            console.error('Fetch Data Error:', error.message);
             throw error;
         }
     },
-    
+
     dLink(cdnUrl, type, quality, videoKey) {
-        return `https://${cdnUrl}/download`;
+        return `https://${cdnUrl}/download?type=${type}&quality=${quality}&key=${videoKey}`;
     },
-    
+
     async dl(link, qualityIndex, typeIndex) {
-        const type = typeIndex === 1 ? 'audio' : 'video';
-        const quality = SaveTube.qualities[type][qualityIndex];
+        const type = typeIndex === 1 ? 'audio' : typeIndex === 2 ? 'video' : null;
         if (!type) throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
+
         SaveTube.checkQuality(type, qualityIndex);
+        const quality = SaveTube.qualities[type][qualityIndex];
+
         const cdnNumber = SaveTube.cdn();
         const cdnUrl = `cdn${cdnNumber}.savetube.su`;
-        
+
+        // Fetch video information
         const videoInfo = await SaveTube.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: link });
+        if (!videoInfo || !videoInfo.data) {
+            throw new Error('❌ Gagal mendapatkan informasi video.');
+        }
+
         const badi = {
             downloadType: type,
             quality: quality,
             key: videoInfo.data.key
         };
 
+        // Fetch download link
         const dlRes = await SaveTube.fetchData(SaveTube.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, badi);
+        if (!dlRes || !dlRes.data) {
+            throw new Error('❌ Gagal mendapatkan link download.');
+        }
 
         return {
             link: dlRes.data.downloadUrl,
@@ -1841,7 +1856,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await SaveTube.dl(url, 1,3,2,6);
+    const response = await SaveTube.dl(url, 1,2);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
