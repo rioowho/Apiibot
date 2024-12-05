@@ -37,7 +37,7 @@ app.use(cors());
 
 async function youdl(url) {
   try {
-    const apiKey = '5339f12b0c33bf6ea5c3b2ff08f9f1f600cde363';
+    const apiKey = 'dfcb6d76f2f6a9894gjkege8a4ab232222';
     const firstApiUrl = `https://p.oceansaver.in/ajax/download.php?copyright=0&format=720&url=${encodeURIComponent(url)}&api=${apiKey}`;
     const firstApiResponse = await axios.get(firstApiUrl);
 
@@ -62,6 +62,7 @@ async function youdl(url) {
     const mp3DownloadUrl = mp3ApiResponse.data.download_url;
 
     return Promise.resolve({
+    success: true,
       videoInfo: {
         title: videoData.title,
         thumbnail: videoData.info.image,
