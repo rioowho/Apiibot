@@ -2036,9 +2036,13 @@ function muptime(seconds) {
 
 
 // Handle 404 error
-app.use((req, res, next) => {
-  res.status(404).send("Sorry can't find that!");
-});
+app.use(function (req, res, next) {
+	next(createError(404))
+  })
+
+app.use(function (err, req, res, next) {
+	res.sendFile(__path + '/view/404.html')
+  })
 
 // Handle error
 app.use((err, req, res, next) => {
