@@ -165,7 +165,7 @@ const SaveTube = {
     }
 };
 async function bard(prompt) {
-    const apiKey = 'AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o'; // Masukkan API Key Anda
+    const apiKey = 'AIzaSyBxYESR_ThUTwm8yghLqfp6LzWV_uMdlFU'; // Masukkan API Key Anda
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
     
     const body = {
@@ -940,18 +940,56 @@ async function imagetohd(url, method) {
 const meki = axios.create({
     httpsAgent: new https.Agent({ rejectUnauthorized: false }),
 });
-async function mediafiredl(url) {
-  if (!url) throw new Error('URL is required.');
 
-  const endpoint = `https://api.neastooid.xyz/api/downloader/mediafire?url=${encodeURIComponent(url)}`;
-  const response = await fetch(endpoint);
+const MediaFire = {
+    async request(url) {
+        try {
+            const { data } = await meki.get(url, { headers: { 'User-Agent': 'Postify/1.0.0' } });
+            return cheerio.load(data);
+        } catch (error) {
+            console.error(error.message);
+            return null;
+        }
+    },
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch: ${response.status}`);
-  }
+    async dl(url) {
+        const fileName = path.basename(url);
+        const filePath = path.join('Downloads', fileName);
 
-  return response.json();
-}
+        try {
+            const writer = fs.createWriteStream(filePath);
+            const response = await meki.get(url, { responseType: 'stream' });
+            response.data.pipe(writer);
+
+            return new Promise((resolve, reject) => {
+                writer.on('finish', () => {
+                    resolve();
+                });
+                writer.on('error', (error) => {
+                    console.error(error.message);
+                    reject(error);
+                });
+            });
+        } catch (error) {
+            console.error(error.message);
+        }
+    },
+
+    async detail(url) {
+        const $ = await this.request(url);
+        if (!$) return {};
+
+        const downloadLink = $('#download_link a.input.popsok').attr('href');
+        const result = {
+            fileName: $('.dl-btn-label').text().trim(),
+            downloadLink: downloadLink.startsWith('//') ? `https:${downloadLink}` : downloadLink,
+            fileSize: $('.dl-info .details li').first().find('span').text().trim(),
+            uploadedDate: $('.dl-info .details li').last().find('span').text().trim(),
+            mimetype: $('.dl-btn-cont .icon').attr('class')?.split(' ')[1] || 'Gak tau',
+        };
+        return result; 
+    },
+};
 async function igdl(url) {
   try {
     const form = new FormData();
@@ -1942,7 +1980,7 @@ app.get('/api/mediafire', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await mediafiredl(url);
+    const response = await MediaFire.dl.detail(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
