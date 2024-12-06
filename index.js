@@ -1980,7 +1980,7 @@ app.get('/api/mediafire', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await MediaFire.dl.detail(url);
+    const response = await MediaFire.detail(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
