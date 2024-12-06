@@ -15,6 +15,7 @@ const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
+const https = require('https');
 const jsobfus = require('javascript-obfuscator')
 const d = new Date(new Date() + 3600000);
 const locale = 'id';
@@ -936,68 +937,59 @@ async function imagetohd(url, method) {
   })
 }
 
-async function mediafire(url) {
- const code = `const { chromium } = require('playwright');
+const meki = axios.create({
+    httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+});
 
- async function mediafire(url) {
- const browser = await chromium.launch({ headless: true });
- const context = await browser.newContext({
- userAgent: 'Mozilla/5.0 (Linux; Android 6.0; iris50) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36'
- });
- const page = await context.newPage();
- try {
- await page.goto(url);
- const downloadInfo = await page.evaluate(() => {
- const fileNameElement = document.querySelector('.dl-btn-label');
- const fileName = fileNameElement ? fileNameElement.textContent.trim() : '';
- const downloadLinkElement = document.querySelector('#downloadButton');
- const downloadLink = downloadLinkElement ? downloadLinkElement.href : '';
- const fileSizeText = downloadLinkElement ? downloadLinkElement.textContent : '';
- const sizeMatch = fileSizeText.match(/\\$([^)]+)\\$/);
- const fileSize = sizeMatch ? sizeMatch[1] : '';
-
- return {
- fileName: fileName,
- downloadLink: downloadLink,
- fileSize: fileSize
- };
- });
-
- return downloadInfo;
- } catch (error) {
- console.error("Error:", error.response ? error.response.data : error.message);
- return { success: false, message: error.message };
- } finally {
- await browser.close();
- }
- }
- mediafire(\`${url}\`).then(a => console.log(a));`;
-
- const start = await run('javascript', code);
- return start.result.output;
-}
-async function getToken() {
+const MediaFire = {
+    async request(url) {
         try {
-  const { data } = await axios.get("https://storysaver.to/en")
+            const { data } = await meki.get(url, { headers: { 'User-Agent': 'Postify/1.0.0' } });
+            return cheerio.load(data);
+        } catch (error) {
+            console.error(error.message);
+            return null;
+        }
+    },
 
-  // Modify regex patterns for flexibility and ensure capturing
-  const kExpMatch = /k_exp\s*=\s*"(\d+)"/.exec(data);
-  const kTokenMatch = /k_token\s*=\s*"([a-f0-9]+)"/.exec(data);
+    async dl(url) {
+        const fileName = path.basename(url);
+        const filePath = path.join('Downloads', fileName);
 
-  // Retrieve the values
-  const k_exp = kExpMatch ? kExpMatch[1] : null;
-  const k_token = kTokenMatch ? kTokenMatch[1] : null;
+        try {
+            const writer = fs.createWriteStream(filePath);
+            const response = await meki.get(url, { responseType: 'stream' });
+            response.data.pipe(writer);
 
-  console.log("k_exp:", k_exp);
-  console.log("k_token:", k_token);
-  return {
-    k_exp: k_exp,
-    k_token: k_token,
-  }     
-    } catch (e) {        
-        return e.message
-    }
-}
+            return new Promise((resolve, reject) => {
+                writer.on('finish', () => {
+                    resolve();
+                });
+                writer.on('error', (error) => {
+                    console.error(error.message);
+                    reject(error);
+                });
+            });
+        } catch (error) {
+            console.error(error.message);
+        }
+    },
+
+    async detail(url) {
+        const $ = await this.request(url);
+        if (!$) return {};
+
+        const downloadLink = $('#download_link a.input.popsok').attr('href');
+        const result = {
+            fileName: $('.dl-btn-label').text().trim(),
+            downloadLink: downloadLink.startsWith('//') ? `https:${downloadLink}` : downloadLink,
+            fileSize: $('.dl-info .details li').first().find('span').text().trim(),
+            uploadedDate: $('.dl-info .details li').last().find('span').text().trim(),
+            mimetype: $('.dl-btn-cont .icon').attr('class')?.split(' ')[1] || 'Gak tau',
+        };
+        return result; 
+    },
+};
 
 async function igdl(url) {
   try {
@@ -1989,7 +1981,7 @@ app.get('/api/mediafire', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await mediafire(url);
+    const response = await MediaFire.dl(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
