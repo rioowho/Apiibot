@@ -940,47 +940,18 @@ async function imagetohd(url, method) {
 const meki = axios.create({
     httpsAgent: new https.Agent({ rejectUnauthorized: false }),
 });
-
 async function mediafiredl(url) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      if (!/https?:\/\/(www\.)?mediafire\.com/.test(url)) {
-        return reject(new Error("URL tidak valid untuk MediaFire"));
-      }
+  if (!url) throw new Error('URL is required.');
 
-      const response = await fetch(url);
-      if (!response.ok) {
-        return reject(new Error("Tidak dapat mengakses halaman MediaFire"));
-      }
+  const endpoint = `https://api.neastooid.xyz/api/downloader/mediafire?url=${encodeURIComponent(url)}`;
+  const response = await fetch(endpoint);
 
-      const data = await response.text();
-      const $ = cheerio.load(data);
-      const Url = ($("#downloadButton").attr("href") || "").trim();
-      const url2 = ($("#download_link > a.retry").attr("href") || "").trim();
-      const $intro = $("div.dl-info > div.intro");
-      const filename = $intro.find("div.filename").text().trim();
-      const filetype = $intro.find("div.filetype > span").eq(0).text().trim();
-      const ext = ((/\.([^.]*)$/.exec(filename) || [])[1] || "bin").trim();
-      const $li = $("div.dl-info > ul.details > li");
-      const upload_date = $li.eq(1).find("span").text().trim();
-      const filesizeH = $li.eq(0).find("span").text().trim();
+  if (!response.ok) {
+    throw new Error(`Failed to fetch: ${response.status}`);
+  }
 
-      const result = {
-        url: Url || url2,
-        filename,
-        filetype,
-        ext,
-        upload_date,
-        filesizeH,
-      };
-
-      resolve(result);
-    } catch (error) {
-      reject(new Error("Gagal mengambil informasi file dari MediaFire"));
-    }
-  });
+  return response.json();
 }
-
 async function igdl(url) {
   try {
     const form = new FormData();
