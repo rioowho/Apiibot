@@ -135,63 +135,48 @@
       margin: 0 auto;
     }
   }  
-  .profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .name {
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-    }
-
-    .centang-biru {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 16px;
-      height: 16px;
-      background-color: #34B7F1; /* Warna biru WhatsApp */
-      border-radius: 50%;
-      position: relative;
-    }
-
-    .centang-biru::before {
-      content: '';
-      position: absolute;
-      width: 2px;
-      height: 6px;
-      background-color: white;
-      border-radius: 1px;
-      transform: rotate(-45deg);
-      bottom: 4px;
-      left: 5px;
-    }
-
-    .centang-biru::after {
-      content: '';
-      position: absolute;
-      width: 2px;
-      height: 10px;
-      background-color: white;
-      border-radius: 1px;
-      transform: rotate(45deg);
-      bottom: 2px;
-      left: 6px;
-    }
+        .verified-badge {
+            display: flex;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .verified-badge .checkmark {
+            width: 24px;
+            height: 24px;
+            background-color: #25d366;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+        }
+        .verified-badge .checkmark svg {
+            width: 16px;
+            height: 16px;
+            fill: #ffffff;
+        }
+        .verified-badge .name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333333;
+        }
 }
 </style>
 
 
 </head>
 <body>
-    <h1>Api Documentation <span class="highlight">By RiooXdzz</span></h1>
+    <div class="verified-badge">
+        <div class="checkmark">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M20.285 5.508l-11.43 11.43-5.364-5.363 1.414-1.415 3.95 3.95 10.016-10.016z"/>
+            </svg>
+        </div>
+        <div class="name">Rioo Api's</div>
+</div>
     <img src="https://pomf2.lain.la/f/d3l8zx17.jpg" alt="Profile" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
 <div class="container">
   <p>Welcome to the API documentation for our service. Below you will find information about the available endpoints and how to use them.</p>
@@ -354,11 +339,5 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-</head>
-<body>
-  <div class="profile">
-    <span class="name">Rioo Api's</span>
-    <div class="centang-biru"></div>
-  </div>
 </body>
 </html>
