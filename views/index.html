@@ -135,6 +135,56 @@
       margin: 0 auto;
     }
   }  
+  .profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .name {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .centang-biru {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      background-color: #34B7F1; /* Warna biru WhatsApp */
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .centang-biru::before {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 6px;
+      background-color: white;
+      border-radius: 1px;
+      transform: rotate(-45deg);
+      bottom: 4px;
+      left: 5px;
+    }
+
+    .centang-biru::after {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 10px;
+      background-color: white;
+      border-radius: 1px;
+      transform: rotate(45deg);
+      bottom: 2px;
+      left: 6px;
+    }
 }
 </style>
 
@@ -304,5 +354,11 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+</head>
+<body>
+  <div class="profile">
+    <span class="name">Rioo Api's</span>
+    <div class="centang-biru"></div>
+  </div>
 </body>
 </html>
