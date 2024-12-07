@@ -35,27 +35,7 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-async function gptturbo(message) {
-    try {
-        const info = await getInfo();
-        const data = new FormData();
-        data.append('_wpnonce', info[0]['data-nonce']);
-        data.append('post_id', info[0]['data-post-id']);
-        data.append('action', 'wpaicg_chatbox_message');
-        data.append('message', message);
-        const response = await fetch('https://chatgptt.me/wp-admin/admin-ajax.php', {
-            method: 'POST',
-            body: data
-        });
 
-        if (!response.ok) throw new Error('Network response was not ok');
-
-        return await response.json();
-    } catch (error) {
-        console.error('An error occurred:', error.message);
-        throw error;
-    }
-}
 async function getInfo() {
     const url = 'https://chatgptt.me';
 
@@ -1328,6 +1308,31 @@ async function ai4chat(prompt, text) {
     return { data: error.message };
   }
 }      	
+async function gptlogic(message) {
+   try {
+   let prompt = `Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150 :`
+     var ress = await axios.get(`https://hercai.onrender.com/gemini/hercai?question=${encodeURIComponent(prompt + message)}`, {
+         headers: {
+         "content-type": "application/json",
+         },         
+        })
+      return ress.data;
+    } catch (e) {
+    console.log(e)
+  }
+}
+async function gptturbo(message) {
+   try {
+     var ress = await axios.get(`https://hercai.onrender.com/turbo-16k/hercai?question=${encodeURIComponent(message)}`, {
+         headers: {
+         "content-type": "application/json",
+         },         
+        })
+      return ress.data;
+    } catch (e) {
+    console.log(e)
+  }
+}
 async function turbo(message) {
    try {
      var ress = await axios.get(`https://hercai.onrender.com/turbo-16k/hercai?question=${encodeURIComponent(message)}`, {
@@ -1549,6 +1554,22 @@ app.get('/api/gptturbo', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
     const response = await gptturbo(message);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/gptlogic', async (req, res) => {
+  try {
+    const message = req.query.message;
+    if (!message) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await gptlogic(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
