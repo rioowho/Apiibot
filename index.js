@@ -45,8 +45,7 @@ function dekode(a) {
     }
 }
 
-const grabDL = {
-    create: async (link) => {
+async function grabDL(link) {
         const domain = /hexupload|filer\.net|filespace|uploadcloud|vipfile|nelion|voe\.sx|ex-load|4shared|wayshare|world-files|fikper|filestore|drop\.download|wupfile|elitefile|filecat|hotlink|mexa\.sh|filesfly|alfafile|cloudghost|novafile|mexashare|nitro\.download|file-upload|florenfile|ubiqfile|filenext|tezfiles|send\.cm|streamtape|filejoker|fastfile|uploadgig|fileland|loadme|xubster|racaty|filesmonster|icerbox|subyshare|extmatrix|depositfiles|fileboom|1fichier|jumploads|fshare|prefiles|hitfile|ufile\.io|upstore|mega|file\.al|easybytez|isra\.cloud|usersdrive|uploadrar|worlduploads|file2share|syncs\.online|emload|mountfile|mixdrop|clicknupload|pixeldrain|moondl|turbobit|xenupload|wdupload|hot4share|nitroflare|k2s|dropgalaxy|filefox|rosefile|upstream|gigapeta|uploadhaven|fireget|katfile|fileblade|fboom|ddownload|keep2share|fastbit|daofile|takefile|filedot|ulozto|mixloads|mediafire|fastclick|bayfiles|kshared|flashbit|rapidrar|rapidgator|fileaxa/;
 
         if (domain.test(new URL(link).hostname)) {
@@ -89,8 +88,7 @@ const grabDL = {
         } else {
             throw new Error('Gausah macem2 bree, domain yang warek buat di grab ada di atas yak ...');
         }
-    }
-};
+    };
 const SaveTube = {
     qualities: {
         audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
