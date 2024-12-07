@@ -36,22 +36,61 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 
-async function getInfo() {
-    const url = 'https://chatgptt.me';
-
+function dekode(a) {
     try {
-        const html = await (await fetch(url)).text();
-        const $ = cheerio.load(html);
-
-        const chatData = $('.wpaicg-chat-shortcode').map((index, element) => {
-            return Object.fromEntries(Object.entries(element.attribs));
-        }).get();
-
-        return chatData;
+        return atob(a.replace(/\s/g, '+'));
     } catch (error) {
-        throw new Error('Error:', error.message);
+        console.error(error);
+        return null;
     }
 }
+
+const grabDL = {
+    create: async (link) => {
+        const domain = /hexupload|filer\.net|filespace|uploadcloud|vipfile|nelion|voe\.sx|ex-load|4shared|wayshare|world-files|fikper|filestore|drop\.download|wupfile|elitefile|filecat|hotlink|mexa\.sh|filesfly|alfafile|cloudghost|novafile|mexashare|nitro\.download|file-upload|florenfile|ubiqfile|filenext|tezfiles|send\.cm|streamtape|filejoker|fastfile|uploadgig|fileland|loadme|xubster|racaty|filesmonster|icerbox|subyshare|extmatrix|depositfiles|fileboom|1fichier|jumploads|fshare|prefiles|hitfile|ufile\.io|upstore|mega|file\.al|easybytez|isra\.cloud|usersdrive|uploadrar|worlduploads|file2share|syncs\.online|emload|mountfile|mixdrop|clicknupload|pixeldrain|moondl|turbobit|xenupload|wdupload|hot4share|nitroflare|k2s|dropgalaxy|filefox|rosefile|upstream|gigapeta|uploadhaven|fireget|katfile|fileblade|fboom|ddownload|keep2share|fastbit|daofile|takefile|filedot|ulozto|mixloads|mediafire|fastclick|bayfiles|kshared|flashbit|rapidrar|rapidgator|fileaxa/;
+
+        if (domain.test(new URL(link).hostname)) {
+            try {
+                const response = await axios.post('https://okdebrid.com/api?mode=plg&token=__', `link=${encodeURIComponent(link)}&lang=en-US&chck=.&`, {
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Accept": "*/*",
+                        "User-Agent": "Postify/1.0.0" 
+                    },
+                    timeout: 10000
+                });
+
+                const { data } = response;
+                console.log(data)
+                if (data.link) {
+                    const result = dekode(data.link);
+                    if (result) {
+                        console.log(result);
+                        return result;
+                    } else {
+                        console.log(data);
+                        return data;
+                    }
+                } else {
+                    throw new Error('Grabber link nya kagak ada ceunah bree 😝...');
+                }
+            } catch (error) {
+                if (axios.isAxiosError(error)) {
+                    if (error.code === 'ETIMEDOUT') {
+                        console.error('Kagak bisa terhubung ke web nya 😂');
+                    } else {
+                        console.error(error.message);
+                    }
+                } else {
+                    console.error(error);
+                }
+                throw error;
+            }
+        } else {
+            throw new Error('Gausah macem2 bree, domain yang warek buat di grab ada di atas yak ...');
+        }
+    }
+};
 const SaveTube = {
     qualities: {
         audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
@@ -1973,11 +2012,11 @@ app.get('/api/spotify', async (req, res) => {
 });
 app.get('/api/mediafire', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const link = req.query.url;
+    if (!link) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await MediaFireDl(url);
+    const response = await grabDL(link);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
