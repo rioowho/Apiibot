@@ -226,15 +226,16 @@
         </div>
     </div>
     <!-- Audio element -->
-    <audio autoplay loop>
-        <source src="/music/song.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
-      <h2>Usage</h2>
-  <p>To use the endpoints, send a GET request to the desired endpoint with the following query parameter:</p>
-  <ul>
-    <li>message: Your message content</li>
-  </ul>
+        <script>
+      function play() {
+//Link Audio Bisa Diganti
+  var audio = new Audio("/music/song.mp3");audio.play();
+  audio.loop=false;audio.addEventListener('ended', function() {this.currentTime = 0;this.play();}, false);
+}         
+// auto play lagu
+play()
+
+    </script>
 
   <h2>Response</h2>
   <p>The response will be in JSON format with the following structure:</p>
