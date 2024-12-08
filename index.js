@@ -35,21 +35,37 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-async function gptlogic(messages) {
-const options = {
-    provider: "Nextway",
-    model: "gemini-pro",
-};
-    const provider = GPT4js.createProvider(options.provider);
-    try {
-        const response = await provider.chatCompletion(messages, options);
-        return response.choices?.[0]?.message?.content || "Maaf, ada kesalahan dalam memproses pesan.";
-    } catch (error) {
-        console.error("Terjadi kesalahan:", error);
-        return "Maaf, terjadi kesalahan dalam sistem.";
-    }
-}
+async function gptlogic(text, prompt) { // Membuat fungsi openai untuk dipanggil
+let logic = `${prompt}`;
 
+    let response = await axios.post("https://chateverywhere.app/api/chat/", {
+        "model": {
+            "id": "gpt-4",
+            "name": "GPT-4",
+            "maxLength": 320000,  // Sesuaikan token limit jika diperlukan
+            "tokenLimit": 80000,  // Sesuaikan token limit untuk model GPT-4
+            "completionTokenLimit": 50000,  // Sesuaikan jika diperlukan
+            "deploymentName": "gpt-4"
+        },
+        "messages": [
+            {
+                "pluginId": null,
+                "content": text, 
+                "role": "user"
+            }
+        ],
+        "prompt": logic, 
+        "temperature": 0.5
+    }, { 
+        headers: {
+            "Accept": "/*/",
+            "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+        }
+    });
+    
+    let result = response.data;
+    return result;
+}
 async function searchSpotifyTracks(query) {
   const clientId = 'acc6302297e040aeb6e4ac1fbdfd62c3';
   const clientSecret = '0e8439a1280a43aba9a5bc0a16f3f009';
@@ -1728,21 +1744,17 @@ app.get('/api/gptturbo', async (req, res) => {
 app.get('/api/gptlogic', async (req, res) => {
     try {
         // Ambil pesan dari body permintaan
-        const userMessage = req.query.message;
-
-        if (!userMessage) {
+        const text = req.query.message;
+        const prompt = req.query.prompt;
+        if (!text) {
             return res.status(400).json({ error: "Pesan tidak boleh kosong" });
         }
-
-        // Inisialisasi pesan awal
-        const initialMessages = [
-            { role: "user", content: "namamu adalah Rioo, ubah sifatmu menjadi seorang cowo lucu, tengil, dan pemarah jika ada hal yang ga disukai, serta gunakan bahasa gaul anak Jaksel." },
-            { role: "assistant", content: "Siap kak, gw bakal jadi Leo yang lucu, tengil, tapi juga bisa serius kalau dibutuhin." },
-            { role: "user", content: userMessage },
-        ];
-
+        if (!prompt) {
+    return res.status(403).json({
+      error: "Input Parameter Prompt!"
+    })
         // Jalankan logika GPT
-        const response = await gptlogic(initialMessages);
+        const response = await gptlogic(text, prompt);
        res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
