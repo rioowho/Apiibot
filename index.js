@@ -34,86 +34,30 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-function randomUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0,
-        v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
+async function searchSpotifyTracks(query) {
+  const clientId = 'acc6302297e040aeb6e4ac1fbdfd62c3';
+  const clientSecret = '0e8439a1280a43aba9a5bc0a16f3f009';
+  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+  const getToken = async () => {
+    const response = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      timeout: 60000, // 60 seconds
+      body: new URLSearchParams({ grant_type: 'client_credentials' }),
+      headers: { Authorization: `Basic ${auth}` },
+    });
+    return (await response.json()).access_token;
+  };
+
+  const accessToken = await getToken();
+  const offset = 10;
+  const searchUrl = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&offset=${offset}`;
+  const response = await fetch(searchUrl, {
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
+  const data = await response.json();
+  return data.tracks.items;
 }
-async function youAI(
-  prompt,
-  {
-    page = 1,
-    count = 10,
-    safeSearch = "Moderate",
-    onShoppingpage = false,
-    mkt = "",
-    responseFilter = "WebPages,Translations,TimeZone,Computation,RelatedSearches",
-    domain = "youchat",
-    queryTraceId = null,
-    chat = [],
-    includelinks = false,
-    detailed = false,
-    debug = false
-  } = {}
-) {
-  let proxyurl = "https://files.xianqiao.wang/"
-  const headers = {
-    "authority": "you.com",
-    "accept": "text/event-stream",
-    "accept-language": "en,fr-FRq=0.9,frq=0.8,es-ESq=0.7,esq=0.6,en-USq=0.5,amq=0.4,deq=0.3",
-    "cache-control": "no-cache",
-    "referer": `https://you.com/search?q=${prompt}&tbm=youchat`,
-    "sec-ch-ua": '"Not_A Brand"v="99", "Google Chrome"v="109", "Chromium"v="109"',
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": '"Windows"',
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin",
-    "cookie": `safesearch_guest=Moderate uuid_guest=${randomUUID()}`,
-    "user-agent": "Mozilla/5.0 (Macintosh Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Safari/605.1.15",
-  }
-
-  const params = new URLSearchParams({
-    q: prompt,
-    page: page,
-    count: count,
-    safeSearch: safeSearch,
-    onShoppingPage: onShoppingpage,
-    mkt: mkt,
-    responseFilter: responseFilter,
-    domain: domain,
-    queryTraceId: queryTraceId === null ? randomUUID() : queryTraceId,
-    chat: JSON.stringify(chat),
-  })
-
-  const response = await axios.get(proxyurl + "https://you.com/api/streamingSearch?" + params.toString(), {
-    headers: headers
-  })
-
-  if (debug) {
-    console.clear()
-    console.log(chalk.green("[DEBUGGER]:"))
-  }
-
-  const responseText = response.data
-  const youChatSerpResults = responseText.match(/youChatSerpResults\ndata: (.*)\n\nevent/)[1]
-  const thirdPartySearchResults = responseText.match(/thirdPartySearchResults\ndata: (.*)\n\nevent/)[1]
-  const text = responseText.split('}]}\n\nevent: youChatToken\ndata: {"youChatToken": "')[1].replace(/"}\n\nevent: youChatToken\ndata: {"youChatToken": "|event: done\ndata: I'm Mr. Meeseeks. Look at me.\n\n/g, '')
-
-  const extra = {
-    youChatSerpResults: JSON.parse(youChatSerpResults),
-  }
-
-  return {
-    response: text,
-    links: includelinks ? JSON.parse(thirdPartySearchResults).search.third_party_search_results : null,
-    extra: detailed ? extra : null,
-  }
-}
-
-
 async function fbdl(url) {
 	return new Promise((resolve, reject) => {
 axios("https://getmyfb.com/process", {
@@ -1795,11 +1739,11 @@ app.get('/api/aisearch', async (req, res) => {
 });
 app.get('/api/youai', async (req, res) => {
   try {
-    const prompt = req.query.message;
-    if (!prompt) {
+    const searchTerm = req.query.message;
+    if (!searchTerm) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await youAI(prompt);
+    const response = await youSearch(searchTerm);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -1952,6 +1896,22 @@ app.get('/api/search-playstore', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
     const response = await PlayStore(search);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/search-spotify', async (req, res) => {
+  try {
+    const query = req.query.message;
+    if (!query) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await searchSpotifyTracks(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
