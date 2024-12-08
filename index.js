@@ -1479,7 +1479,41 @@ async function ai4chat(prompt, text) {
     return { data: error.message };
   }
 }      	
-async function gptlogic(message) {
+function gptlogic(messages) {
+    return new Promise(async (resolve, reject) => {
+        try {
+        const initialMessages = [
+               { role: "user", content: messages },
+                { role: "assistant", content: `Hallo, ada yang bisa saya bantu hari ini? Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150` }
+
+            ];
+            if (!Array.isArray(initialMessages)) {
+                messages = [initialMessages];
+            }
+
+            const url = 'https://chatsandbox.com/api/chat';
+            const requestData = {
+                messages: messages,
+                character: 'openai'
+            };
+
+            const headers = {
+                "Content-Type": "application/json"
+            };
+
+            const response = await axios.post(url, requestData, { headers });
+
+            if (response.status === 200 && response.data) {
+                resolve(response.data);
+            } else {
+                reject(new Error('Failed to get a valid response'));
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+async function gptlogicx(message) {
    try {
    const initialMessages = [
                { role: "user", content: message },
@@ -1739,11 +1773,11 @@ app.get('/api/gptturbo', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const messages = req.query.message;
+    if (!messages) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await gptlogic(message);
+    const response = await gptlogic(messages);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
