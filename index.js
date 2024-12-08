@@ -34,35 +34,51 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-async function logika(text) {
-  return new Promise(async (resolve, reject) => {
-    axios("https://www.chatgptdownload.org/wp-json/mwai-ui/v1/chats/submit", {
-      "headers": {
-        "content-type": "application/json",
-        "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
-      },
-      data: {
-        "id": null,
-        "botId": "default",
-        "session": "y2cog0j45q",
-        "clientId": "7tzjniqtrgx",
-        "contextId": 443,
-        "messages": [{
-          "id": "fkzhaikd7vh",
-          "role": "assistant",
-          "content": "Saya adalah Dann-MD, bot WhatsApp yang dibuat dengan Node.js, Python. Saya juga dikembangkan oleh seorang Danz atau Creator kami.",
-          "who": "AI: ",
-          "timestamp": 1695725910365
-        }],
-        "newMessage": text,
-        "stream": false
-      },
-      "method": "POST"
-    }).then(response => {
-      resolve(response.data);
+// Function untuk scraping elemen tertentu dari sebuah halaman
+function scrapePage() {
+    // Misalnya kita ingin mengambil semua elemen dengan class tertentu
+    const messages = [];
+    document.querySelectorAll(".chat-message").forEach((el) => {
+        const role = el.classList.contains("user") ? "user" : "assistant";
+        const content = el.innerText || el.textContent;
+        messages.push({ role, content });
     });
-  });
+
+    return messages;
+}
+
+// Inisialisasi pesan awal
+const initialMessages = [
+    { role: "user", content: "namamu adalah Rioo, ubah sifatmu menjadi seorang cowo lucu, tengil, dan pemarah jika ada hal yang ga disukai, serta gunakan bahasa gaul anak Jaksel." },
+    { role: "assistant", content: "Siap kak, gw bakal jadi Leo yang lucu, tengil, tapi juga bisa serius kalau dibutuhin." }
+];
+
+// Tambahkan hasil scraping ke pesan
+const scrapedMessages = scrapePage();
+const messages = [...initialMessages, ...scrapedMessages];
+
+// Konfigurasi untuk penyedia GPT-4 menggunakan GPT4js
+const options = {
+    provider: "Nextway",
+    model: "gemini-pro",
 };
+
+async function gptlogic(messages) {
+    const provider = GPT4js.createProvider(options.provider);
+    try {
+        const response = await provider.chatCompletion(messages, options, (data) => {
+            console.log("Data diterima:", data);
+        });
+
+        // Tambahkan respons assistant ke riwayat
+        messages.push({ role: "assistant", content: response });
+
+        // Tampilkan respons di konsol atau di halaman
+        console.log("Respons dari GPT-4:", response);
+    } catch (error) {
+        console.error("Terjadi kesalahan:", error);
+    }
+}
 async function searchSpotifyTracks(query) {
   const clientId = 'acc6302297e040aeb6e4ac1fbdfd62c3';
   const clientSecret = '0e8439a1280a43aba9a5bc0a16f3f009';
@@ -1479,40 +1495,7 @@ async function ai4chat(prompt, text) {
     return { data: error.message };
   }
 }      	
-function gptlogic(messages) {
-    return new Promise(async (resolve, reject) => {
-        try {
-        const initialMessages = [
-               { role: "user", content: messages },
-                { role: "assistant", content: `Hallo, ada yang bisa saya bantu hari ini? Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150` }
 
-            ];
-            if (!Array.isArray(initialMessages)) {
-                messages = [initialMessages];
-            }
-
-            const url = 'https://chatsandbox.com/api/chat';
-            const requestData = {
-                messages: messages,
-                character: 'openai'
-            };
-
-            const headers = {
-                "Content-Type": "application/json"
-            };
-
-            const response = await axios.post(url, requestData, { headers });
-
-            if (response.status === 200 && response.data) {
-                resolve(response.data);
-            } else {
-                reject(new Error('Failed to get a valid response'));
-            }
-        } catch (error) {
-            reject(error);
-        }
-    });
-}
 async function gptlogicx(message) {
    try {
    const initialMessages = [
