@@ -58,12 +58,12 @@ async function gptlogic(text, prompt) { // Membuat fungsi openai untuk dipanggil
 let logic = `${prompt}`;
     let response = await axios.post("https://chateverywhere.app/api/chat/", {
         "model": {
-            "id": "gpt-4",
-            "name": "GPT-4",
-            "maxLength": 320000,  // Sesuaikan token limit jika diperlukan
-            "tokenLimit": 80000,  // Sesuaikan token limit untuk model GPT-4
-            "completionTokenLimit": 50000,  // Sesuaikan jika diperlukan
-            "deploymentName": "gpt-4"
+            "id": "gpt-logic",
+            "name": "GPT-logic",
+            "maxLength": 32000000,  // Sesuaikan token limit jika diperlukan
+            "tokenLimit": 8000000,  // Sesuaikan token limit untuk model GPT-4
+            "completionTokenLimit": 5000000,  // Sesuaikan jika diperlukan
+            "deploymentName": "gpt-logic"
         },
         "messages": [
             {
