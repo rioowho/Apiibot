@@ -35,7 +35,27 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-
+async function fbdl(url) {
+	return new Promise((resolve, reject) => {
+axios("https://getmyfb.com/process", {
+  headers: {
+    "cookie": "PHPSESSID=mtkljtmk74aiej5h6d846gjbo4; __cflb=04dToeZfC9vebXjRcJCMjjSQh5PprejufZXs2vHCt5; _token=K5Qobnj4QvoYKeLCW6uk"
+  },
+  data: { 
+     id: url,
+     locale: "en"
+    },
+  "method": "POST"
+}).then(res => { 
+let $ = cheerio.load(res.data)
+let result = {}
+result.caption = $("div.results-item-text").eq(0).text().trim()
+result.thumb = $(".results-item-image-wrapper img").attr("src") 
+result.result = $("a").attr("href")
+ resolve(result) 
+  })
+ })
+}
 function dekode(a) {
     try {
         return atob(a.replace(/\s/g, '+'));
@@ -1944,13 +1964,13 @@ app.get('/api/ytdl', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/aio', async (req, res) => {
+app.get('/api/fbdl', async (req, res) => {
   try {
-    const link = req.query.url;
-    if (!link) {
+    const url = req.query.url;
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await aio(link);
+    const response = await fbdl(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
