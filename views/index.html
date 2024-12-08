@@ -169,14 +169,9 @@
 
 </head>
 <body>
-    <div class="verified-badge">
-        <div class="checkmark">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M20.285 5.508l-11.43 11.43-5.364-5.363 1.414-1.415 3.95 3.95 10.016-10.016z"/>
-            </svg>
-        </div>
-        <div class="name">Rioo Api's</div>
-</div>
+<div class="container">
+  <h1>API Documentation</h1>
+  <p>Welcome to the API documentation for our service. Below you will find information about the available endpoints and how to use them.</p>
     <img src="https://pomf2.lain.la/f/d3l8zx17.jpg" alt="Profile" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
 <div class="container">
   <p>Welcome to the API documentation for our service. Below you will find information about the available endpoints and how to use them.</p>
@@ -252,7 +247,7 @@
                   <option value="/api/brat?message=">Brat</option>
                    </select>
                 </div>
-                <button disabled style="color: red";>Inject</button>
+                <button disabled>RESULT!</button>
             </form>
         </div>
         <div class="links">
@@ -260,18 +255,8 @@
             <span class="divider"></span>
         </div>
     </div>
-    <!-- Audio element -->
-        <script>
-      function play() {
-//Link Audio Bisa Diganti
-  var audio = new Audio("/music/song.mp3");audio.play();
-  audio.loop=false;audio.addEventListener('ended', function() {this.currentTime = 0;this.play();}, false);
-}         
-// auto play lagu
-play()
-
-    </script>
-
+    <iframe src="/music/song.mp3" allow="autoplay" style="display:none"></iframe>
+                </div>                
   <h2>Response</h2>
   <p>The response will be in JSON format with the following structure:</p>
   <pre>
