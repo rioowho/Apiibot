@@ -1483,22 +1483,6 @@ async function ai4chat(prompt, text) {
   }
 }      	
 
-async function gptlogicx(message) {
-   try {
-   const initialMessages = [
-               { role: "user", content: message },
-               { role: "assistant", content: `Hallo, ada yang bisa saya bantu hari ini? Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150` }
-            ];
-     var ress = await axios.get(`https://hercai.onrender.com/v3/hercai?question=${encodeURIComponent(initialMessages)}`, {
-         headers: {
-         "content-type": "application/json",
-         },         
-        })
-      return ress.data;
-    } catch (e) {
-    console.log(e)
-  }
-}
 async function gptturbo(message) {
    try {
      var ress = await axios.get(`https://hercai.onrender.com/turbo-16k/hercai?question=${encodeURIComponent(message)}`, {
@@ -1742,20 +1726,17 @@ app.get('/api/gptturbo', async (req, res) => {
   }
 });
 app.get('/api/gptlogic', async (req, res) => {
-    try {
-        // Ambil pesan dari body permintaan
-        const text = req.query.message;
-        const prompt = req.query.prompt;
-        if (!text) {
-            return res.status(400).json({ error: "Pesan tidak boleh kosong" });
-        }
-        if (!prompt) {
-    return res.status(403).json({
-      error: "Input Parameter Prompt!"
-    })
-        // Jalankan logika GPT
-        const response = await gptlogic(text, prompt);
-       res.status(200).json({
+  try {
+    const query = req.query.message;
+    const prompt = req.query.prompt;
+    if (!text) {
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
+    }
+    if (!prompt) {
+      return res.status(403).json({ error: 'Parameter "prompt" tidak ditemukan' });
+    }
+    const response = await gptlogic(text);
+    res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
       data: { response }
