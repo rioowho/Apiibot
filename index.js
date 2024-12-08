@@ -15,6 +15,7 @@ const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
+const GPT4js = require("gpt4js");
 const https = require('https');
 const jsobfus = require('javascript-obfuscator')
 const d = new Date(new Date() + 3600000);
