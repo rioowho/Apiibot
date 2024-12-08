@@ -35,9 +35,27 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+
+async function palmAi(query) {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(
+        'https://palmassistant.up.railway.app/generateResponse',
+        { user_message: query },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+          },
+        }
+      )
+      .then((response) => resolve(response.data.response))
+      .catch((error) => reject(error.message));
+  });
+}
 async function gptlogic(text, prompt) { // Membuat fungsi openai untuk dipanggil
 let logic = `${prompt}`;
-
     let response = await axios.post("https://chateverywhere.app/api/chat/", {
         "model": {
             "id": "gpt-4",
@@ -1727,7 +1745,7 @@ app.get('/api/gptturbo', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const query = req.query.message;
+    const text = req.query.message;
     const prompt = req.query.prompt;
     if (!text) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
@@ -1735,7 +1753,7 @@ app.get('/api/gptlogic', async (req, res) => {
     if (!prompt) {
       return res.status(403).json({ error: 'Parameter "prompt" tidak ditemukan' });
     }
-    const response = await gptlogic(text);
+    const response = await gptlogic(text, prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
