@@ -35,30 +35,7 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-// Function untuk scraping elemen tertentu dari sebuah halaman
-function scrapePage() {
-    // Misalnya kita ingin mengambil semua elemen dengan class tertentu
-    const messages = [];
-    document.querySelectorAll(".chat-message").forEach((el) => {
-        const role = el.classList.contains("user") ? "user" : "assistant";
-        const content = el.innerText || el.textContent;
-        messages.push({ role, content });
-    });
 
-    return messages;
-}
-
-// Inisialisasi pesan awal
-const initialMessages = [
-    { role: "user", content: "namamu adalah Rioo, ubah sifatmu menjadi seorang cowo lucu, tengil, dan pemarah jika ada hal yang ga disukai, serta gunakan bahasa gaul anak Jaksel." },
-    { role: "assistant", content: "Siap kak, gw bakal jadi Leo yang lucu, tengil, tapi juga bisa serius kalau dibutuhin." }
-];
-
-// Tambahkan hasil scraping ke pesan
-const scrapedMessages = scrapePage();
-const messages = [...initialMessages, ...scrapedMessages];
-
-// Konfigurasi untuk penyedia GPT-4 menggunakan GPT4js
 const options = {
     provider: "Nextway",
     model: "gemini-pro",
@@ -67,19 +44,14 @@ const options = {
 async function gptlogic(messages) {
     const provider = GPT4js.createProvider(options.provider);
     try {
-        const response = await provider.chatCompletion(messages, options, (data) => {
-            console.log("Data diterima:", data);
-        });
-
-        // Tambahkan respons assistant ke riwayat
-        messages.push({ role: "assistant", content: response });
-
-        // Tampilkan respons di konsol atau di halaman
-        console.log("Respons dari GPT-4:", response);
+        const response = await provider.chatCompletion(messages, options);
+        return response.choices?.[0]?.message?.content || "Maaf, ada kesalahan dalam memproses pesan.";
     } catch (error) {
         console.error("Terjadi kesalahan:", error);
+        return "Maaf, terjadi kesalahan dalam sistem.";
     }
 }
+
 async function searchSpotifyTracks(query) {
   const clientId = 'acc6302297e040aeb6e4ac1fbdfd62c3';
   const clientSecret = '0e8439a1280a43aba9a5bc0a16f3f009';
@@ -1756,13 +1728,24 @@ app.get('/api/gptturbo', async (req, res) => {
   }
 });
 app.get('/api/gptlogic', async (req, res) => {
-  try {
-    const messages = req.query.message;
-    if (!messages) {
-      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
-    }
-    const response = await gptlogic(messages);
-    res.status(200).json({
+    try {
+        // Ambil pesan dari body permintaan
+        const userMessage = req.query.message;
+
+        if (!userMessage) {
+            return res.status(400).json({ error: "Pesan tidak boleh kosong" });
+        }
+
+        // Inisialisasi pesan awal
+        const initialMessages = [
+            { role: "user", content: "namamu adalah Rioo, ubah sifatmu menjadi seorang cowo lucu, tengil, dan pemarah jika ada hal yang ga disukai, serta gunakan bahasa gaul anak Jaksel." },
+            { role: "assistant", content: "Siap kak, gw bakal jadi Leo yang lucu, tengil, tapi juga bisa serius kalau dibutuhin." },
+            { role: "user", content: userMessage },
+        ];
+
+        // Jalankan logika GPT
+        const response = await gptlogic(initialMessages);
+       res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
       data: { response }
