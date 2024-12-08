@@ -34,6 +34,35 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+async function logika(text) {
+  return new Promise(async (resolve, reject) => {
+    axios("https://www.chatgptdownload.org/wp-json/mwai-ui/v1/chats/submit", {
+      "headers": {
+        "content-type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+      },
+      data: {
+        "id": null,
+        "botId": "default",
+        "session": "y2cog0j45q",
+        "clientId": "7tzjniqtrgx",
+        "contextId": 443,
+        "messages": [{
+          "id": "fkzhaikd7vh",
+          "role": "assistant",
+          "content": "Saya adalah Dann-MD, bot WhatsApp yang dibuat dengan Node.js, Python. Saya juga dikembangkan oleh seorang Danz atau Creator kami.",
+          "who": "AI: ",
+          "timestamp": 1695725910365
+        }],
+        "newMessage": text,
+        "stream": false
+      },
+      "method": "POST"
+    }).then(response => {
+      resolve(response.data);
+    });
+  });
+};
 async function searchSpotifyTracks(query) {
   const clientId = 'acc6302297e040aeb6e4ac1fbdfd62c3';
   const clientSecret = '0e8439a1280a43aba9a5bc0a16f3f009';
@@ -1707,11 +1736,11 @@ app.get('/api/gptturbo', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const text = req.query.message;
+    if (!text) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await gptlogic(message);
+    const response = await logika(text);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
