@@ -1481,8 +1481,11 @@ async function ai4chat(prompt, text) {
 }      	
 async function gptlogic(message) {
    try {
-   let prompt = `Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150 :`
-     var ress = await axios.get(`https://hercai.onrender.com/v3/hercai?question=${encodeURIComponent(message + prompt)}`, {
+   const initialMessages = [
+               { role: "user", content: message },
+               { role: "assistant", content: `Hallo, ada yang bisa saya bantu hari ini? Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150` }
+            ];
+     var ress = await axios.get(`https://hercai.onrender.com/v3/hercai?question=${encodeURIComponent(initialMessages)}`, {
          headers: {
          "content-type": "application/json",
          },         
@@ -1736,11 +1739,11 @@ app.get('/api/gptturbo', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const text = req.query.message;
-    if (!text) {
+    const message = req.query.message;
+    if (!message) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await logika(text);
+    const response = await gptlogic(message);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
