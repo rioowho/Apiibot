@@ -35,13 +35,11 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-
+async function gptlogic(messages) {
 const options = {
     provider: "Nextway",
     model: "gemini-pro",
 };
-
-async function gptlogic(messages) {
     const provider = GPT4js.createProvider(options.provider);
     try {
         const response = await provider.chatCompletion(messages, options);
