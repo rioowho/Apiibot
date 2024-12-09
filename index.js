@@ -1274,8 +1274,9 @@ async function pinterest(message) {
     let data = json.resource_response.data.results;
     if (!data.length) throw `Query "${message}" not found :/`;
 
-    // Selalu mengambil elemen pertama
-    return data[0].images.orig.url;
+    // Memilih elemen secara acak dari hasil
+    const randomIndex = Math.floor(Math.random() * data.length);
+    return data[randomIndex].images.orig.url;
 }
 
 async function tiktoks(message) {
