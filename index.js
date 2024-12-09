@@ -423,6 +423,79 @@ URL: {link}`,
     throw error;
   }
 };
+const savetubee = {
+    qualities: {
+        audio: { 1: '32', 2: '64', 3: '128', 4: '192' }
+    },
+    
+    headers: {
+        accept: '*/*',
+        referer: 'https://ytshorts.savetube.me/',
+        origin: 'https://ytshorts.savetube.me/',
+        'user-agent': 'Postify/1.0.0',
+        'Content-Type': 'application/json'
+    },
+
+    cdn() {
+        return Math.floor(Math.random() * 11) + 51; // CDN 51-61
+    },
+
+    validateQuality(type, qualityIndex) {
+        if (!this.qualities[type][qualityIndex]) {
+            throw new Error(`❌ Kualitas ${type} tidak valid. Pilih salah satu: ${Object.values(this.qualities[type]).join(', ')}`);
+        }
+    },
+
+    async fetchData(url, body = {}) {
+        const cdnNumber = this.cdn();
+        const headers = {
+            ...this.headers,
+            authority: `cdn${cdnNumber}.savetube.su`
+        };
+
+        try {
+            const response = await axios.post(url, body, { headers });
+            return response.data;
+        } catch (error) {
+            console.error('❌ Error saat mengakses data:', error);
+            throw error;
+        }
+    },
+
+    async getAudioInfo(dl) {
+        const cdnNumber = this.cdn();
+        const url = `https://cdn${cdnNumber}.savetube.su/info`;
+        return this.fetchData(url, { url: dl });
+    },
+
+    downloadLink(cdnNumber, type, quality, key) {
+        return `https://cdn${cdnNumber}.savetube.su/download?type=${type}&quality=${quality}&key=${key}`;
+    },
+
+    async dl(dl, qualityIndex) {
+        const type = 'audio'; // Force type to audio for audio downloads
+        this.validateQuality(type, qualityIndex);
+
+        const quality = this.qualities[type][qualityIndex];
+        const audioInfo = await this.getAudioInfo(dl);
+        
+        if (!audioInfo.data || !audioInfo.data.key) {
+            throw new Error('❌ Gagal mendapatkan informasi audio.');
+        }
+
+        const cdnNumber = this.cdn();
+        const downloadUrl = this.downloadLink(cdnNumber, type, quality, audioInfo.data.key);
+
+        return {
+            dl,
+            title: audioInfo.data.title,
+            thumbnail: audioInfo.data.thumbnail,
+            duration: audioInfo.data.duration,
+            quality,
+            type
+        };
+    }
+};
 function ytdlnew(url, format = 'mp3') {
     return new Promise(async(resolve, reject) => {
  
@@ -2111,7 +2184,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await SaveTube.dl(url, 1);
+    const response = await savetubee.dl(url, 1);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
