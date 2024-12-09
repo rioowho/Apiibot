@@ -1778,8 +1778,7 @@ app.get('/api/gptlogic', async (req, res) => {
 });
 app.get('/api/llama', async (req, res) => {
   try {
-    const text = req.query.message;
-    const prompt = req.query.prompt;
+    const prompt = req.query.message;
     if (!prompt) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
