@@ -423,101 +423,11 @@ URL: {link}`,
     throw error;
   }
 };
-const SaveTube = {
-    qualities: {
-        audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
-        video: { 1: '144', 2: '240', 3: '360', 4: '480', 5: '720', 6: '1080', 7: '1440', 8: '2160' }
-    },
 
-    headers: {
-        accept: '*/*',
-        referer: 'https://ytshorts.savetube.me/',
-        origin: 'https://ytshorts.savetube.me/',
-        'user-agent': 'Postify/1.0.0',
-        'Content-Type': 'application/json'
-    },
-
-    cdn() {
-        return Math.floor(Math.random() * 11) + 51;
-    },
-
-    checkQuality(type, qualityIndex) {
-        if (!this.qualities[type] || !(qualityIndex in this.qualities[type])) {
-            throw new Error(`❌ Kualitas ${type} tidak valid. Pilih salah satu: ${Object.keys(this.qualities[type]).join(', ')}`);
-        }
-    },
-
-    async fetchData(url, cdn, body = {}) {
-        const headers = {
-            ...this.headers,
-            authority: `cdn${cdn}.savetube.su`
-        };
-
-        try {
-            const response = await axios.post(url, body, { headers });
-            if (response && response.data) {
-                return response.data;
-            } else {
-                throw new Error('Respon API tidak valid.');
-            }
-        } catch (error) {
-            console.error('Fetch Data Error:', error.message);
-            throw error;
-        }
-    },
-
-    dLink(cdnUrl, type, quality, videoKey) {
-        return `https://${cdnUrl}/download?type=${type}&quality=${quality}&key=${videoKey}`;
-    },
-
-    async dl(link, qualityIndex, typeIndex) {
-        const type = typeIndex === 1 ? 'audio' : 'video';
-        if (!type) throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
-
-        SaveTube.checkQuality(type, qualityIndex);
-        const quality = SaveTube.qualities[type][qualityIndex];
-
-        const cdnNumber = SaveTube.cdn();
-        const cdnUrl = `cdn${cdnNumber}.savetube.su`;
-
-        // Fetch video information
-        const videoInfo = await SaveTube.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: link });
-        if (!videoInfo || !videoInfo.data) {
-            throw new Error('❌ Gagal mendapatkan informasi video.');
-        }
-
-        const badi = {
-            downloadType: type,
-            quality: quality,
-            key: videoInfo.data.key
-        };
-
-        // Fetch download link
-        const dlRes = await SaveTube.fetchData(SaveTube.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, badi);
-        if (!dlRes || !dlRes.data) {
-            throw new Error('❌ Gagal mendapatkan link download.');
-        }
-
-        return {
-            link: dlRes.data.downloadUrl,
-            duration: videoInfo.data.duration,
-            durationLabel: videoInfo.data.durationLabel,
-            fromCache: videoInfo.data.fromCache,
-            id: videoInfo.data.id,
-            key: videoInfo.data.key,
-            thumbnail: videoInfo.data.thumbnail,
-            thumbnail_formats: videoInfo.data.thumbnail_formats,
-            title: videoInfo.data.title,
-            titleSlug: videoInfo.data.titleSlug,
-            videoUrl: videoInfo.data.url,
-            quality,
-            type
-        };
-    }
-};
 const savetubee = {
     qualities: {
-        audio: { 1: '32', 2: '64', 3: '128', 4: '192' }
+        audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
+        video: { 1: '360', 2: '480', 3: '720', 4: '1080' }  // Added video qualities
     },
     
     headers: {
@@ -562,17 +472,23 @@ const savetubee = {
     },
 
     async dl(link, qualityIndex, typeIndex) {
-        const type = typeIndex === 1 ? 'audio';
-        if (!type) throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
+        let type;
+        if (typeIndex === 1) {
+            type = 'audio';
+        } else if (typeIndex === 2) {
+            type = 'video';
+        } else {
+            throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
+        }
 
-        SaveTube.checkQuality(type, qualityIndex);
-        const quality = SaveTube.qualities[type][qualityIndex];
+        this.checkQuality(type, qualityIndex);
+        const quality = this.qualities[type][qualityIndex];
 
-        const cdnNumber = SaveTube.cdn();
+        const cdnNumber = this.cdn();
         const cdnUrl = `cdn${cdnNumber}.savetube.su`;
 
         // Fetch video information
-        const videoInfo = await SaveTube.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: link });
+        const videoInfo = await this.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: link });
         if (!videoInfo || !videoInfo.data) {
             throw new Error('❌ Gagal mendapatkan informasi video.');
         }
@@ -584,7 +500,7 @@ const savetubee = {
         };
 
         // Fetch download link
-        const dlRes = await SaveTube.fetchData(SaveTube.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, badi);
+        const dlRes = await this.fetchData(this.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, badi);
         if (!dlRes || !dlRes.data) {
             throw new Error('❌ Gagal mendapatkan link download.');
         }
@@ -606,6 +522,9 @@ const savetubee = {
         };
     }
 };
+
+// You need to make sure axios is included as well
+const axios = require('axios');
 function ytdlnew(url, format = 'mp3') {
     return new Promise(async(resolve, reject) => {
  
