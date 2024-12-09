@@ -15,7 +15,8 @@ const { chromium } = require('playwright');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
-const GPT4js = require("gpt4js");
+const Groq = require('groq-sdk')
+const client = new Groq({ apiKey: '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' });
 const https = require('https');
 const jsobfus = require('javascript-obfuscator')
 const d = new Date(new Date() + 3600000);
@@ -35,6 +36,18 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+async function llama(prompt) {
+ chatCompletion = await client.chat.completions.create({
+messages: [
+        { role: "system", content: `"Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150` },
+        { role: "assistant", content: `"Halo" > Kamu adalah asisten AI yang siap membantu segala hal."` },
+{ role: "user", content: prompt }
+],
+model: 'llama3-8b-8192'
+});
+let hasil = chatCompletion.choices[0].message.content
+return hasil
+}
 
 async function palmAi(query) {
   return new Promise((resolve, reject) => {
@@ -73,11 +86,11 @@ let logic = `${prompt}`;
             }
         ],
         "prompt": logic, 
-        "temperature": 0.5
+        "temperature": 0.3
     }, { 
         headers: {
             "Accept": "/*/",
-            "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Linux; Windows 11; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
         }
     });
     
@@ -1754,6 +1767,23 @@ app.get('/api/gptlogic', async (req, res) => {
       return res.status(403).json({ error: 'Parameter "prompt" tidak ditemukan' });
     }
     const response = await gptlogic(text, prompt);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/llama', async (req, res) => {
+  try {
+    const text = req.query.message;
+    const prompt = req.query.prompt;
+    if (!prompt) {
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
+    }
+    const response = await llama(prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
