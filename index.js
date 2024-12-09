@@ -58,6 +58,7 @@ const prompttt = prompt;
 const resultt = await modello.generateContent(prompttt);
 const responsek = await resultt.response;
 const textt = responsek.text();
+return textt
   } catch (error) {
     console.error('Error generating content:', error);
     throw error;
