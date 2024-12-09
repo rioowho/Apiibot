@@ -36,6 +36,32 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+try {
+async function geminigoogle(prompt) {
+  const { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } = require("@google/generative-ai");
+   const Used_Apikey = "AIzaSyBbh2azakeGzP_gyKpX5JhupO7XRrvtVN4"
+  const genAI = new GoogleGenerativeAI(Used_Apikey);
+const safetySettings = [
+  {
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+  },
+];
+
+const modello = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySettings: safetySettings });
+const prompttt = prompt;
+const resultt = await modello.generateContent(prompttt);
+const responsek = await resultt.response;
+const textt = responsek.text();
+  } catch (error) {
+    console.error('Error generating content:', error);
+    throw error;
+  }
+}
 async function llama(prompt) {
  chatCompletion = await client.chat.completions.create({
 messages: [
@@ -1758,11 +1784,11 @@ app.get('/api/luminai', async (req, res) => {
 // Endpoint untuk gemini
 app.get('/api/gemini', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const prompt = req.query.message;
+    if (!prompt) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await gemini(message);
+    const response = await geminigoogle(prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
