@@ -471,7 +471,7 @@ const savetubee = {
         return `https://${cdnUrl}/download?type=${type}&quality=${quality}&key=${videoKey}`;
     },
 
-    async dl(link, qualityIndex, typeIndex) {
+    async dl(dl, qualityIndex, typeIndex) {
         let type;
         if (typeIndex === 1) {
             type = 'audio';
@@ -488,7 +488,7 @@ const savetubee = {
         const cdnUrl = `cdn${cdnNumber}.savetube.su`;
 
         // Fetch video information
-        const videoInfo = await this.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: link });
+        const videoInfo = await this.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: dl });
         if (!videoInfo || !videoInfo.data) {
             throw new Error('❌ Gagal mendapatkan informasi video.');
         }
@@ -506,7 +506,7 @@ const savetubee = {
         }
 
         return {
-            link: dlRes.data.downloadUrl,
+            dl: dlRes.data.downloadUrl,
             duration: videoInfo.data.duration,
             durationLabel: videoInfo.data.durationLabel,
             fromCache: videoInfo.data.fromCache,
