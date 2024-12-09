@@ -36,8 +36,9 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-try {
+
 async function geminigoogle(prompt) {
+try {
   const { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } = require("@google/generative-ai");
    const Used_Apikey = "AIzaSyBbh2azakeGzP_gyKpX5JhupO7XRrvtVN4"
   const genAI = new GoogleGenerativeAI(Used_Apikey);
