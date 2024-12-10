@@ -12,6 +12,7 @@ const FormData = require('form-data');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const { chromium } = require('playwright');
+const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
@@ -40,13 +41,7 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-const express = require('express');
-const axios = require('axios');
-const cheerio = require('cheerio');
-const { Buffer } = require('buffer');
 
-const app = express();
-app.use(express.json());
 
 const y2mate = {
   create: async () => {
