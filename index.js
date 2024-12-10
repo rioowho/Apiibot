@@ -100,7 +100,7 @@ class yt {
      * @param {string} qualities.mp3 - Kualitas untuk MP3.
      * @returns {Promise<Object>} - Objek berisi URL unduhan MP4 dan MP3.
      */
-    async function download(url, { mp4 = '360', mp3 = '128' } = {}) {
+    async function download(url, { mp4 = '360', mp3 = '128' } {
         try {
             let h = new yt()
             const mp4Link = await h.dl(url, 'mp4', mp4);
