@@ -40,7 +40,77 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+class yt {
+    /**
+     * Mengunduh video dari YouTube dalam format MP4 atau MP3.
+     * @param {string} url - URL video YouTube yang valid.
+     * @param {string} downtype - Tipe unduhan: 'mp4' atau 'mp3'.
+     * @param {string} vquality - Kualitas video atau audio:
+     *      - Untuk 'mp4': '144', '240', '360', '720', '1080'
+     *      - Untuk 'mp3': '128', '360'
+     * @returns {Promise<string>} - URL unduhan dari API.
+     */
+    async dl(url, downtype, vquality) {
+        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|watch\?v=|music\?v=|embed\/|v\/|.+\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+        const match = url.match(regex);
 
+        if (!match) {
+            throw new Error('URL tidak valid. Silakan masukkan URL YouTube yang benar.');
+        }
+
+        const videoId = match[1];
+        const data = new URLSearchParams({ videoid: videoId, downtype, vquality });
+
+        try {
+            const response = await axios.post('https://api-cdn.saveservall.xyz/ajax-v2.php', data, {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
+            });
+            return response.data
+        } catch (error) {
+            throw new Error('Terjadi kesalahan: ' + error.message);
+        }
+    }
+
+    async result(url) {
+        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|watch\?v=|music\?v=|embed\/|v\/|.+\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+        const match = url.match(regex);
+
+        if (!match) {
+            throw new Error('URL tidak valid. Silakan masukkan URL YouTube yang benar.');
+        }
+
+        const videoId = match[1];
+        const data = new URLSearchParams({ videoid: videoId, downtype, vquality });
+
+        try {
+            const response = await axios.post('https://api-cdn.saveservall.xyz/ajax-v2.php', data, {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
+            });
+            return response.data
+        } catch (error) {
+            throw new Error('Terjadi kesalahan: ' + error.message);
+        }
+    }
+    
+    /**
+     * Mengambil link unduhan untuk kedua format MP4 dan MP3.
+     * @param {string} url - URL video YouTube yang valid.
+     * @param {Object} qualities - Kualitas unduhan untuk masing-masing format.
+     * @param {string} qualities.mp4 - Kualitas untuk MP4.
+     * @param {string} qualities.mp3 - Kualitas untuk MP3.
+     * @returns {Promise<Object>} - Objek berisi URL unduhan MP4 dan MP3.
+     */
+    async function download(url, { mp4 = '360', mp3 = '128' } = {}) {
+        try {
+            let h = new yt()
+            const mp4Link = await h.dl(url, 'mp4', mp4);
+            const mp3Link = await h.dl(url, 'mp3', mp3);
+            return { mp4: mp4Link, mp3: mp3Link };
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+    
 const hdown = {
     dl: async (link) => {
         try {
@@ -2276,7 +2346,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const result = await YTDownloader.download(url);
+    const result = await download(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
