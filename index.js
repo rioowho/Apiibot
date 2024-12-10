@@ -40,6 +40,23 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 async function geminilogic(input, prompt) {
+try {
+
+const modell = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: `${prompt}`,
+    });
+const prompttt = input || prompt;
+const resultt = await modell.generateContent(prompttt);
+const responsek = await resultt.response;
+const textt = responsek.text();
+return textt
+  } catch (error) {
+    console.error('Error generating content:', error);
+    throw error;
+  }
+}
+async function geminilogic(input, prompt) {
   try {
     const modell = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
