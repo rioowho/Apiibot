@@ -662,7 +662,7 @@ const savetubee = {
     }
 };
 
-function ytdlnew(url, format = 'mp3') {
+async function ytdlnew(url, format = 'mp3') {
     return new Promise(async(resolve, reject) => {
  
         const isYouTubeUrl = /^(youtu.be)/
@@ -2347,12 +2347,12 @@ app.get('/api/ytmp4', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const { progressURL, videoUrl } = req.query.progressURL.videoUrl; // Ambil parameter dari query
-    if (!progressURL || !videoUrl) {
-      return res.status(400).json({ error: 'Parameter "progressURL" atau "videoUrl" tidak ditemukan' });
+    const url = req.query.url; // Ambil parameter dari query
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
     
-    const result = await y2mate.progress(progressURL, videoUrl);
+    const result = await ytdlnew(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
