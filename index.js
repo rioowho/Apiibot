@@ -39,19 +39,33 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-async function geminilogic(text, prompt) {
-try {
-const modell = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
-  systemInstruction: `${prompt}`,
-});
-const promptt = text;
-const resultp = await modell.generateContent(promptt);
-const responseqo = await resultp.response;
-const textl = responseqo.text();
-return textl
+async function geminilogic(input, prompt) {
+  try {
+    const modell = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: `${prompt}`,
+    });
+
+    // Mengecek apakah input adalah teks atau gambar
+    let resultp;
+    if (typeof input === "string") {
+      // Jika input berupa teks
+      resultp = await modell.generateContent(input);
+    } else if (input instanceof Blob || input instanceof File) {
+      // Jika input berupa gambar (Blob/File)
+      resultp = await modell.generateImage({
+        image: input,
+        prompt: prompt,
+      });
+    } else {
+      throw new Error("Input type not supported. Use string for text or Blob/File for image.");
+    }
+
+    const responseqo = await resultp.response;
+    const textl = responseqo.text();
+    return textl;
   } catch (error) {
-    console.error('Error generating content:', error);
+    console.error("Error generating content:", error);
     throw error;
   }
 }
