@@ -17,6 +17,9 @@ var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
 const Groq = require('groq-sdk')
 const client = new Groq({ apiKey: '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' });
+  const { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } = require("@google/generative-ai");
+   const Used_Apikey = "AIzaSyBbh2azakeGzP_gyKpX5JhupO7XRrvtVN4"
+  const genAI = new GoogleGenerativeAI(Used_Apikey);
 const https = require('https');
 const jsobfus = require('javascript-obfuscator')
 const d = new Date(new Date() + 3600000);
@@ -36,12 +39,24 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-
+async function geminilogic(text, prompt) {
+try {
+const modell = genAI.getGenerativeModel({
+  model: "gemini-1.5-flash",
+  systemInstruction: `${prompt}`,
+});
+const promptt = text;
+const resultp = await modell.generateContent(promptt);
+const responseqo = await resultp.response;
+const textl = responseqo.text();
+return textl
+  } catch (error) {
+    console.error('Error generating content:', error);
+    throw error;
+  }
+}
 async function geminigoogle(prompt) {
 try {
-  const { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } = require("@google/generative-ai");
-   const Used_Apikey = "AIzaSyBbh2azakeGzP_gyKpX5JhupO7XRrvtVN4"
-  const genAI = new GoogleGenerativeAI(Used_Apikey);
 const safetySettings = [
   {
     category: HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -1894,7 +1909,7 @@ app.get('/api/gptlogic', async (req, res) => {
     if (!prompt) {
       return res.status(403).json({ error: 'Parameter "prompt" tidak ditemukan' });
     }
-    const response = await gptlogic(text, prompt);
+    const response = await geminilogic(text, prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
