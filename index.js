@@ -56,48 +56,6 @@ return textt
     throw error;
   }
 }
-async function geminilogic(input, prompt) {
-  try {
-    const modell = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      systemInstruction: `${prompt}`,
-    });
-
-    // Mengecek apakah input adalah teks atau gambar
-    let resultp;
-    if (typeof input === "string") {
-      // Jika input berupa teks
-      resultp = await modell.generateContent(input);
-    } else if (input instanceof Blob || input instanceof File) {
-      // Jika input berupa gambar (Blob/File)
-      resultp = await modell.generateImage({
-        image: input,
-        prompt: prompt,
-      });
-    } else {
-      throw new Error("Input type not supported. Use string for text or Blob/File for image.");
-    }
-
-    // Mendapatkan respons hasil dari pemrosesan model
-    const responseqo = await resultp;
-
-    // Memastikan respons memiliki format yang dapat diproses
-    if (responseqo.image) {
-      // Jika respons berisi gambar
-      const imageBlob = await responseqo.image();
-      return { type: "image", data: imageBlob };
-    } else if (responseqo.text) {
-      // Jika respons berisi teks
-      const textl = await responseqo.text();
-      return { type: "text", data: textl };
-    } else {
-      throw new Error("Response does not contain valid image or text data.");
-    }
-  } catch (error) {
-    console.error("Error generating content:", error);
-    throw error;
-  }
-}
 async function geminigoogle(prompt) {
 try {
 const safetySettings = [
