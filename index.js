@@ -61,16 +61,20 @@ async function geminilogic(input, prompt) {
       throw new Error("Input type not supported. Use string for text or Blob/File for image.");
     }
 
-    const responseqo = await resultp.response;
+    // Mendapatkan respons hasil dari pemrosesan model
+    const responseqo = await resultp;
 
-    if (responseqo.hasImage()) {
-      // Jika balasan berisi gambar
+    // Memastikan respons memiliki format yang dapat diproses
+    if (responseqo.image) {
+      // Jika respons berisi gambar
       const imageBlob = await responseqo.image();
       return { type: "image", data: imageBlob };
-    } else {
-      // Jika balasan berisi teks
-      const textl = responseqo.text();
+    } else if (responseqo.text) {
+      // Jika respons berisi teks
+      const textl = await responseqo.text();
       return { type: "text", data: textl };
+    } else {
+      throw new Error("Response does not contain valid image or text data.");
     }
   } catch (error) {
     console.error("Error generating content:", error);
@@ -1923,16 +1927,16 @@ app.get('/api/gptturbo', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const text = req.query.message;
+    const input = req.query.message;
     const prompt = req.query.prompt;
     const imageUri = req.query;
-    if (!text) {
+    if (!input) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
     if (!prompt) {
       return res.status(403).json({ error: 'Parameter "prompt" tidak ditemukan' });
     }
-    const response = await geminilogic(text, prompt);
+    const response = await geminilogic(input, prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
