@@ -2346,7 +2346,7 @@ app.get('/api/ytmp4', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const { progressURL, videoUrl } = req.query.url; // Ambil parameter dari query
+    const { progressURL, videoUrl } = req.query.progressURL.videoUrl; // Ambil parameter dari query
     if (!progressURL || !videoUrl) { // Validasi parameter
       return res.status(400).json({ error: 'Parameter "progressURL" atau "videoUrl" tidak ditemukan' });
     }
