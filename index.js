@@ -62,8 +62,16 @@ async function geminilogic(input, prompt) {
     }
 
     const responseqo = await resultp.response;
-    const textl = responseqo.text();
-    return textl;
+
+    if (responseqo.hasImage()) {
+      // Jika balasan berisi gambar
+      const imageBlob = await responseqo.image();
+      return { type: "image", data: imageBlob };
+    } else {
+      // Jika balasan berisi teks
+      const textl = responseqo.text();
+      return { type: "text", data: textl };
+    }
   } catch (error) {
     console.error("Error generating content:", error);
     throw error;
