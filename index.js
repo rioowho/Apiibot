@@ -2354,11 +2354,11 @@ app.get('/api/ytmp4', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const progressURL = req.query.url;
-    if (!progressURL) {
+    const videoUrl = req.query.url;
+    if (!videoUrl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await y2mate.progress(progressURL, videoUrl);
+    const response = await y2mate.progress(videoUrl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
