@@ -665,7 +665,7 @@ const savetubee = {
 async function ytdlnew(url, format = 'mp3') {
     return new Promise(async(resolve, reject) => {
  
-        const isYouTubeUrl = /^(youtu.be)/
+        const isYouTubeUrl = /(?:youtube\.com\/\S*(?:(?:\/e(?:mbed))?\/|watch\?(?:\S*?&?v\=))|youtu\.be\/)([a-zA-Z0-9_-]{6,11})/;
     
         if (!isYouTubeUrl.test(url)) {
             resolve({
