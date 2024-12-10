@@ -2346,18 +2346,19 @@ app.get('/api/ytmp4', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const progressURL, videoUrl  = req.query.url;
-        if (!progressURL, videoUrl) {
-      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    const { progressURL, videoUrl } = req.query; // Ambil parameter dari query
+    if (!progressURL || !videoUrl) { // Validasi parameter
+      return res.status(400).json({ error: 'Parameter "progressURL" atau "videoUrl" tidak ditemukan' });
     }
-    const result = await y2mate.progress(progressURL, videoUrl);
+    
+    const result = await y2mate.progress(progressURL, videoUrl); // Panggil fungsi dengan parameter
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
       data: result
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message }); // Tangkap error
   }
 });
 app.get('/api/ytdl', async (req, res) => {
