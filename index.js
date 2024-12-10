@@ -133,7 +133,24 @@ const y2mate = {
     }
   }
 };
-
+const hdown = {
+    dl: async (link) => {
+        try {
+            const { data: api } = await axios.get('https://hddownloaders.com');
+            const token = cheerio.load(api)('#token').val();
+            console.log(token)
+            const { data } = await axios.post('https://hddownloaders.com/wp-json/aio-dl/video-data/', new URLSearchParams({ url: link, token }), {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': 'Postify/1.0.0'
+                }
+            });
+            return data;
+        } catch (error) {
+            return { error: error.response?.data || error.message };
+        }
+    }
+};
 async function geminilogic(input, prompt) {
 try {
 
@@ -2347,12 +2364,12 @@ app.get('/api/ytmp4', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const url = req.query.url; // Ambil parameter dari query
-    if (!url) {
+    const link = req.query.url; // Ambil parameter dari query
+    if (!link) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
     
-    const result = await ytdlnew(url);
+    const result = await hdown.dl(link);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
