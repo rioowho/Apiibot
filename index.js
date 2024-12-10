@@ -16,6 +16,9 @@ const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
+const jwt = require("jsonwebtoken");
+const UrlPattern = require("url-pattern");
+const qs = require("qs");
 const Groq = require('groq-sdk')
 const client = new Groq({ apiKey: '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' });
   const { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } = require("@google/generative-ai");
@@ -40,76 +43,209 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-class yt {
-    /**
-     * Mengunduh video dari YouTube dalam format MP4 atau MP3.
-     * @param {string} url - URL video YouTube yang valid.
-     * @param {string} downtype - Tipe unduhan: 'mp4' atau 'mp3'.
-     * @param {string} vquality - Kualitas video atau audio:
-     *      - Untuk 'mp4': '144', '240', '360', '720', '1080'
-     *      - Untuk 'mp3': '128', '360'
-     * @returns {Promise<string>} - URL unduhan dari API.
-     */
-    async dl(url, downtype, vquality) {
-        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|watch\?v=|music\?v=|embed\/|v\/|.+\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-        const match = url.match(regex);
+const privateKey = `-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEIF7u6fQ1RaVV7YUg+dOD0j6upkFJ1fNQZ4nzz8n0m1zboAoGCCqGSM49
+AwEHoUQDQgAEuG6npq0n2HHW+kKK2x2RfMh0J/AzwJeXgUKuMvzC2aXoKZyTLNf+
+TNX1cfH+h+aMkOhenIabeiHsjdiHzX/n54lM/g==
+-----END EC PRIVATE KEY-----`;
+const payload = {
+  exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 1 minggu dalam detik
+  referer: "https://apimate.net/",
+  origin: "https://apimate.net",
+  userAgent:
+    "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
+};
+const header = {
+  alg: "HS256",
+  typ: "JWT",
+  kid: "8d79bd11784029a8cfb3aa5a79741a6f",
+};
+const jwt_token = jwt.sign(payload, privateKey, {
+  algorithm: "ES256",
+  header: header,
+});
 
-        if (!match) {
-            throw new Error('URL tidak valid. Silakan masukkan URL YouTube yang benar.');
-        }
+const ytdl = {
+  // url parser
+  parseYouTubeUrl: async function parseYouTubeUrl(url) {
+    const [domain, querystring] = url.split("?");
+    const options = {};
+    const query = qs.parse(querystring);
 
-        const videoId = match[1];
-        const data = new URLSearchParams({ videoid: videoId, downtype, vquality });
+    if (query.list) {
+      options.playlistId = query.list;
+    } else if (query.v) {
+      options.videoId = query.v;
+    } else {
+      const shortVideo = new UrlPattern(
+        "(http(s)\\://)(www.)youtu.be/:videoId",
+      );
+      const directVideo = new UrlPattern(
+        "(http(s)\\://)(www.)youtube.com/v/:videoId",
+      );
+      const embedVideo = new UrlPattern(
+        "(http(s)\\://)(www.)youtube.com/embed/:videoId",
+      );
 
-        try {
-            const response = await axios.post('https://api-cdn.saveservall.xyz/ajax-v2.php', data, {
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
+      let params = shortVideo.match(domain);
+      if (params) options.videoId = params.videoId;
+
+      params = directVideo.match(domain);
+      if (params) options.videoId = params.videoId;
+
+      params = embedVideo.match(domain);
+      if (params) options.videoId = params.videoId;
+    }
+
+    // Check for start and end times for single videos.
+    if (options.videoId) {
+      // Start times can be set with &start= for embed urls or
+      // &t= for short urls.
+      if (query.start) {
+        options.start = parseInt(query.start, 10);
+      } else if (query.t) {
+        options.start = parseInt(query.t, 10);
+      }
+
+      if (query.end) {
+        options.end = parseInt(query.end, 10);
+      }
+    }
+
+    return options;
+  },
+  getInfo: async function getInfo(url) {
+    try {
+      if (!url)
+        return { status: false, message: "failed get info, invalid url link" };
+      return await new Promise(async (resolve, reject) => {
+        const videoId = (await parseYouTubeUrl(url)).videoId;
+        axios
+          .get(`https://rr-01-bucket.cdn1313.net/api/v4/info/` + videoId, {
+            headers: {
+              authority: "rr-01-bucket.cdn1313.net",
+              accept: "application/json",
+              origin: "https://apimate.net",
+              referer: "https://apimate.net/",
+            },
+          })
+          .then(async (res) => {
+            const data = res.data;
+            if (!data?.videoId) reject("failed fetch video information");
+            let video = data.formats.video.mp4.filter((d) =>
+              /H.264/.test(d.codec),
+            );
+            resolve({
+              status: true,
+              data: {
+                videoId: data.videoId,
+                title: data.title,
+                duration: data.humanDuration,
+                media: {
+                  video,
+                  audio: data.formats.audio.mp3 || undefined,
+                },
+              },
             });
-            return response.data
-        } catch (error) {
-            throw new Error('Terjadi kesalahan: ' + error.message);
-        }
+          })
+          .catch(reject);
+      });
+    } catch (e) {
+      return { status: false, message: e };
     }
-
-    async result(url) {
-        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|watch\?v=|music\?v=|embed\/|v\/|.+\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-        const match = url.match(regex);
-
-        if (!match) {
-            throw new Error('URL tidak valid. Silakan masukkan URL YouTube yang benar.');
-        }
-
-        const videoId = match[1];
-        const data = new URLSearchParams({ videoid: videoId, downtype, vquality });
-
-        try {
-            const response = await axios.post('https://api-cdn.saveservall.xyz/ajax-v2.php', data, {
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
-            });
-            return response.data
-        } catch (error) {
-            throw new Error('Terjadi kesalahan: ' + error.message);
-        }
+  },
+  download: async function download(token) {
+    try {
+      if (!token) return { status: false, message: "invalid content token!" };
+      return await new Promise(async (resolve, reject) => {
+        axios
+          .post(
+            "https://rr-01-bucket.cdn1313.net/api/v4/convert",
+            {
+              token,
+            },
+            {
+              headers: {
+                authorization: jwt_token,
+                authority: "rr-01-bucket.cdn1313.net",
+                accept: "application/json",
+                origin: "https://apimate.net",
+                referer: "https://apimate.net/",
+                "user-agent":
+                  "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
+              },
+            },
+          )
+          .then(async (res) => {
+            const data = res.data;
+            if (data?.error) reject("content token expired!");
+            let jobProc = async () => {
+              return await new Promise((resolve, reject) => {
+                axios
+                  .get(
+                    `https://rr-01-bucket.cdn1313.net/api/v4/status/` + data.id,
+                    {
+                      headers: {
+                        authorization: jwt_token,
+                        authority: "rr-01-bucket.cdn1313.net",
+                        accept: "application/json",
+                        origin: "https://apimate.net",
+                        referer: "https://apimate.net/",
+                        "user-agent":
+                          "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36",
+                      },
+                    },
+                  )
+                  .then((res) => {
+                    const data = res.data;
+                    if (data?.error)
+                      reject({ status: "error", message: data.message });
+                    if (data.status === "failed")
+                      reject({
+                        status: "error",
+                        message: "failed converting content",
+                      });
+                    if (data.status == "active")
+                      resolve({
+                        status: "queue",
+                        message: "on queue...",
+                        data,
+                      });
+                    resolve({
+                      status: "completed",
+                      data: {
+                        url: data.download,
+                        title: data.title,
+                        quality: data.quality,
+                        ext: data.ext,
+                      },
+                    });
+                  })
+                  .catch((e) => reject({ status: false, message: e }));
+              });
+            };
+            let count = 0;
+            async function process() {
+              let job = await jobProc();
+              console.log(count + ":", job);
+              count++;
+              if (job?.status == "error")
+                return reject("failed converting content");
+              if (job.status == "completed") {
+                job.status = true;
+                return resolve(job);
+              }
+              setTimeout(process, 3000);
+            }
+            await process();
+          })
+          .catch(reject);
+      });
+    } catch (e) {
+      return { status: false, message: e };
     }
-    
-    /**
-     * Mengambil link unduhan untuk kedua format MP4 dan MP3.
-     * @param {string} url - URL video YouTube yang valid.
-     * @param {Object} qualities - Kualitas unduhan untuk masing-masing format.
-     * @param {string} qualities.mp4 - Kualitas untuk MP4.
-     * @param {string} qualities.mp3 - Kualitas untuk MP3.
-     * @returns {Promise<Object>} - Objek berisi URL unduhan MP4 dan MP3.
-     */
-    async function download(url, { mp4 = '360', mp3 = '128' } {
-        try {
-            let h = new yt()
-            const mp4Link = await h.dl(url, 'mp4', mp4);
-            const mp3Link = await h.dl(url, 'mp3', mp3);
-            return { mp4: mp4Link, mp3: mp3Link };
-        } catch (error) {
-            throw new Error(error.message);
-        }
-    }
+  },
+};
     
 const hdown = {
     dl: async (link) => {
@@ -2346,7 +2482,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const result = await download(url);
+    const result = await ytdl.getInfo(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
