@@ -23,7 +23,7 @@ const client = new Groq({ apiKey: 'gsk_SQTrJ3oq5xvaIlLlF0D9WGdyb3FYngASmptvYXaIu
   const genAI = new GoogleGenerativeAI(Used_Apikey);
 const https = require('https');
 const jsobfus = require('javascript-obfuscator')
-const YTDownloader = require('./lib/ytiz');
+const YTDownloader = require('./lib/ytiz')
 const d = new Date(new Date() + 3600000);
 const locale = 'id';
 const jam = new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
@@ -42,98 +42,6 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-
-
-const y2mate = {
-  create: async () => {
-    try {
-      const { data } = await axios.get('https://y2mate.nu/en-o3iJ/');
-      const script = cheerio.load(data)('script').filter((_, el) => el.children[0]?.data.includes('atob')).html();
-      if (!script) throw new Error('Base64 tidak ditemukan.');
-
-      const decoded = Buffer.from(script.match(/atob'([^']+)'/)[1], 'base64').toString('utf-8');
-      const [, gCStr, gEStr] = decoded.match(/gC\s*=\s*([^]+).*?gE\s*=\s*([^]+)/s) || [];
-
-      const gC = JSON.parse(gCStr.replace(/'/g, '"'));
-      const gE = JSON.parse(gEStr.replace(/'/g, '"'));
-
-      const key = gC[2].split(',').map(i => (gC[1] > 0 ? [...gC[0]].reverse().join('') : gC[0])[i]).join('');
-      
-      const { data: itil } = await axios.get(`https://nu.${String.fromCharCode(109,110,117,117,46,110,117)}/api/v1/init?_=${Math.random()}`, {
-        headers: { 'x-request-c': gC[4], 'x-request-k': key, 'x-request-u': gC[3] }
-      });
-
-      if (itil.error !== "0") throw new Error('Gagal inisialisasi.');
-
-      return { gC, gE, convertURL: itil.convertURL };
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  convert: async (url, format = 'mp3') => {
-    try {
-      const { convertURL } = await y2mate.create();
-      const sig = new URL(convertURL).searchParams.get('sig');
-
-      const response = await axios.get(`https://nmuu.mnuu.nu/api/v1/convert`, {
-        params: {
-          sig,
-          v: url,
-          f: format,
-          _: Math.random()
-        },
-        headers: {
-          'Accept': '*/*',
-          'User-Agent': 'Postify/1.0.0'
-        }
-      });
-
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  progress: async (progressURL, videoUrl) => {
-    try {
-      const sig = new URL(progressURL).searchParams.get('sig');
-      let completed = false;
-      let title = '';
-
-      while (!completed) {
-        const response = await axios.get(`https://nmuu.mnuu.nu/api/v1/progress`, {
-          params: { sig },
-          headers: {
-            'Accept': '*/*',
-            'User-Agent': 'Postify/1.0.0'
-          }
-        });
-
-        const { progress, error, title: videoTitle } = response.data;
-
-        if (title === '' && videoTitle !== '') {
-          title = videoTitle;
-        }
-
-        if (progress >= 3) {
-          const finalResult = await y2mate.convert(videoUrl);
-          return { ...finalResult, title };
-        }
-
-        if (progress === 100 || error !== 0) {
-          completed = true;
-        } else {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-
-      return { completed, title };
-    } catch (error) {
-      throw error;
-    }
-  }
-};
 const hdown = {
     dl: async (link) => {
         try {
