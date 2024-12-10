@@ -23,7 +23,6 @@ const client = new Groq({ apiKey: 'gsk_SQTrJ3oq5xvaIlLlF0D9WGdyb3FYngASmptvYXaIu
   const genAI = new GoogleGenerativeAI(Used_Apikey);
 const https = require('https');
 const jsobfus = require('javascript-obfuscator')
-const { YTDownloader } = require('./lib/ytiz')
 const d = new Date(new Date() + 3600000);
 const locale = 'id';
 const jam = new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
@@ -2277,7 +2276,6 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    
     const result = await YTDownloader.download(url);
     res.status(200).json({
       status: 200,
