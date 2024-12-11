@@ -46,7 +46,9 @@ app.use(cors());
 
 async function metaai(text, userName) {
     const Together = require("together-ai")
-    const together = new Together();;
+    const together = new Together({ 
+            apiKey: '522aeeed9ccfea4eeabb86608d24bcc0ad35b0c08598c60bdf214b8bd7bb42c0' 
+        });
 
     // Fallback to 'User' if userName is not provided
     const user = userName || "User";
@@ -65,7 +67,7 @@ async function metaai(text, userName) {
         const response = await together.chat.completions.create({
             messages: initialMessages,
             model: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
-            max_tokens: 1000, // Set a reasonable token limit
+            max_tokens: null, // Set a reasonable token limit
             temperature: 0.7,
             top_p: 0.7,
             top_k: 50,
