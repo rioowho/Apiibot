@@ -59,7 +59,7 @@ const withYouTubeValidation = (fn) => async (url, ...args) => {
 // Higher-order function untuk memanggil API
 const withAPIRequest = (fn, apiType) => async (...args) => {
     try {
-        const result = await fn(API_CONFIG[apiType], ...args);
+        const result = await fn(API_CONFIG[download], ...args);
         return result;
     } catch (error) {
         throw new Error(`Gagal memproses ${apiType} API: ${error.message}`);
