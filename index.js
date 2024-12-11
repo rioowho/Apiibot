@@ -94,46 +94,6 @@ async function metaai(text, userName) {
         return "Terjadi kesalahan saat memproses permintaan Anda. Mohon coba lagi nanti. 😔";
     }
 }
-async function metaai(text) {
-  try {
-    // Ambil konten HTML dari URL
-    const { data: html } = await axios.get("https://www.meta.ai");
-
-    // Parsing HTML menggunakan Cheerio
-    const $ = cheerio.load(html);
-
-    // Objek untuk menyimpan meta tag
-    const metaTags = {};
-
-    // Ambil semua meta tag
-    $("meta").each((_, element) => {
-      const metaProperty = $(element).attr("property") || $(element).attr("name");
-      const metaContent = $(element).attr("content");
-
-      // Filter meta tag yang relevan
-      if (metaProperty && metaContent) {
-        if (
-          metaProperty.toLowerCase().includes("ai") || // Tag yang mengandung kata "ai"
-          metaProperty.toLowerCase().startsWith("og:") || // Open Graph meta tags
-          metaProperty.toLowerCase().includes("meta.ai") // Tag terkait AI
-        ) {
-          metaTags[metaProperty] = metaContent;
-        }
-      }
-    });
-
-    // Ambil judul halaman
-    const title = $("title").text();
-    if (title) metaTags["title"] = title;
-
-    // Kembalikan metadata
-    return metaTags;
-  } catch (error) {
-    console.error("Error fetching the URL:", error.message);
-    return null;
-  }
-}
-
 const retatube = {
   getPrefix: async () => {
     try {
@@ -2095,8 +2055,12 @@ app.get('/api/openai', async (req, res) => {
 app.get('/api/metaai', async (req, res) => {
   try {
     const text = req.query.message;
+    const userName = req.query.userName;
     if (!text) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    if (!userName) {
+      return res.status(403).json({ error: 'Parameter "Nama mu" tidak ditemukan' });
     }
     const response = await metaai(text, userName);
     res.status(200).json({
