@@ -100,7 +100,7 @@ const fetchBothDownloads = async (url, options = { mp4: '360', mp3: '128' }) => 
         fetchMP3(url, 'mp3', mp3),
     ]);
     return { 
-    creator: "restapii.rioooxdzz.web.id"
+    creator: "restapii.rioooxdzz.web.id",
     mp4: mp4Link,
     mp3: mp3Link
      };
