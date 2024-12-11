@@ -47,7 +47,7 @@ app.use(cors());
 async function metaai(text, userName) {
     const Together = require("together-ai")
     const together = new Together({ 
-            apiKey: '522aeeed9ccfea4eeabb86608d24bcc0ad35b0c08598c60bdf214b8bd7bb42c0' 
+            apiKey: '522aeeed9ccfea4eeabb86608d24bcc0ad35b0c08598c60bdf214b8bd7bb42c0, b08ecc42947ad25e0acdc8a508db4e6be52cfebb8910dd36a8abef8406b91c20' 
         });
 
     // Fallback to 'User' if userName is not provided
@@ -206,19 +206,24 @@ const hdown = {
     }
 };
 async function geminilogic(input, prompt) {
-try {
+  try {
+    if (!input && !prompt) {
+      throw new Error("Input atau prompt harus diberikan.");
+    }
 
-const modell = genAI.getGenerativeModel({
+    const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
-      systemInstruction: `${prompt}`,
+      systemInstruction: prompt,
     });
-const prompttt = input || prompt;
-const resultt = await modell.generateContent(prompttt);
-const responsek = await resultt.response;
-const textt = responsek.text();
-return textt
+
+    const query = input || prompt;
+    const result = await model.generateContent(query);
+    const response = await result.response;
+    const text = await response.text();
+    return text;
+
   } catch (error) {
-    console.error('Error generating content:', error);
+    console.error('Error generating content:', error.message);
     throw error;
   }
 }
