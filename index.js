@@ -2060,7 +2060,7 @@ app.get('/api/metaai', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
     if (!userName) {
-      return res.status(403).json({ error: 'Parameter "Nama mu" tidak ditemukan' });
+      return res.status(403).json({ error: 'Parameter "userName" tidak ditemukan' });
     }
     const response = await metaai(text, userName);
     res.status(200).json({
