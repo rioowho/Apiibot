@@ -119,6 +119,21 @@ const fetchBothDownloads = async (url, options = { mp4: '360', mp3: '128' }) => 
         };
     }
 };
+// Higher-order function untuk logging
+const withLogging = fn => async (...args) => {
+    try {
+        console.log(`Memulai fungsi ${fn.name} dengan argumen:`, args);
+        const result = await fn(...args);
+        console.log(`Hasil dari ${fn.name}:`, result);
+        return result;
+    } catch (error) {
+        console.error(`Error dalam fungsi ${fn.name}:`, error.message);
+        throw error;
+    }
+};
+
+// Membungkus semua fungsi utama dengan logging
+const mp33 = withLogging(fetchBothDownloads);
 
 async function metaai(text, userName) {
     const Together = require("together-ai")
@@ -2526,7 +2541,7 @@ app.get('/api/ytmp4', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await fetchBothDownloads(url);
+    const response = await mp33(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
