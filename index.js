@@ -43,10 +43,6 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-const axios = require('axios')
-const fs = require('fs')
-const path = require('path')
-
 const urls = {
     info: 'https://m8.fly.dev/api/info',
     download: 'https://m8.fly.dev/api/download'
