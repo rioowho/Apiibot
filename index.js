@@ -45,10 +45,8 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 async function metaai(text, userName) {
-    const Together = require("together-ai");
-    const together = new Together({ 
-        apiKey: 'd1aa6e82697226df5fe78557438e7c87d706cb1b9baba51a0bf8b7d4f4b36420'
-    });
+    const Together = require("together-ai")
+    const together = new Together();;
 
     // Fallback to 'User' if userName is not provided
     const user = userName || "User";
