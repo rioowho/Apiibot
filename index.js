@@ -57,7 +57,7 @@ const withYouTubeValidation = (fn) => async (url, ...args) => {
 };
 
 // Higher-order function untuk memanggil API
-const withAPIRequest = (fn, apiType) => async (...args) => {
+const withAPIRequest = (fn, download) => async (...args) => {
     try {
         const result = await fn(API_CONFIG[download], ...args);
         return result;
@@ -67,9 +67,9 @@ const withAPIRequest = (fn, apiType) => async (...args) => {
 };
 
 // Fungsi unduhan
-const fetchDownload = withAPIRequest(async (api, videoId, type, quality) => {
+const fetchDownload = withAPIRequest(async (downloadi, videoId, type, quality) => {
     const data = new URLSearchParams({ videoid: videoId, downtype: type, vquality: quality });
-    const response = await axios.post(api, data, {
+    const response = await axios.post(download, data, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
     });
     if (!response.data || !response.data.link) {
@@ -79,8 +79,8 @@ const fetchDownload = withAPIRequest(async (api, videoId, type, quality) => {
 }, 'download');
 
 // Fungsi pencarian
-const fetchSearch = withAPIRequest(async (api, query) => {
-    const response = await axios.get(`${api}${encodeURIComponent(query)}`, {
+const fetchSearch = withAPIRequest(async (download, query) => {
+    const response = await axios.get(`${download}${encodeURIComponent(query)}`, {
         headers: {
             'Accept-Encoding': 'gzip, deflate, br',
             'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
