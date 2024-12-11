@@ -110,7 +110,7 @@ const fetchBothDownloads = async (url, options = { mp4: '360', mp3: '128' }) => 
         return {
             status: true,
             mp4: mp4Link,
-            mp3: mp3Link,
+            mp3: mp3Link
         };
     } catch (error) {
         return {
