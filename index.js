@@ -44,6 +44,96 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
+async function metaai(text, userName) {
+    const Together = require("together-ai");
+    const together = new Together({ 
+        apiKey: 'd1aa6e82697226df5fe78557438e7c87d706cb1b9baba51a0bf8b7d4f4b36420'
+    });
+
+    // Fallback to 'User' if userName is not provided
+    const user = userName || "User";
+
+    const initialMessages = [
+        {
+            role: "system",
+            content: `Hi! 😊 Saya adalah ChatGPT menggunakan model Meta LLaMA. Saya dibuat oleh seseorang bernama Anggazyy. 
+            Saya adalah Geforce Stars - MD, asisten bot yang bisa menyimpan nama Anda sebagai "${user}", 
+            berbicara dalam bahasa Indonesia, dan selalu berusaha membantu dengan cara yang ramah dan menyenangkan. Ayo ngobrol!`
+        },
+        { role: "user", content: text }
+    ];
+
+    try {
+        const response = await together.chat.completions.create({
+            messages: initialMessages,
+            model: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+            max_tokens: 1000, // Set a reasonable token limit
+            temperature: 0.7,
+            top_p: 0.7,
+            top_k: 50,
+            repetition_penalty: 1,
+            stop: ["<|eot_id|>", "<|eom_id|>"],
+            stream: true
+        });
+
+        let generatedResponse = "";
+        for await (const token of response) {
+            if (token.choices && token.choices[0] && token.choices[0].delta && token.choices[0].delta.content) {
+                generatedResponse += token.choices[0].delta.content;
+            }
+        }
+
+        if (!generatedResponse.trim()) {
+            generatedResponse = "Maaf, saya tidak bisa memberikan jawaban untuk pertanyaan Anda. 😔";
+        }
+        
+        generatedResponse += " 👋";
+        return generatedResponse;
+    } catch (error) {
+        console.error("Error during the API call:", error);
+        return "Terjadi kesalahan saat memproses permintaan Anda. Mohon coba lagi nanti. 😔";
+    }
+}
+async function metaai(text) {
+  try {
+    // Ambil konten HTML dari URL
+    const { data: html } = await axios.get("https://www.meta.ai");
+
+    // Parsing HTML menggunakan Cheerio
+    const $ = cheerio.load(html);
+
+    // Objek untuk menyimpan meta tag
+    const metaTags = {};
+
+    // Ambil semua meta tag
+    $("meta").each((_, element) => {
+      const metaProperty = $(element).attr("property") || $(element).attr("name");
+      const metaContent = $(element).attr("content");
+
+      // Filter meta tag yang relevan
+      if (metaProperty && metaContent) {
+        if (
+          metaProperty.toLowerCase().includes("ai") || // Tag yang mengandung kata "ai"
+          metaProperty.toLowerCase().startsWith("og:") || // Open Graph meta tags
+          metaProperty.toLowerCase().includes("meta.ai") // Tag terkait AI
+        ) {
+          metaTags[metaProperty] = metaContent;
+        }
+      }
+    });
+
+    // Ambil judul halaman
+    const title = $("title").text();
+    if (title) metaTags["title"] = title;
+
+    // Kembalikan metadata
+    return metaTags;
+  } catch (error) {
+    console.error("Error fetching the URL:", error.message);
+    return null;
+  }
+}
+
 const retatube = {
   getPrefix: async () => {
     try {
@@ -1993,6 +2083,22 @@ app.get('/api/openai', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
     const response = await openai(messages);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/metaai', async (req, res) => {
+  try {
+    const text = req.query.message;
+    if (!text) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await metaai(text, userName);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
