@@ -43,10 +43,8 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-const API_CONFIG = {
-    download: 'https://api-cdn.saveservall.xyz/ajax-v2.php',
-    search: 'https://api.flvto.top/@api/search/YouTube/',
-};
+
+const API_CONFIG = `https://api-cdn.saveservall.xyz/ajax-v2.php`;
 
 // Higher-order function untuk validasi URL YouTube
 const withYouTubeValidation = fn => async (url, ...args) => {
