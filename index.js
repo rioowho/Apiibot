@@ -62,7 +62,7 @@ const withAPIRequest = (fn, download) => async (...args) => {
         const result = await fn(API_CONFIG[download], ...args);
         return result;
     } catch (error) {
-        throw new Error(`Gagal memproses ${apiType} API: ${error.message}`);
+        throw new Error(`Gagal memproses ${download} API: ${error.message}`);
     }
 };
 
