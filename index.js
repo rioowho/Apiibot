@@ -43,7 +43,30 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+async function bingimg(keyword, numImages) {
+  const images = [];
+  const url = `https://www.bing.com/images/search?q=${encodeURIComponent(keyword)}`;
 
+  try {
+    const response = await fetch(url);
+    const html = await response.text();
+    const $ = cheerio.load(html);
+
+    // Pastikan selector CSS sesuai
+    $('img.mimg').each((index, img) => {
+      if (index >= numImages) return false; // Stop jika sudah mencapai jumlah yang diinginkan
+      const imageUrl = $(img).attr('data-src') || $(img).attr('src');
+      if (imageUrl) {
+        images.push(imageUrl);
+      }
+    });
+
+  } catch (error) {
+    console.error("Error scraping images:", error);
+  }
+
+  return images;
+}
 const hdown = {
     dl: async (link) => {
         try {
@@ -1909,6 +1932,22 @@ app.get('/api/openai', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.get('/api/bingimg', async (req, res) => {
+  try {
+    const keyword = req.query.message;
+    if (!keyword) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await bingimg(keyword, 15);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 app.get('/api/gptturbo', async (req, res) => {
   try {
     const message = req.query.message;
@@ -2329,6 +2368,22 @@ app.get('/api/tiktok', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
     const response = await tiktok(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/aio', async (req, res) => {
+  try {
+    const link = req.query.url;
+    if (!link) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await hdown.dl(link);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
