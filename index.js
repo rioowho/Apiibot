@@ -43,92 +43,90 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+const axios = require('axios')
+const fs = require('fs')
+const path = require('path')
 
-const API_CONFIG = `https://api-cdn.saveservall.xyz/ajax-v2.php`;
+const urls = {
+    info: 'https://m8.fly.dev/api/info',
+    download: 'https://m8.fly.dev/api/download'
+}
 
-// Higher-order function untuk validasi URL YouTube
-const withYouTubeValidation = fn => async (url, ...args) => {
-    const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/|v\/|.+\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-    const match = url.match(regex);
-    if (!match) throw new Error('URL tidak valid. Masukkan URL YouTube yang benar.');
-    return fn(match[1], ...args);
-};
+const getHeaders = (extraHeaders = {}) => ({
+    'Content-Type': 'application/json',
+    'User-Agent': 'Downloader/1.0.0',
+    'Referer': 'https://ytiz.xyz/',
+    ...extraHeaders
+})
 
-// Higher-order function untuk memanggil API
-const withAPIRequest = (fn, apiType) => async (...args) => {
-    try {
-        const result = await fn(API_CONFIG[apiType], ...args);
-        return result;
-    } catch (error) {
-        throw new Error(`Gagal memproses ${apiType} API: ${error.message}`);
+const sendRequest = async (urlKey, data) => {
+    const response = await axios.post(urls[urlKey], data, { headers: getHeaders() })
+    return response.data
+}
+
+const validateInput = (format, quality) => {
+    const validFormats = ['m4a', 'mp3', 'flac']
+    const validQualities = ['32', '64', '128', '192', '256', '320']
+
+    if (!validFormats.includes(format)) {
+        throw new Error(`Invalid format! Choose one of the following: ${validFormats.join(', ')}`)
     }
-};
 
-// Fungsi unduhan
-const fetchDownload = withAPIRequest(async (api, videoId, type, quality) => {
-    const data = new URLSearchParams({ videoid: videoId, downtype: type, vquality: quality });
-    const response = await axios.post(api, data, {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-    });
-    return response.data;
-}, 'download');
-
-// Fungsi pencarian
-const fetchSearch = withAPIRequest(async (api, query) => {
-    const response = await axios.get(`${api}${encodeURIComponent(query)}`, {
-        headers: {
-            'Accept-Encoding': 'gzip, deflate, br',
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
-        },
-    });
-    return response.data.items.map(item => ({
-        title: item.title,
-        url: `https://www.youtube.com/watch?v=${item.id}`,
-        description: item.description,
-    }));
-}, 'search');
-
-// Fungsi utama untuk mengunduh MP4 dan MP3
-const fetchBothDownloads = async (url, options = { mp4: '360', mp3: '128' }) => {
-    try {
-        const { mp4, mp3 } = options;
-        const fetchValidatedDownload = withYouTubeValidation(fetchDownload);
-
-        const [mp4Link, mp3Link] = await Promise.all([
-            fetchValidatedDownload(url, 'mp4', mp4),
-            fetchValidatedDownload(url, 'mp3', mp3),
-        ]);
-
-        return {
-            status: true,
-            creator: "restapii.rioooxdzz.web.id",
-            mp4: mp4Link,
-            mp3: mp3Link,
-        };
-    } catch (error) {
-        return {
-            status: false,
-            message: error.message,
-        };
+    if (!validQualities.includes(quality)) {
+        throw new Error(`Invalid quality! Choose one of the following: ${validQualities.join(', ')}`)
     }
-};
+}
 
-// Higher-order function untuk logging
-const withLogging = fn => async (...args) => {
-    try {
-        console.log(`Memulai fungsi ${fn.name} dengan argumen:`, args);
-        const result = await fn(...args);
-        console.log(`Hasil dari ${fn.name}:`, result);
-        return result;
-    } catch (error) {
-        console.error(`Error dalam fungsi ${fn.name}:`, error.message);
-        throw error;
+const ensureDirectoryExists = (filePath) => {
+    const directoryPath = path.dirname(filePath)
+    if (!fs.existsSync(directoryPath)) {
+        fs.mkdirSync(directoryPath, { recursive: true })
     }
-};
+}
 
-// Membungkus semua fungsi utama dengan logging
-const mp33 = withLogging(fetchBothDownloads);
+const fetchVideoDetails = async (url, format) => sendRequest('info', { url, format, startTime: 0, endTime: 0 })
 
+const fetchAudio = async (url, quality, filename, randomID, format) => sendRequest('download', {
+    url,
+    quality,
+    metadata: true,
+    filename,
+    randID: randomID,
+    trim: false,
+    startTime: 0,
+    endTime: 0,
+    format
+})
+
+const executeDownload = async (url, format = 'mp3', quality = '128') => {
+    validateInput(format, quality)
+
+    const videoDetails = await fetchVideoDetails(url, format)
+    const audioDetails = await fetchAudio(url, quality, videoDetails.filename, videoDetails.randID, format)
+    console.log(audioDetails)
+
+    const outputDirectory = path.join(process.cwd(), 'downloads')
+    const outputPath = path.join(outputDirectory, audioDetails.filename)
+    ensureDirectoryExists(outputPath)
+
+    const fileResponse = await axios.post('https://m8.fly.dev/api/file_send', {
+        filepath: audioDetails.filepath,
+        randID: audioDetails.randID
+    }, { responseType: 'arraybuffer' })
+
+    fs.writeFileSync(outputPath, fileResponse.data)
+    console.log(`${outputPath}`)
+}
+
+const YTDownloader = {
+    download: async (url, format = 'mp3', quality = '32') => {
+        try {
+            await executeDownload(url, format, quality)
+        } catch (error) {
+            console.error('Error downloading file:', error.message)
+        }
+    }
+}
 async function metaai(text, userName) {
     const Together = require("together-ai")
     const together = new Together({ 
@@ -2535,7 +2533,7 @@ app.get('/api/ytmp4', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await mp33(url);
+    const response = await YTDownloader.download(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
