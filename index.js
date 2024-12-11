@@ -49,7 +49,7 @@ const API_CONFIG = {
 };
 
 // Higher-order function untuk validasi URL YouTube
-const withYouTubeValidation = (fn) => async (url, ...args) => {
+const withYouTubeValidation = fn => async (url, ...args) => {
     const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:shorts\/|watch\?v=|embed\/|v\/|.+\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     const match = url.match(regex);
     if (!match) throw new Error('URL tidak valid. Masukkan URL YouTube yang benar.');
@@ -57,39 +57,33 @@ const withYouTubeValidation = (fn) => async (url, ...args) => {
 };
 
 // Higher-order function untuk memanggil API
-const withAPIRequest = (fn, download) => async (...args) => {
+const withAPIRequest = (fn, apiType) => async (...args) => {
     try {
-        const result = await fn(API_CONFIG[download], ...args);
+        const result = await fn(API_CONFIG[apiType], ...args);
         return result;
     } catch (error) {
-        throw new Error(`Gagal memproses ${download} API: ${error.message}`);
+        throw new Error(`Gagal memproses ${apiType} API: ${error.message}`);
     }
 };
 
 // Fungsi unduhan
-const fetchDownload = withAPIRequest(async (downloadi, videoId, type, quality) => {
+const fetchDownload = withAPIRequest(async (api, videoId, type, quality) => {
     const data = new URLSearchParams({ videoid: videoId, downtype: type, vquality: quality });
-    const response = await axios.post(download, data, {
+    const response = await axios.post(api, data, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
     });
-    if (!response.data || !response.data.link) {
-        throw new Error('Gagal mendapatkan tautan unduhan.');
-    }
-    return response.data.link;
+    return response.data;
 }, 'download');
 
 // Fungsi pencarian
-const fetchSearch = withAPIRequest(async (download, query) => {
-    const response = await axios.get(`${download}${encodeURIComponent(query)}`, {
+const fetchSearch = withAPIRequest(async (api, query) => {
+    const response = await axios.get(`${api}${encodeURIComponent(query)}`, {
         headers: {
             'Accept-Encoding': 'gzip, deflate, br',
             'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
         },
     });
-    if (!response.data || !response.data.items) {
-        throw new Error('Gagal mendapatkan hasil pencarian.');
-    }
-    return response.data.items.map((item) => ({
+    return response.data.items.map(item => ({
         title: item.title,
         url: `https://www.youtube.com/watch?v=${item.id}`,
         description: item.description,
@@ -101,17 +95,16 @@ const fetchBothDownloads = async (url, options = { mp4: '360', mp3: '128' }) => 
     const { mp4, mp3 } = options;
     const fetchMP4 = withYouTubeValidation(fetchDownload);
     const fetchMP3 = withYouTubeValidation(fetchDownload);
-
-    try {
-        const [mp4Link, mp3Link] = await Promise.all([
-            fetchMP4(url, 'mp4', mp4),
-            fetchMP3(url, 'mp3', mp3),
-        ]);
-        return {
-            status: true,
-            mp4: mp4Link,
-            mp3: mp3Link
-        };
+    const [mp4Link, mp3Link] = await Promise.all([
+        fetchMP4(url, 'mp4', mp4),
+        fetchMP3(url, 'mp3', mp3),
+    ]);
+    return { 
+    creator: "restapii.rioooxdzz.web.id"
+    mp4: mp4Link,
+    mp3: mp3Link
+     };
+};
     } catch (error) {
         return {
             status: false,
