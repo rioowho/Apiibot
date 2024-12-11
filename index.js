@@ -92,19 +92,21 @@ const fetchSearch = withAPIRequest(async (api, query) => {
 
 // Fungsi utama untuk mengunduh MP4 dan MP3
 const fetchBothDownloads = async (url, options = { mp4: '360', mp3: '128' }) => {
-    const { mp4, mp3 } = options;
-    const fetchMP4 = withYouTubeValidation(fetchDownload);
-    const fetchMP3 = withYouTubeValidation(fetchDownload);
-    const [mp4Link, mp3Link] = await Promise.all([
-        fetchMP4(url, 'mp4', mp4),
-        fetchMP3(url, 'mp3', mp3),
-    ]);
-    return { 
-    creator: "restapii.rioooxdzz.web.id",
-    mp4: mp4Link,
-    mp3: mp3Link
-     };
-};
+    try {
+        const { mp4, mp3 } = options;
+        const fetchValidatedDownload = withYouTubeValidation(fetchDownload);
+
+        const [mp4Link, mp3Link] = await Promise.all([
+            fetchValidatedDownload(url, 'mp4', mp4),
+            fetchValidatedDownload(url, 'mp3', mp3),
+        ]);
+
+        return {
+            status: true,
+            creator: "restapii.rioooxdzz.web.id",
+            mp4: mp4Link,
+            mp3: mp3Link,
+        };
     } catch (error) {
         return {
             status: false,
@@ -112,6 +114,7 @@ const fetchBothDownloads = async (url, options = { mp4: '360', mp3: '128' }) => 
         };
     }
 };
+
 // Higher-order function untuk logging
 const withLogging = fn => async (...args) => {
     try {
