@@ -14,7 +14,6 @@ const cheerio = require('cheerio');
 const { chromium } = require('playwright');
 const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
-const download = require('./lib/ytdlnew')
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
 const jwt = require("jsonwebtoken");
@@ -36,6 +35,7 @@ const tgl = d.toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric'
 });
+const { mp33 } = require("./lib/ytdlnew")
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -2451,7 +2451,7 @@ app.get('/api/ytmp4', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await download(url);
+    const response = await mp33(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
