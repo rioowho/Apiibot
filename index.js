@@ -43,7 +43,7 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 const formats = ["audio", "video"];
-const audioQuality = [320, 256, 192, 128, 64];
+const audioQuality = ["320", "256", "192", "128", "64"];
 const videoQuality = ["360p", "480p", "720p", "1080p"];
 
 const ytdl = async (url) => {
@@ -225,7 +225,7 @@ const ytmp33 = async (url) => {
     return result;
   };
 
-  const convert = async (url, format, quality = 256) => {
+  const convert = async (url, format, quality = "256") => {
     const data = await getToken(url);
     const formats = data.data.formats;
 
@@ -277,7 +277,7 @@ const ytmp33 = async (url) => {
     return { jobId: response.data.id, cookie: data.cookie, authorization: data.authorization };
   };
 
-  const download = async (url, format, quality = 256) => {
+  const download = async (url, format, quality = "256") => {
     const { jobId, cookie, authorization } = await convert(url, format, quality);
     return new Promise((resolve, reject) => {
       const checkStatus = async () => {
@@ -489,16 +489,13 @@ const hdown = {
 };
 async function geminilogic(prompt, input) {
   try {
-    if (!prompt && !inputt) {
-      throw new Error("Input atau prompt harus diberikan.");
-    }
 
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
       systemInstruction: `${prompt}`,
     });
 
-    const query = input || prompt;
+    const query = prompt;
     const result = await model.generateContent(query);
     const loh = await result.response;
     const text = await loh.text();
