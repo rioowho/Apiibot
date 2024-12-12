@@ -16,9 +16,6 @@ const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
-const jwt = require("jsonwebtoken");
-const UrlPattern = require("url-pattern");
-const qs = require("qs");
 const Groq = require('groq-sdk')
 const client = new Groq({ apiKey: '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' });
   const { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } = require("@google/generative-ai");
@@ -35,6 +32,7 @@ const tgl = d.toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric'
 });
+const mediafire = require('./lib/mediafire')
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -2684,11 +2682,11 @@ app.get('/api/spotify', async (req, res) => {
 });
 app.get('/api/mediafire', async (req, res) => {
   try {
-    const link = req.query.url;
-    if (!link) {
+    const url = req.query.url;
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await grabDL(linkl);
+    const response = await mediafire(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
