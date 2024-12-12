@@ -225,7 +225,7 @@ const ytmp33 = async (url) => {
     return result;
   };
 
-  const convert = async (url, format, quality = "720p") => {
+  const convert = async (url, format, quality = 256) => {
     const data = await getToken(url);
     const formats = data.data.formats;
 
