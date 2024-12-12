@@ -495,12 +495,11 @@ async function geminilogic(prompt, input) {
       systemInstruction: `${prompt}`,
     });
 
-    const query = prompt;
+    const query = input;
     const result = await model.generateContent(query);
     const loh = await result.response;
     const text = await loh.text();
-    return text;
-
+    return text
   } catch (error) {
     console.error('Error generating content:', error.message);
     throw error;
