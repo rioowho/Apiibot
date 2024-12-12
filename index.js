@@ -2360,15 +2360,15 @@ app.get('/api/gptturbo', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const rioojirr = req.query.message;
+    const text = req.query.message;
     const prompt = req.query.prompt;
-    if (!rioojirr) {
+    if (!text) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
     if (!prompt) {
       return res.status(403).json({ error: 'Parameter "prompt" tidak ditemukan' });
     }
-    const response = await geminilogic(rioojirr, prompt);
+    const response = await gptlogic(text, prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
