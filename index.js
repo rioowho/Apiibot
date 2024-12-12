@@ -16,8 +16,7 @@ const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
-const { fetch } = require("undici");
-const { lookup } = require("mime-types");
+
 const jwt = require("jsonwebtoken");
 const UrlPattern = require("url-pattern");
 const qs = require("qs");
@@ -1521,6 +1520,8 @@ async function imagetohd(url, method) {
 
 
 async function mediafire(url) {
+let { fetch } = require("undici");
+let { lookup } = require("mime-types");
     return new Promise(async (resolve, reject) => {
            const response = await fetch(url);
             const html = await response.text();
@@ -2624,7 +2625,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytdl(url, audio || video);
+    const response = await ytdl(url, "audio","video");
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
