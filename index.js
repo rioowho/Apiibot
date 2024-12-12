@@ -487,20 +487,18 @@ const hdown = {
         }
     }
 };
-async function geminilogic(query, prompt) {
+async function geminilogic(rioojirr, prompt) {
   try {
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      systemInstruction: `${prompt}`,
-    });
-
-    const query = query;
-    const result = await model.generateContent(query);
-    const loh = await result.response;
-    const text = await loh.text();
-    return text
-  } catch (error) {
+const modell = genAI.getGenerativeModel({
+  model: "gemini-1.5-flash",
+  systemInstruction: `${prompt}`,
+});
+const promptt = rioojirr;
+const resultp = await modell.generateContent(promptt);
+const responseqo = await resultp.response;
+const textl = responseqo.text();
+return textl
+} catch (error) {
     console.error('Error generating content:', error.message);
     throw error;
   }
@@ -2362,15 +2360,15 @@ app.get('/api/gptturbo', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const query = req.query.message;
+    const rioojirr = req.query.message;
     const prompt = req.query.prompt;
-    if (!query) {
+    if (!rioojirr) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
     if (!prompt) {
       return res.status(403).json({ error: 'Parameter "prompt" tidak ditemukan' });
     }
-    const response = await geminilogic(query, prompt);
+    const response = await geminilogic(rioojirr, prompt);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
