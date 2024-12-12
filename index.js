@@ -136,7 +136,7 @@ const ytdl = async (url) => {
     return { jobId: response.data.id, cookie: data.cookie, authorization: data.authorization };
   };
 
-  const ytmp44 = async (url, format, quality = "720p") => {
+  const download = async (url, format, quality = "720p") => {
     const { jobId, cookie, authorization } = await convert(url, format, quality);
     return new Promise((resolve, reject) => {
       const checkStatus = async () => {
@@ -174,10 +174,10 @@ const ytdl = async (url) => {
   };
 
   try {
-    const result = await ytmp44(url, "video", "720p");
+    const ytmp44 = await download(url, "video", "720p");
      return {
       status: 200,
-      data: result
+      data: ytmp44
     };
   } catch (error) {
     return {
