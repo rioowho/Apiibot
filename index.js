@@ -43,7 +43,7 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 const formats = ["audio", "video"];
-const audioQuality = ["320", "256", "192", "128", "64"];
+const audioQuality = [320, 256, 192, 128, 64];
 const videoQuality = ["360p", "480p", "720p", "1080p"];
 
 const ytdl = async (url) => {
@@ -277,7 +277,7 @@ const ytmp33 = async (url) => {
     return { jobId: response.data.id, cookie: data.cookie, authorization: data.authorization };
   };
 
-  const download = async (url, format, quality = "256") => {
+  const download = async (url, format, quality = 256) => {
     const { jobId, cookie, authorization } = await convert(url, format, quality);
     return new Promise((resolve, reject) => {
       const checkStatus = async () => {
