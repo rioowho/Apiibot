@@ -353,13 +353,13 @@ async function geminilogic(input, prompt) {
 
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
-      systemInstruction: prompt,
+      systemInstruction: `${prompt}`,
     });
 
     const query = input || prompt;
     const result = await model.generateContent(query);
-    const response = await result.response;
-    const text = await response.text();
+    const loh = await result.response;
+    const text = await loh.text();
     return text;
 
   } catch (error) {
