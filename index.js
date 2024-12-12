@@ -2362,9 +2362,8 @@ app.get('/api/gptturbo', async (req, res) => {
 });
 app.get('/api/gptlogic', async (req, res) => {
   try {
-    const input = req.query.message;
+    const text = req.query.message;
     const prompt = req.query.prompt;
-    const imageUri = req.query;
     if (!text) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
