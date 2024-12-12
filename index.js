@@ -68,12 +68,6 @@ const ytdl = async (url) => {
         "accept-language": "id-ID",
         referer: "https://bigconv.com/",
         origin: "https://bigconv.com",
-        "alt-used": "dd-n01.yt2api.com",
-        "sec-fetch-dest": "empty",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-site": "cross-site",
-        priority: "u=0",
-        te: "trailers",
       },
     };
 
@@ -81,28 +75,35 @@ const ytdl = async (url) => {
     const cookies = response.headers["set-cookie"];
     const processedCookie = cookies ? cookies[0].split(";")[0] : "";
     const authorization = response.headers["authorization"] || "";
-    const result = { data: response.data, cookie: processedCookie, authorization };
-    return result;
+    return { data: response.data, cookie: processedCookie, authorization };
   };
 
   const convert = async (url, requestedFormats) => {
     const data = await getToken(url);
     const formats = data.data.formats;
 
+    if (!formats || !formats.audio || !formats.video) {
+      throw new Error("Data format tidak ditemukan.");
+    }
+
     const tokens = {};
 
     for (const format of requestedFormats) {
       if (format === "audio") {
-        const audioOptions = formats.audio.mp3;
-        const selectedAudio = audioOptions.find((option) => audioQuality.includes(option.quality));
+        const audioOptions = formats.audio.mp3 || [];
+        const selectedAudio =
+          audioOptions.find((option) => audioQuality.includes(Number(option.quality))) ||
+          audioOptions[0]; // Pilih opsi pertama jika tidak ada kecocokan
         if (selectedAudio) {
           tokens.audio = selectedAudio.token;
         } else {
           throw new Error("Kualitas audio tidak tersedia.");
         }
       } else if (format === "video") {
-        const videoOptions = formats.video.mp4;
-        const selectedVideo = videoOptions.find((option) => videoQuality.includes(option.quality));
+        const videoOptions = formats.video.mp4 || [];
+        const selectedVideo =
+          videoOptions.find((option) => videoQuality.includes(option.quality)) ||
+          videoOptions[0]; // Pilih opsi pertama jika tidak ada kecocokan
         if (selectedVideo) {
           tokens.video = selectedVideo.token;
         } else {
@@ -125,11 +126,6 @@ const ytdl = async (url) => {
           "accept-language": "id-ID",
           referer: "https://bigconv.com/",
           origin: "https://bigconv.com",
-          "sec-fetch-dest": "empty",
-          "sec-fetch-mode": "cors",
-          "sec-fetch-site": "cross-site",
-          priority: "u=0",
-          te: "trailers",
           Cookie: data.cookie,
           authorization: data.authorization,
         },
@@ -146,7 +142,7 @@ const ytdl = async (url) => {
   const download = async (url, requestedFormats) => {
     const conversionResults = await convert(url, requestedFormats);
 
-    const downloads = conversionResults.map(async ({ format, jobId }) => {
+    const downloads = conversionResults.map(({ format, jobId }) => {
       return new Promise((resolve, reject) => {
         const checkStatus = async () => {
           const config = {
@@ -158,11 +154,6 @@ const ytdl = async (url) => {
               "accept-language": "id-ID",
               referer: "https://bigconv.com/",
               origin: "https://bigconv.com",
-              "sec-fetch-dest": "empty",
-              "sec-fetch-mode": "cors",
-              "sec-fetch-site": "cross-site",
-              priority: "u=4",
-              te: "trailers",
             },
           };
 
