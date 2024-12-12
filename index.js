@@ -35,7 +35,6 @@ const tgl = d.toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric'
 });
-const mediafire = require('./lib/mediafire')
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -2685,11 +2684,11 @@ app.get('/api/spotify', async (req, res) => {
 });
 app.get('/api/mediafire', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const link = req.query.url;
+    if (!link) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await mediafire(url);
+    const response = await grabDL(linkl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
