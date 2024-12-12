@@ -317,7 +317,7 @@ let audioQuality = [320, 256, 192, 128, 64];
   };
 
   try {
-    const result = await download(url, "audio", "128 kbps");
+    const result = await download(url, "audio", "128");
     return {
       data: result
     };
