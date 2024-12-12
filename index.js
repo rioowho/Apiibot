@@ -174,9 +174,8 @@ const ytdl = async (url) => {
   };
 
   try {
-    const result = await download(url, "video", "720p");
+    const result = await download(url, "video", "720p", "audio", "192");
      return {
-      status: 200,
       data: result
     };
   } catch (error) {
