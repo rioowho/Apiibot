@@ -2589,7 +2589,7 @@ app.get('/api/ytmp4', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytdl.download(url);
+    const response = await ytdl(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
