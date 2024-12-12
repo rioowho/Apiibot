@@ -35,8 +35,7 @@ const tgl = d.toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric'
 });
-const { fetch } = require("undici");
-const { lookup } = require("mime-types");
+const mediafire = require('./lib/mediafire')
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -1519,39 +1518,6 @@ async function imagetohd(url, method) {
   })
 }
 
-
-function mediafire(url) {
-  return new Promise((resolve, reject) => {
-    if (!url) {
-      reject({ msg: 'URL tidak boleh kosong' });
-      return;
-    }
-
-    fetch(url)
-      .then(response => response.text())
-      .then(html => {
-        const $ = cheerio.load(html);
-        const type = $('.dl-info').find('.filetype > span').text().trim();
-        const filename = $('.dl-info').find('.intro .filename').text();
-        const size = $('.details li:contains("File size:") span').text();
-        const uploaded = $('.details li:contains("Uploaded:") span').text();
-        const ext = /(\.(.*?)\)/.exec($(".dl-info").find(".filetype > span").eq(1).text())?.[1]?.trim() || "bin";
-        const mimetype = lookup(ext.toLowerCase());
-        const download = $(".input").attr('href');
-
-        resolve({
-          filename,
-          type,
-          size,
-          uploaded,
-          ext,
-          mimetype,
-          download
-        });
-      })
-      .catch(e => reject({ msg: 'Gagal mengambil data dari link tersebut', error: e }));
-  });
-}
 async function igdl(url) {
   return new Promise(async (resolve) => {
   try {
