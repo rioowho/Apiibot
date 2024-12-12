@@ -196,7 +196,7 @@ let audioQuality = ["320 kbps", "256 kbps", "192 kbps", "128 kbps", "64 kbps"];
       return match ? match[1] : null;
     };
 
-    const id = extractVideoId(url);
+    const id = extractAudioId(url);
     if (!id) {
       throw new Error('ID videonya gk ketemu jir, pastikan link youtube yak');
     }
