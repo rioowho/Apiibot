@@ -188,7 +188,7 @@ const ytdl = async (url) => {
 };
 const ytmp33 = async (url) => {
 let formats = ["audio", "video"];
-let audioQuality = [320, 256, 192, 128, 64];
+let audioQuality = ["320 kbps", "256 kbps", "192 kbps", "128 kbps", "64 kbps"];
   const getToken = async (url) => {
     const extractVideoId = (url) => {
       const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
@@ -227,7 +227,7 @@ let audioQuality = [320, 256, 192, 128, 64];
     return result;
   };
 
-  const convert = async (url, format, quality = "256") => {
+  const convert = async (url, format, quality = "256 kbps") => {
     const data = await getToken(url);
     const formats = data.data.formats;
 
@@ -279,7 +279,7 @@ let audioQuality = [320, 256, 192, 128, 64];
     return { jobId: response.data.id, cookie: data.cookie, authorization: data.authorization };
   };
 
-  const download = async (url, format, quality = "256") => {
+  const download = async (url, format, quality = "256 kbps") => {
     const { jobId, cookie, authorization } = await convert(url, format, quality);
     return new Promise((resolve, reject) => {
       const checkStatus = async () => {
