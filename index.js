@@ -16,6 +16,8 @@ const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
+const { fetch } = require("undici");
+const { lookup } = require("mime-types");
 const jwt = require("jsonwebtoken");
 const UrlPattern = require("url-pattern");
 const qs = require("qs");
@@ -1517,34 +1519,35 @@ async function imagetohd(url, method) {
   })
 }
 
-async function MediaFireDl(url) {
-   return new Promise(async(resolve, reject) => {
-     try {
-       const { data, status } = await axios.get(url)
-       const $ = cheerio.load(data);
-       let filename = $('.dl-info > div > div.filename').text();
-       let filetype = $('.dl-info > div > div.filetype').text();
-       let filesize = $('a#downloadButton').text().split("(")[1].split(")")[0];
-       let uploadAt = $('ul.details > li:nth-child(2)').text().split(": ")[1];
-       let link = $('#downloadButton').attr('href');
-       let desc = $('div.description > p.description-subheading').text();
-       if (typeof link === undefined) return resolve({ status: false, msg: 'No result found' })
-       let result = {
-         status: true,
-         filename: filename,
-         filetype: filetype,
-         filesize: filesize,
-         uploadAt: uploadAt,
-         link: link,
-         desc: desc
-       }
-       console.log(result)
-       resolve(result)
-     } catch (err) {
-       console.error(err)
-       resolve({ status: false, msg: 'No result found' })
-     }
-   })
+
+async function mediafire(url) {
+    return new Promise(async (resolve, reject) => {
+           const response = await fetch(url);
+            const html = await response.text();
+            const $ = cheerio.load(html);
+
+            const type = $('.dl-info').find('.filetype > span').text().trim();
+            const filename = $('.dl-info').find('.intro .filename').text();
+            const size = $('.details li:contains("File size:") span').text();
+            const uploaded = $('.details li:contains("Uploaded:") span').text()
+         const ext =
+      /\(\.(.*?)\)/
+        .exec($(".dl-info").find(".filetype > span").eq(1).text())?.[1]
+        ?.trim() || "bin";
+          const mimetype = lookup(ext.toLowerCase());
+           const download = $(".input").attr('href');
+            resolve({
+                filename,
+                type,
+                size,
+                uploaded,
+                ext,
+                mimetype,
+                download
+            });
+    }).catch(e => reject({
+     msg: "Gagal mengambil data dari link tersebut"
+})); 
 }
 async function igdl(url) {
   return new Promise(async (resolve) => {
@@ -2713,11 +2716,11 @@ app.get('/api/spotify', async (req, res) => {
 });
 app.get('/api/mediafire', async (req, res) => {
   try {
-    const link = req.query.url;
-    if (!link) {
+    const url = req.query.url;
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await grabDL(link);
+    const response = await mediafire(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
