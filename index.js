@@ -33,6 +33,7 @@ const tgl = d.toLocaleDateString(locale, {
     year: 'numeric'
 });
 const mediafire = require('./lib/mediafire')
+const mateai = require('./lib/metaai')
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -186,148 +187,7 @@ const ytdl = async (url) => {
     };
   }
 };
-const ytmp33 = async (url) => {
-let formats = ["audio", "video"];
-let audioQuality = ["320kbps", "256kbps", "192kbps", "128kbps", "64kbps"];
-  const getToken = async (url) => {
-    const extractAudioId = (url) => {
-      const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-      const match = url.match(regex);
-      return match ? match[1] : null;
-    };
 
-    const id = extractAudioId(url);
-    if (!id) {
-      throw new Error('ID videonya gk ketemu jir, pastikan link youtube yak');
-    }
-
-    const config = {
-      method: 'GET',
-      url: `https://dd-n01.yt2api.com/api/v4/info/${id}`,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Android 10; Mobile; rv:131.0) Gecko/131.0 Firefox/131.0',
-        'Accept': 'application/json',
-        'accept-language': 'id-ID',
-        'referer': 'https://bigconv.com/',
-        'origin': 'https://bigconv.com',
-        'alt-used': 'dd-n01.yt2api.com',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'cross-site',
-        'priority': 'u=0',
-        'te': 'trailers'
-      }
-    };
-
-    const response = await axios.request(config);
-    const cookies = response.headers['set-cookie'];
-    const processedCookie = cookies ? cookies[0].split(';')[0] : '';
-    const authorization = response.headers['authorization'] || '';
-    const result = { data: response.data, cookie: processedCookie, authorization };
-    return result;
-  };
-
-  const convert = async (url, format, quality = "128kbps" ) => {
-    const data = await getToken(url);
-    const formats = data.data.formats;
-
-    let token;
-    if (format === "audio") {
-      const audioOptions = formats.audio.mp3;
-      const selectedAudio = audioOptions.find(option => option.quality === quality);
-      if (selectedAudio) {
-        token = selectedAudio.token;
-      } else {
-        throw new Error(`Kualitas audio ${quality} tidak tersedia.`);
-      }
-    } else if (format === "video") {
-      const videoOptions = formats.video.mp4;
-      const selectedVideo = videoOptions.find(option => option.quality === quality);
-      if (selectedVideo) {
-        token = selectedVideo.token;
-      } else {
-        throw new Error(`Kualitas video ${quality} tidak tersedia.`);
-      }
-    } else {
-      throw new Error('Format tidak dikenali. Gunakan "audio" atau "video".');
-    }
-
-    const raw = JSON.stringify({ "token": token });
-
-    const config = {
-      method: 'POST',
-      url: 'https://dd-n01.yt2api.com/api/v4/convert',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Android 10; Mobile; rv:131.0) Gecko/131.0 Firefox/131.0',
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'accept-language': 'id-ID',
-        'referer': 'https://bigconv.com/',
-        'origin': 'https://bigconv.com',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'cross-site',
-        'priority': 'u=0',
-        'te': 'trailers',
-        'Cookie': data.cookie,
-        'authorization': data.authorization
-      },
-      data: raw
-    };
-
-    const response = await axios.request(config);
-    return { jobId: response.data.id, cookie: data.cookie, authorization: data.authorization };
-  };
-
-  const download = async (url, format, quality = "128kbps") => {
-    const { jobId, cookie, authorization } = await convert(url, format, quality);
-    return new Promise((resolve, reject) => {
-      const checkStatus = async () => {
-        const config = {
-          method: 'GET',
-          url: `https://dd-n01.yt2api.com/api/v4/status/${jobId}`,
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Android 10; Mobile; rv:131.0) Gecko/131.0 Firefox/131.0',
-            'Accept': 'application/json',
-            'accept-language': 'id-ID',
-            'referer': 'https://bigconv.com/',
-            'origin': 'https://bigconv.com',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'cross-site',
-            'priority': 'u=4',
-            'te': 'trailers',
-            'Cookie': cookie,
-            'authorization': authorization
-          }
-        };
-
-        const response = await axios.request(config);
-        if (response.data.status === 'completed') {
-          clearInterval(interval);
-          resolve(response.data);
-        } else if (response.data.status === 'failed') {
-          clearInterval(interval);
-          resolve(response.data);
-        }
-      };
-
-      const interval = setInterval(checkStatus, 5000);
-    });
-  };
-
-  try {
-    const result = await download(url, "audio", "128kbps");
-    return {
-      data: result
-    };
-  } catch (error) {
-    return {
-      status: 500,
-      data: { error: error.message }
-    };
-  }
-};
 async function metaai(text, userName) {
     const Together = require("together-ai")
     const together = new Together({ 
@@ -2310,15 +2170,11 @@ app.get('/api/openai', async (req, res) => {
 });
 app.get('/api/metaai', async (req, res) => {
   try {
-    const text = req.query.message;
-    const userName = req.query.userName;
-    if (!text) {
+    const array = req.query.message;
+    if (!array) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    if (!userName) {
-      return res.status(403).json({ error: 'Parameter "userName" tidak ditemukan' });
-    }
-    const response = await metaai(text, userName);
+    const response = await mateai(array);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -2698,7 +2554,7 @@ app.get('/api/ytmp4', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytdl(url, "audio", "video");
+    const response = await ytdl(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -2730,7 +2586,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytmp33(url);
+    const response = await ytdl(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
