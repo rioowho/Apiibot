@@ -187,6 +187,8 @@ const ytdl = async (url) => {
   }
 };
 const ytmp33 = async (url) => {
+let formats = ["audio", "video"];
+let audioQuality = [320, 256, 192, 128, 64];
   const getToken = async (url) => {
     const extractVideoId = (url) => {
       const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
