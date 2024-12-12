@@ -42,7 +42,7 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-const audioQuality = [320, 256, 192, 128, 64];
+const audioQualityy = [320, 256, 192, 128, 64];
 
 const ytdlToAudio = async (url, quality = 128) => {
   const getToken = async (url) => {
