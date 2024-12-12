@@ -279,7 +279,7 @@ let audioQuality = ["320 kbps", "256 kbps", "192 kbps", "128 kbps", "64 kbps"];
     return { jobId: response.data.id, cookie: data.cookie, authorization: data.authorization };
   };
 
-  const download = async (url, format, quality = "256 kbps") => {
+  const download = async (url, format, quality = "128 kbps") => {
     const { jobId, cookie, authorization } = await convert(url, format, quality);
     return new Promise((resolve, reject) => {
       const checkStatus = async () => {
@@ -317,7 +317,7 @@ let audioQuality = ["320 kbps", "256 kbps", "192 kbps", "128 kbps", "64 kbps"];
   };
 
   try {
-    const result = await download(url, "audio", "256");
+    const result = await download(url, "audio", "128 kbps");
     return {
       data: result
     };
