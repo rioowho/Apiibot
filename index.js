@@ -161,10 +161,7 @@ const ytdlToAudio = async (url, quality = 128) => {
 
   try {
     const result = await downloadAudio(url, quality);
-    return {
-      status: 200,
-      data: result
-    };
+    return { result };
   } catch (error) {
     return {
       status: 500,
@@ -306,9 +303,7 @@ const ytdl = async (url) => {
 
   try {
     const result = await download(url, "video", "360p");
-    return {
-      data: result
-    };
+    return { result };
   } catch (error) {
     return {
       status: 500,
