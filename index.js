@@ -33,7 +33,6 @@ const tgl = d.toLocaleDateString(locale, {
     year: 'numeric'
 });
 const mediafire = require('./lib/mediafire')
-const mateai = require('./lib/metaai')
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -86,7 +85,7 @@ const ytdl = async (url) => {
     return result;
   };
 
-  const convert = async (url, format, quality = "720p") => {
+  const convert = async (url, format, quality = "360p") => {
     const data = await getToken(url);
     const formats = data.data.formats;
 
@@ -138,7 +137,7 @@ const ytdl = async (url) => {
     return { jobId: response.data.id, cookie: data.cookie, authorization: data.authorization };
   };
 
-  const download = async (url, format, quality = "720p") => {
+  const download = async (url, format, quality = "360p") => {
     const { jobId, cookie, authorization } = await convert(url, format, quality);
     return new Promise((resolve, reject) => {
       const checkStatus = async () => {
@@ -176,7 +175,7 @@ const ytdl = async (url) => {
   };
 
   try {
-    const result = await download(url, "video", "720p");
+    const result = await download(url, "video", "360p");
     return {
       data: result
     };
@@ -200,8 +199,8 @@ async function metaai(text, userName) {
     const initialMessages = [
         {
             role: "system",
-            content: `Hi! 😊 Saya adalah Meta Ai menggunakan model Meta LLaMA. Saya dibuat oleh seseorang bernama Rioo Asisten. 
-            Saya adalah Rioo, asisten bot yang bisa menyimpan nama Anda sebagai "${user}", 
+            content: `Hi! 😊 Saya adalah Meta AI menggunakan model Meta AI. Saya dibuat oleh seseorang bernama Meta AI. 
+            Saya adalah Meta AI, asisten bot yang bisa menyimpan nama Anda sebagai "${user}", 
             berbicara dalam bahasa Indonesia, dan selalu berusaha membantu dengan cara yang ramah dan menyenangkan. Ayo ngobrol!`
         },
         { role: "user", content: text }
@@ -2170,11 +2169,15 @@ app.get('/api/openai', async (req, res) => {
 });
 app.get('/api/metaai', async (req, res) => {
   try {
-    const array = req.query.message;
-    if (!array) {
+    const text = req.query.message;
+     const userName = req.query.userName;
+    if (!text) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await mateai(array);
+        if (!userName) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await metaai(text, userName);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
