@@ -491,7 +491,7 @@ async function geminilogic(rioojirr, prompt) {
   try {
 const modell = genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
-  systemInstruction: `${prompt}`,
+  systemInstruction: `${encodeURIComponent(prompt)}`,
 });
 const promptt = rioojirr;
 const resultp = await modell.generateContent(promptt);
