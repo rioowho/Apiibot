@@ -43,7 +43,7 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 const formats = ["audio", "video"];
-const audioQuality = ["320", "256", "192", "128", "64"];
+const audioQuality = [320, 256, 192, 128, 64];
 const videoQuality = ["360p", "480p", "720p", "1080p"];
 
 const ytdl = async (url) => {
