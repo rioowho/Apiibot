@@ -174,10 +174,10 @@ const ytdl = async (url) => {
   };
 
   try {
-    const ytmp44 = await download(url, "video", "720p");
+    const result = await download(url, "video", "720p");
      return {
       status: 200,
-      data: ytmp44
+      data: result
     };
   } catch (error) {
     return {
@@ -2563,7 +2563,7 @@ app.get('/api/ytmp4', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytmp44(url);
+    const response = await ytdl(url, "audio", "video");
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
