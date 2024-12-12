@@ -16,7 +16,6 @@ const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
-
 const jwt = require("jsonwebtoken");
 const UrlPattern = require("url-pattern");
 const qs = require("qs");
@@ -36,6 +35,8 @@ const tgl = d.toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric'
 });
+const { fetch } = require("undici");
+const { lookup } = require("mime-types");
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -1519,36 +1520,37 @@ async function imagetohd(url, method) {
 }
 
 
-async function mediafire(url) {
-let { fetch } = require("undici");
-let { lookup } = require("mime-types");
-    return new Promise(async (resolve, reject) => {
-           const response = await fetch(url);
-            const html = await response.text();
-            const $ = cheerio.load(html);
+function mediafire(url) {
+  return new Promise((resolve, reject) => {
+    if (!url) {
+      reject({ msg: 'URL tidak boleh kosong' });
+      return;
+    }
 
-            const type = $('.dl-info').find('.filetype > span').text().trim();
-            const filename = $('.dl-info').find('.intro .filename').text();
-            const size = $('.details li:contains("File size:") span').text();
-            const uploaded = $('.details li:contains("Uploaded:") span').text()
-         const ext =
-      /\(\.(.*?)\)/
-        .exec($(".dl-info").find(".filetype > span").eq(1).text())?.[1]
-        ?.trim() || "bin";
-          const mimetype = lookup(ext.toLowerCase());
-           const download = $(".input").attr('href');
-            resolve({
-                filename,
-                type,
-                size,
-                uploaded,
-                ext,
-                mimetype,
-                download
-            });
-    }).catch(e => reject({
-     msg: "Gagal mengambil data dari link tersebut"
-})); 
+    fetch(url)
+      .then(response => response.text())
+      .then(html => {
+        const $ = cheerio.load(html);
+        const type = $('.dl-info').find('.filetype > span').text().trim();
+        const filename = $('.dl-info').find('.intro .filename').text();
+        const size = $('.details li:contains("File size:") span').text();
+        const uploaded = $('.details li:contains("Uploaded:") span').text();
+        const ext = /(\.(.*?)\)/.exec($(".dl-info").find(".filetype > span").eq(1).text())?.[1]?.trim() || "bin";
+        const mimetype = lookup(ext.toLowerCase());
+        const download = $(".input").attr('href');
+
+        resolve({
+          filename,
+          type,
+          size,
+          uploaded,
+          ext,
+          mimetype,
+          download
+        });
+      })
+      .catch(e => reject({ msg: 'Gagal mengambil data dari link tersebut', error: e }));
+  });
 }
 async function igdl(url) {
   return new Promise(async (resolve) => {
