@@ -174,12 +174,17 @@ const ytdl = async (url) => {
   };
 
   try {
-    const result = await download(url, "video", "720p");
-    return {result};
-    } catch (error) {
-        console.error("Error during the API call:", error);
-        return "Terjadi kesalahan saat memproses permintaan Anda. Mohon coba lagi nanti. 😔";
-    }
+    const result = await ytmp44(url, "video", "720p");
+     return {
+      status: 200,
+      data: result
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      data: { error: error.message }
+    };
+  }
 };
 async function metaai(text, userName) {
     const Together = require("together-ai")
