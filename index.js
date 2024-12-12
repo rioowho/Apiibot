@@ -487,7 +487,7 @@ const hdown = {
         }
     }
 };
-async function geminilogic(prompt, text) {
+async function geminilogic(text, prompt) {
   try {
 
     const model = genAI.getGenerativeModel({
