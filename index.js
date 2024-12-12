@@ -138,7 +138,7 @@ const ytdl = async (url) => {
     return { jobId: response.data.id, cookie: data.cookie, authorization: data.authorization };
   };
 
-  const download = async (url, format, quality = "720p") => {
+  const ytmp44 = async (url, format, quality = "720p") => {
     const { jobId, cookie, authorization } = await convert(url, format, quality);
     return new Promise((resolve, reject) => {
       const checkStatus = async () => {
@@ -2589,7 +2589,7 @@ app.get('/api/ytmp4', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytdl(url);
+    const response = await ytmp44(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -2621,7 +2621,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await SaveTube.dl(url, 1);
+    const response = await ytdl(url, audio || video);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
