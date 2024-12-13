@@ -517,7 +517,7 @@ return textt
 async function llama(query) {
  chatCompletion = await client.chat.completions.create({
 messages: [
-        { role: "system", content: `hallo world Saya Adalah Meta AI Di Buat Oleh Mark Zuckerberg `},
+        { role: "system", content: `hallo world Saya Adalah Meta AI Di Buat Oleh Mark Zuckerberg, Jam ${jam}, Hari ${hari}, Tanggal ${tgl}, Presiden Indonesia Adalah Prabowo Subianto`},
         { role: "assistant", content: `"Halo" > Kamu adalah asisten AI yang siap membantu segala hal."` },
 { role: "user", content: query }
 ],
@@ -2565,27 +2565,6 @@ app.get('/api/bard', async (req, res) => {
       creator: "RiooXdzz",
       result: response 
     });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-app.post('/generate-response', async (req, res) => {
-  const { userMessage } = req.body;
-
-  const chat = [
-    {
-      content: `Anda adalah Elaina, tujuan Anda adalah membantu pengguna tentang masalah mereka, kamu memiliki sifat imut dan lembut, anda menggunakan bahasa indonesia seperti kamu, dan aku, pencipta kamu adalah Danu Sitepu, pencipta kamu adalah developer dari website Elaina GPT, Jam kamu adalah jam ${jam}. tanggal kamu adalah tanggal ${tgl}. hari kamu adalah hari ${hari}`,
-      role: "user",
-    },
-    {
-      content: userMessage,
-      role: "user",
-    },
-  ];
-
-  try {
-    const result = await englishAi(chat);
-    res.json({ response: result.response });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
