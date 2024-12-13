@@ -112,7 +112,6 @@
     </div>
 
     <script>
-        const apiUrl = 'https://restapii.rioooxdzz.web.id/api/gemini?message=';
 
         function appendMessage(sender, content) {
             const chatBody = document.getElementById('chatBody');
@@ -132,7 +131,7 @@
             const chatBody = document.getElementById('chatBody');
             const loadingDiv = document.createElement('div');
             loadingDiv.classList.add('message', 'ai', 'loading');
-            loadingDiv.textContent = 'Menulis...';
+            loadingDiv.textContent = 'waiting...';
             loadingDiv.id = 'loadingMessage';
             chatBody.appendChild(loadingDiv);
             chatBody.scrollTop = chatBody.scrollHeight;
@@ -154,11 +153,10 @@
             showLoading();
 
             try {
-                const response = await fetch(apiUrl + encodeURIComponent(message));
-                const data = await response.json();
+                const response = await fetch(https://restapii.rioooxdzz.web.id/api/gemini?message=encodeURIComponent(message));
+                const gpt = await response.json();
                 hideLoading();
-
-                appendMessage('ai', data.data.response || 'Maaf, saya tidak dapat memahami pesan Anda.');
+                appendMessage('ai', gpt.data.response || 'Maaf, saya tidak dapat memahami pesan Anda.');
             } catch (error) {
                 hideLoading();
                 appendMessage('ai', 'Terjadi kesalahan. Coba lagi nanti.');
