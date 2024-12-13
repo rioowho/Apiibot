@@ -271,13 +271,13 @@ if (message.toLowerCase().includes("image mem")) {
 }
 
         const response = await fetch(
-            `https://restapii.rioooxdzz.web.id/api/gptlogic?message=text=${encodeURIComponent(message)}`
+            `https://restapii.rioooxdzz.web.id/api/metaai?gemini=text=${encodeURIComponent(message)}`
         );
 
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         const gpt = await response.json();
-        return gpt.data.response.reply || 'Maaf, saya tidak dapat memahami permintaan Anda.';
+        return gpt.data.response || 'Maaf, saya tidak dapat memahami permintaan Anda.';
     } catch (error) {
         console.error(error);
         return `Maaf, terjadi kesalahan saat memproses permintaan Anda. ${error.message}`;
