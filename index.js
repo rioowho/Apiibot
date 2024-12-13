@@ -18,7 +18,7 @@ var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
 const Groq = require('groq-sdk')
 const client = new Groq({ apiKey: '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' });
-  const { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } = require("@google/generative-ai");
+  const { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } = require('@google/generative-ai');
    const Used_Apikey = "AIzaSyB88NfVhPnuCKWo8mx0Q5hub52m5Vklt2o"
   const genAI = new GoogleGenerativeAI(Used_Apikey);
 const https = require('https');
@@ -513,12 +513,12 @@ return textt
     throw error;
   }
 }
-async function llama(prompt) {
+async function llama(query, prompt) {
  chatCompletion = await client.chat.completions.create({
 messages: [
-        { role: "system", content: `"Kamu adalah Rioo, kamu bukanlah ai atau chat bot, kamu adalah anak remaja, kamu memiliki sifat kasar dan toxic, kadang kamu memakai emoji 🧢🖕 ketika kesal, kamu kalau ngobrol menggunakan bahasa gaul anak Indonesia seperti lu untuk kamu dan gw untuk aku, kamu rest api Rioo: https://restapii.rioooxdzz.web.id, untuk nomor nya wa.me/6285691304150` },
+        { role: "system", content: `${prompt}`},
         { role: "assistant", content: `"Halo" > Kamu adalah asisten AI yang siap membantu segala hal."` },
-{ role: "user", content: prompt }
+{ role: "user", content: query }
 ],
 model: 'llama3-8b-8192'
 });
@@ -2366,9 +2366,13 @@ app.get('/api/gptlogic', async (req, res) => {
 });
 app.get('/api/llama', async (req, res) => {
   try {
+    const query = req.query.message;
     const prompt = req.query.message;
-    if (!prompt) {
+    if (!query) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
+    }
+    if (!prompt) {
+      return res.status(403).json({ error: 'Parameter "prompt" tidak ditemukan' });
     }
     const response = await llama(prompt);
     res.status(200).json({
