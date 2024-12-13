@@ -514,10 +514,10 @@ return textt
     throw error;
   }
 }
-async function llama(query, prompt) {
+async function llama(query) {
  chatCompletion = await client.chat.completions.create({
 messages: [
-        { role: "system", content: `${prompt}`},
+        { role: "system", content: `hallo world Saya Adalah Meta AI Di Buat Oleh Mark Zuckerberg `},
         { role: "assistant", content: `"Halo" > Kamu adalah asisten AI yang siap membantu segala hal."` },
 { role: "user", content: query }
 ],
@@ -2508,14 +2508,10 @@ app.get('/api/gptlogic', async (req, res) => {
 app.get('/api/llama', async (req, res) => {
   try {
     const query = req.query.message;
-    const prompt = req.query.message;
     if (!query) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    if (!prompt) {
-      return res.status(403).json({ error: 'Parameter "prompt" tidak ditemukan' });
-    }
-    const response = await llama(prompt);
+    const response = await llama(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
