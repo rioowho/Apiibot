@@ -1718,7 +1718,7 @@ const getDownloadLinks = url => {
       const data = response.data;
       const videoPageContent = getVideoUrl(data);
       const $ = cheerio.load(videoPageContent);
-      const downloadLinks = [];
+      const downloadLinks = "";
       
       $("div.download-items__thumb").each((index, item) => {
         $("div.download-items__btn").each((btnIndex, button) => {
