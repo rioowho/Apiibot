@@ -26,13 +26,9 @@ const https = require('https');
 const jsobfus = require('javascript-obfuscator')
 const d = new Date(new Date() + 3600000);
 const locale = 'id';
-const jam = new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
+const jam = new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" });
 let hari = d.toLocaleDateString(locale, { weekday: 'long' });
-const tgl = d.toLocaleDateString(locale, {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-});
+const tgl = d.toLocaleDateString('id', { day: 'numeric', month: 'long', year: 'numeric' });
 const mediafire = require('./lib/mediafire')
 const app = express();
 const PORT = process.env.PORT || 3000;
