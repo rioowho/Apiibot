@@ -68,6 +68,11 @@
             text-align: left;
         }
 
+        .loading {
+            font-style: italic;
+            color: gray;
+        }
+
         .chat-footer {
             display: flex;
             padding: 10px;
@@ -109,16 +114,33 @@
     <script>
         const apiUrl = 'https://restapii.rioooxdzz.web.id/api/gemini?message=';
 
-        function appendMessage(sender, text) {
+        function appendMessage(sender, content) {
             const chatBody = document.getElementById('chatBody');
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', sender);
+
             const bubble = document.createElement('div');
             bubble.classList.add('bubble');
-            bubble.textContent = text;
+            bubble.textContent = content;
             messageDiv.appendChild(bubble);
+
             chatBody.appendChild(messageDiv);
             chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function showLoading() {
+            const chatBody = document.getElementById('chatBody');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('message', 'ai', 'loading');
+            loadingDiv.textContent = 'Menulis...';
+            loadingDiv.id = 'loadingMessage';
+            chatBody.appendChild(loadingDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function hideLoading() {
+            const loadingDiv = document.getElementById('loadingMessage');
+            if (loadingDiv) loadingDiv.remove();
         }
 
         async function sendMessage() {
@@ -129,11 +151,16 @@
             appendMessage('user', message);
             userInput.value = '';
 
+            showLoading();
+
             try {
                 const response = await fetch(apiUrl + encodeURIComponent(message));
                 const data = await response.json();
-                appendMessage('ai', data.response || 'Maaf, saya tidak dapat memahami pesan Anda.');
+                hideLoading();
+
+                appendMessage('ai', data.data.response || 'Maaf, saya tidak dapat memahami pesan Anda.');
             } catch (error) {
+                hideLoading();
                 appendMessage('ai', 'Terjadi kesalahan. Coba lagi nanti.');
             }
         }
