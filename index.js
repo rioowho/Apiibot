@@ -1651,8 +1651,13 @@ const getDownloadLinks = url => {
       }
 
       function decodeData(data) {
-        let [part1, part2, part3, part4, part5, part6] = data;
-        
+        let part1 = data[0];
+        let part2 = data[1];
+        let part3 = data[2];
+        let part4 = data[3];
+        let part5 = data[4];
+        let part6 = "";
+
         function decodeSegment(segment, base, length) {
           const charSet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/".split("");
           let baseSet = charSet.slice(0, base);
@@ -1673,7 +1678,6 @@ const getDownloadLinks = url => {
           return result || "0";
         }
 
-        part6 = "";
         for (let i = 0, len = part1.length; i < len; i++) {
           let segment = "";
           while (part1[i] !== part3[part5]) {
@@ -1694,7 +1698,7 @@ const getDownloadLinks = url => {
       }
 
       function extractDownloadUrl(data) {
-        return data.split("getElementById(\"download-section\").innerHTML = \"")[1].split("\"; document.getElementById(\"inputData\").remove(); ")[0].replace(/\\(\\)?/g, "");
+        return data.split("getElementById(\"download-section\").innerHTML = \"")[1].split("\"; document.getElementById(\"inputData\").remove(); ")[0].replace(/\\?/g, "");
       }
 
       function getVideoUrl(data) {
@@ -1716,15 +1720,15 @@ const getDownloadLinks = url => {
       const $ = cheerio.load(videoPageContent);
       const downloadLinks = [];
       
-        $("div.download-items__thumb").each((index, item) => {
-          $("div.download-items__btn").each((btnIndex, button) => {
-            let downloadUrl = $(button).find("a").attr("href");
-            if (!/https?:\/\//.test(downloadUrl || "")) {
-              downloadUrl = "https://snapsave.app" + downloadUrl;
-            }
-            downloadLinks.push(downloadUrl);
-          });
+      $("div.download-items__thumb").each((index, item) => {
+        $("div.download-items__btn").each((btnIndex, button) => {
+          let downloadUrl = $(button).find("a").attr("href");
+          if (!/https?:\/\//.test(downloadUrl || "")) {
+            downloadUrl = "https://snapsave.app" + downloadUrl;
+          }
+          downloadLinks.push(downloadUrl);
         });
+      });
       if (!downloadLinks.length) {
         return reject({
           msg: "No data found"
