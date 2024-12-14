@@ -17,6 +17,7 @@ const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
+const moment = require('moment-timezone');
 const Groq = require('groq-sdk')
 const client = new Groq({ apiKey: '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' });
   const { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } = require('@google/generative-ai');
@@ -24,11 +25,13 @@ const client = new Groq({ apiKey: 'gsk_SQTrJ3oq5xvaIlLlF0D9WGdyb3FYngASmptvYXaIu
   const genAI = new GoogleGenerativeAI(Used_Apikey);
 const https = require('https');
 const jsobfus = require('javascript-obfuscator')
-const d = new Date(new Date() + 3600000);
+let d = new Date();
+d.setTime(d.getTime() + 3600000); // Tambahkan 1 jam
 const locale = 'id';
-const jam = new Date().toLocaleString("id-ID", { timeZone: 'Asia/Jakarta' });
-let hari = d.toLocaleDateString(locale, { weekday: 'long' });
-const tgl = d.toLocaleDateString('id', { day: 'numeric', month: 'long', year: 'numeric' });
+const timezone = 'Asia/Jakarta';
+const currentDate = moment.tz(timezone).format('YYYY-MM-DD HH:mm:ss');
+const jam = moment.tz('Asia/Jakarta').format('HH:mm:ss');
+const hariini = d.toLocaleDateString('id', { day: 'numeric', month: 'long', year: 'numeric' });
 const mediafire = require('./lib/mediafire')
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -513,7 +516,7 @@ return textt
 async function llama(query) {
  chatCompletion = await client.chat.completions.create({
 messages: [
-        { role: "system", content: `hallo world Saya Adalah Meta AI Di Buat Oleh Mark Zuckerberg, Jam ${jam}, Hari ${hari}, Tanggal ${tgl}, Presiden Indonesia Adalah Prabowo Subianto`},
+        { role: "system", content: `hallo world Saya Adalah Meta AI Di Buat Oleh Mark Zuckerberg, Jam ${jam}, Hari ${hariini}, Tanggal ${currentDate}, Presiden Indonesia Adalah Prabowo Subianto`},
         { role: "assistant", content: `"Halo" > Kamu adalah asisten AI yang siap membantu segala hal."` },
 { role: "user", content: query }
 ],
