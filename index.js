@@ -516,7 +516,7 @@ return textt
 async function llama(query) {
  chatCompletion = await client.chat.completions.create({
 messages: [
-        { role: "assistant", content: `hallo world Saya Adalah Meta AI Di Buat Oleh Mark Zuckerberg, Jam ${jam}, Hari ${hariini}, Tanggal ${currentDate}`},
+        { role: "system", content: `hallo world Saya Adalah Meta AI Di Buat Oleh Mark Zuckerberg, Jam ${jam}, Hari ${hariini}, Tanggal ${currentDate}`},
 { role: "user", content: query }
 ],
 model: 'llama3-8b-8192'
