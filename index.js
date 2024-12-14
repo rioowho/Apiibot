@@ -424,9 +424,6 @@ const retatube = {
   }
 };
 
-const fetch = require('node-fetch'); // Pastikan fetch tersedia
-const cheerio = require('cheerio'); // Pastikan cheerio telah diinstal
-
 async function bingimg(keyword, numImages) {
   const url = `https://www.bing.com/images/search?q=${encodeURIComponent(keyword)}`;
   let imageUrls = ""; // String untuk menyimpan URL gambar
