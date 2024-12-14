@@ -425,7 +425,6 @@ const retatube = {
 };
 
 async function bingimg(keyword, numImages) {
-  const images = "";
   const url = `https://www.bing.com/images/search?q=${encodeURIComponent(keyword)}`;
 
   try {
@@ -437,16 +436,13 @@ async function bingimg(keyword, numImages) {
     $('img.mimg').each((index, img) => {
       if (index >= numImages) return false; // Stop jika sudah mencapai jumlah yang diinginkan
       const imageUrl = $(img).attr('data-src') || $(img).attr('src');
-      if (imageUrl) {
-        images.push(imageUrl);
-      }
     });
 
   } catch (error) {
     console.error("Error scraping images:", error);
   }
 
-  return images;
+  return { imageUrlt };
 }
 const hdown = {
     dl: async (link) => {
