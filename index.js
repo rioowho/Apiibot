@@ -1321,7 +1321,7 @@ async function PlayStore(search) {
 
       // Ensure valid title and link before adding to string
       if (title && link) {
-        resultsString += `Title: ${title}, Link: ${link}, Snippet: ${snippet}\n`; // Concatenate with a comma and newline
+        resultsString += `Title: ${title}\nLink: ${link}\nSnippet: ${snippet}\n`; // Concatenate with a comma and newline
       }
     });
 
