@@ -425,7 +425,7 @@ const retatube = {
 };
 
 async function bingimg(keyword, numImages) {
-  const images = [];
+  const images = "";
   const url = `https://www.bing.com/images/search?q=${encodeURIComponent(keyword)}`;
 
   try {
