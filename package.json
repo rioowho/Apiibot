@@ -18,6 +18,7 @@
   "shannz-playwright": "^1.0.8",
   "playwright": "^1.49.0",
   "got": "^11.8.6",
+  "moment-timezone": "^0.5.34", 
   "child_process": "^1.0.2",
   "puppeteer": "^23.8.0",
   "form-data": "^4.0.0",
