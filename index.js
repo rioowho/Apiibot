@@ -1301,7 +1301,7 @@ async function google(query) {
     });
 
     const $ = cheerio.load(response.data);
-    const results = [];
+    const results = '';
 
     $('.Gx5Zad.xpd.EtOod.pkphOe').each((index, element) => {
       const title = $(element).find('.vvjwJb.AP7Wnd').text().trim();
@@ -1318,7 +1318,7 @@ async function google(query) {
     return results;
   } catch (error) {
     console.error('Scraping error:', error.message);
-    return [];
+    return ", ";
   }
 }
 
