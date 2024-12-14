@@ -424,25 +424,33 @@ const retatube = {
   }
 };
 
+const fetch = require('node-fetch'); // Pastikan fetch tersedia
+const cheerio = require('cheerio'); // Pastikan cheerio telah diinstal
+
 async function bingimg(keyword, numImages) {
   const url = `https://www.bing.com/images/search?q=${encodeURIComponent(keyword)}`;
+  let imageUrls = ""; // String untuk menyimpan URL gambar
 
   try {
     const response = await fetch(url);
     const html = await response.text();
     const $ = cheerio.load(html);
 
-    // Pastikan selector CSS sesuai
+    // Selector untuk gambar di Bing
     $('img.mimg').each((index, img) => {
-      if (index >= numImages) return false; // Stop jika sudah mencapai jumlah yang diinginkan
+      if (index >= numImages) return false; // Hentikan jika mencapai jumlah gambar yang diminta
       const imageUrl = $(img).attr('data-src') || $(img).attr('src');
+      if (imageUrl) {
+        if (imageUrls) imageUrls += ", "; // Tambahkan koma jika string tidak kosong
+        imageUrls += imageUrl; // Tambahkan URL ke string
+      }
     });
 
   } catch (error) {
     console.error("Error scraping images:", error);
   }
 
-  return { imageUrlt };
+  return imageUrls; // Kembalikan string berisi URL gambar
 }
 const hdown = {
     dl: async (link) => {
