@@ -1290,35 +1290,44 @@ async function PlayStore(search) {
     }
   });
 }
-async function google(query) {
+ async function google(query) {
+  const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+
   try {
-    const response = await axios.get('https://www.google.com/search', {
-      params: { q: query },
+    // Fetch HTML using axios with proper headers
+    const response = await axios.get(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       }
     });
 
+    // Parse the HTML using cheerio
     const $ = cheerio.load(response.data);
-    const results = '';
 
-    $('.Gx5Zad.xpd.EtOod.pkphOe').each((index, element) => {
-      const title = $(element).find('.vvjwJb.AP7Wnd').text().trim();
-      const link = $(element).find('a').first().attr('href');
-      const snippet = $(element).find('.s3v9rd.AP7Wnd').text().trim();
+    // Log HTML content for debugging (first 500 characters)
+    console.log('HTML content fetched: ', response.data.substring(0, 500));
 
-      const extractedLink = link ? decodeURIComponent(link.match(/\/url\?q=([^&]+)/)?.[1] || '') : '';
+    const resultContainer = $("#rso");
+    let resultsString = ""; // Variable to store the results as a string
 
-      if (title && extractedLink) {
-        results.push({ title, link: extractedLink, snippet });
+    // Iterate over each result item
+    resultContainer.find(".g").each((index, element) => {
+      const title = $(element).find("h3").text();
+      const link = $(element).find("a").attr("href");
+      const snippet = $(element).find("span.st").text();
+
+      // Log each result
+      console.log('Result found:', { title, link, snippet });
+
+      // Ensure valid title and link before adding to string
+      if (title && link) {
+        resultsString += `Title: ${title}, Link: ${link}, Snippet: ${snippet}\n`; // Concatenate with a comma and newline
       }
     });
 
-    return results;
+    return resultsString; // Return results as a single string
   } catch (error) {
-    console.error('Scraping error:', error.message);
-    return ", ";
+    console.error("Error scraping Google search:", error);
   }
 }
 
