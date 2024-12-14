@@ -25,13 +25,6 @@ const client = new Groq({ apiKey: 'gsk_SQTrJ3oq5xvaIlLlF0D9WGdyb3FYngASmptvYXaIu
   const genAI = new GoogleGenerativeAI(Used_Apikey);
 const https = require('https');
 const jsobfus = require('javascript-obfuscator')
-let d = new Date();
-d.setTime(d.getTime() + 3600000); // Tambahkan 1 jam
-const locale = 'id';
-const timezone = 'Asia/Jakarta';
-const currentDate = moment.tz(timezone).format('YYYY-MM-DD HH:mm:ss');
-const jam = moment.tz('Asia/Jakarta').format('HH:mm:ss');
-const hariini = d.toLocaleDateString('id', { day: 'numeric', month: 'long', year: 'numeric' });
 const mediafire = require('./lib/mediafire')
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -513,16 +506,28 @@ return textt
     throw error;
   }
 }
+
 async function llama(query) {
- chatCompletion = await client.chat.completions.create({
-messages: [
-        { role: "system", content: `hallo world Saya Adalah Meta AI Di Buat Oleh Mark Zuckerberg, Jam ${jam}, Hari ${hariini}, Tanggal ${currentDate}`},
-{ role: "user", content: query }
-],
-model: 'llama3-8b-8192'
-});
-let hasil = chatCompletion.choices[0].message.content
-return hasil
+  // Dapatkan waktu, hari, dan tanggal saat ini
+  const now = moment().tz("Asia/Jakarta"); // Ganti dengan zona waktu Anda
+  const jam = now.format('HH:mm:ss'); // Format waktu
+  const hariini = now.format('dddd'); // Hari dalam seminggu
+  const currentDate = now.format('YYYY-MM-DD'); // Tanggal
+
+  // Gunakan variabel untuk membuat konten sistem
+  const chatCompletion = await client.chat.completions.create({
+    messages: [
+      {
+        role: "system",
+        content: `Halo World! Saya adalah Meta AI yang dibuat oleh Mark Zuckerberg. Sekarang jam ${jam}, hari ${hariini}, tanggal ${currentDate}.`
+      },
+      { role: "user", content: query }
+    ],
+    model: 'llama3-8b-8192'
+  });
+
+  const hasil = chatCompletion.choices[0].message.content;
+  return hasil;
 }
 
 async function palmAi(query) {
