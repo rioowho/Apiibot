@@ -400,7 +400,7 @@ const retatube = {
     if (link === 'javascript:void(0);') return null;
     const teks = $(el).find('span').text()
       .replace('Download', '')
-      .replace(/|/g, '') // Menghapus tanda [] tanpa menyebabkan error
+      .replace(/", "/g, ", ") // Menghapus tanda [] tanpa menyebabkan error
       .trim()
       .toLowerCase()
       .replace(/\s+/g, '_')
