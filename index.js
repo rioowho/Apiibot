@@ -432,10 +432,9 @@ const retatube = {
     }
   }
 };
-
-async function bingimg(keyword, numImages) {
+async function bingimg(keyword) {
   const url = `https://www.bing.com/images/search?q=${encodeURIComponent(keyword)}`;
-  let imageUrls = ""; // String untuk menyimpan URL gambar
+  let imageUrls = ""; // Gunakan array untuk menyimpan URL gambar
 
   try {
     const response = await fetch(url, {
@@ -443,30 +442,30 @@ async function bingimg(keyword, numImages) {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
       },
     });
+
     const html = await response.text();
     const $ = cheerio.load(html);
 
     // Mengambil URL gambar
     $("img.mimg").each((index, img) => {
-      if (index >= numImages) return false; // Hentikan jika mencapai jumlah gambar yang diminta
       const imageUrl = $(img).attr("data-src") || $(img).attr("src");
       if (imageUrl) {
-        // Menambahkan URL ke string, pisahkan dengan koma
-        if (imageUrls) imageUrls += ", "; 
-        imageUrls += imageUrl;
+        imageUrls.push(imageUrl); // Menambahkan URL gambar ke array
       }
     });
 
-    // Mengacak urutan URL gambar yang ditemukan
-    const imageUrlsArray = imageUrls.split(", "); // Pisahkan URL menjadi array
-    imageUrlsArray.sort(() => Math.random() - 0.5); // Acak urutan
-    imageUrls = imageUrlsArray.join(", "); // Gabungkan kembali menjadi string
+    // Mengacak urutan URL gambar
+    if (imageUrls.length > 25) {
+      const randomImageUrl = imageUrls[Math.floor(Math.random() * imageUrls.length)]; // Ambil 1 URL acak
+      return randomImageUrl;
+    } else {
+      return "No images found";
+    }
 
   } catch (error) {
     console.error("Error scraping images:", error);
+    return "Error fetching images";
   }
-
-  return imageUrls; // Kembalikan string yang berisi URL gambar acak
 }
 
 const hdown = {
@@ -2492,7 +2491,7 @@ app.get('/api/bingimg', async (req, res) => {
     if (!keyword) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await bingimg(keyword, 25);
+    const response = await bingimg(keyword);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
