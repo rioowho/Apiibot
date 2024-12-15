@@ -1467,15 +1467,7 @@ async function sfileSearch(query, page = 1) {
     if (size) {
       size = size.replace(")", "");
     }
-
-    if (link) {
-      result += `Title: ${title} `
-      result += `Size: ${size}`
-      result += `Link: ${link}`
-    }
-  });
-
-  return result || "No results found"; // Return the concatenated result
+return { title, size, link };
 }
 async function sfileDl(url) {
   let res = await fetch(url);
