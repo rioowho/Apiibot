@@ -362,7 +362,7 @@ const retatube = {
         headers: { 'User-Agent': 'Postify/1.0.0' }
       });
       const prefix = cheerio.load(data)('input[name="prefix"]').val();
-      if (!prefix) throw new Error('Waduh, prefix nya kagak ada nih bree.. Input manual aja yak Prefix nya');
+      if (!prefix) throw new Error('Waduh, prefix-nya kagak ada nih bree.. Input manual aja yak Prefix-nya');
       return prefix;
     } catch (error) {
       console.error(error.message);
@@ -379,34 +379,34 @@ const retatube = {
           'User-Agent': 'Postify/1.0.0',
         }
       });
-      
+
       const ext = (regex) => (data.match(regex) || ", ")[1] || '';
       const fans = ext(/<p><strong>Fans：<\/strong>(\d+)/);
       const views = ext(/<p><strong>Views:：<\/strong>(\d+)/);
       const shares = ext(/<p><strong>Shares：<\/strong>(\d+)/);
 
       const $ = cheerio.load(data);
-      const ex = $('div.icon-box').map((_, element) => {
-        const title = $(element).find('strong:contains("Title")').text().replace('Title：', '').trim();
-        const owner = $(element).find('strong:contains("Owner")').parent().text().replace('Owner：', '').trim();
-        const image = $(element).find('img').attr('src');
 
-        const dlink = $('a.button.primary.expand')
-          .map((_, el) => {
-            const link = $(el).attr('href');
-            if (link === 'javascript:void(0);') return null;
-            const teks = $(el).find('span').text().replace('Download', '').trim().toLowerCase()
-              .replace(/[\(\)]/g, '').replace(/\s+/g, '_')
-              .split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-            return { title: teks, link };
-          })
-          .get()
-          .filter(Boolean);
+      const element = $('div.icon-box').first(); // Ambil hanya elemen pertama (tanpa array)
+      if (!element.length) throw new Error('Tidak ada data ditemukan');
 
-        return { title, owner, fans, views, shares, image, dlink };
-      }).get();
+      const title = element.find('strong:contains("Title")').text().replace('Title：', '').trim();
+      const owner = element.find('strong:contains("Owner")').parent().text().replace('Owner：', '').trim();
+      const image = element.find('img').attr('src');
 
-      return ex;
+      const dlink = $('a.button.primary.expand')
+        .map((_, el) => {
+          const link = $(el).attr('href');
+          if (link === 'javascript:void(0);') return null;
+          const teks = $(el).find('span').text().replace('Download', '').trim().toLowerCase()
+            .replace(/[]/g, '').replace(/\s+/g, '_')
+            .split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+          return { title: teks, link };
+        })
+        .get()
+        .filter(Boolean);
+
+      return { title, owner, fans, views, shares, image, dlink };
     } catch (error) {
       console.error(error.message);
       throw error;
@@ -423,7 +423,6 @@ const retatube = {
     }
   }
 };
-
 async function bingimg(keyword, numImages) {
   const url = `https://www.bing.com/images/search?q=${encodeURIComponent(keyword)}`;
   let imageUrls = ""; // String untuk menyimpan URL gambar
@@ -798,7 +797,7 @@ await axios.post('https://teradl-api.dapuntaratya.com/generate_file', {
    mode: 1,
    url: url
 }).then(async(a) => {
-const array = []
+const array = ", "
 for (let x of a.data.list) {
 let dl = await axios.post('https://teradl-api.dapuntaratya.com/generate_link', {
        js_token: a.data.js_token,
@@ -1250,7 +1249,7 @@ async function PlayStore(search) {
       const { data, status } = await axios.get(
           `https://play.google.com/store/search?q=${search}&c=apps`,
         ),
-        hasil = [],
+        hasil = ", ",
         $ = cheerio.load(data);
       if (
         ($(
@@ -1350,7 +1349,7 @@ function youtubeSearch(query) {
         }
         return regex && sc;
       });
-      var results = { video: [], channel: [], playlist: [] };
+      var results = { video: ", ", channel: ", ", playlist: ", " };
       sc.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents.forEach((v) => {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13;
         const typeName = Object.keys(v)[0];
@@ -1429,7 +1428,7 @@ async function sfileSearch(query, page = 1) {
     `https://sfile.mobi/search.php?q=${query}&page=${page}`,
   );
   let $ = cheerio.load(await res.text());
-  let result = [];
+  let result = ", ";
   $("div.list").each(function () {
     let title = $(this).find("a").text();
     let size = $(this).text().trim().split("(")[1];
