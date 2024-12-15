@@ -432,8 +432,7 @@ const retatube = {
     }
   }
 };
-const fetch = require('node-fetch'); // Pastikan untuk menginstal node-fetch
-const cheerio = require('cheerio'); // Pastikan untuk menginstal cheerio
+
 
 async function bingimg(keyword) {
   const url = `https://www.bing.com/images/search?q=${encodeURIComponent(keyword)}`;
