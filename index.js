@@ -34,11 +34,6 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-
-const axios = require('axios');
-const cheerio = require('cheerio');
-
-// Function to scrape Yandex search results
 async function scrapeYandex(query) {
     const url = `https://yandex.com/search/?text=${encodeURIComponent(query)}`;
 
