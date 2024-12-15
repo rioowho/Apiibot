@@ -36,42 +36,28 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 async function searchYandex(query) {
-  const url = `https://yandex.com/search/?text=${encodeURIComponent(query)}`;
-
-  let result = "";  // Keep result as an object
   try {
-    const response = await axios.get(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
-      }
+    const url = `https://yandex.com/search/?text=${encodeURIComponent(query)}`;
+    const response = await axios.get(url);
+
+    // Muat halaman HTML dengan cheerio
+    const $ = cheerio.load(response.data);
+
+    // Mengambil hasil pencarian dari halaman
+    const results = $('.serp-item');
+
+    // Menyimpan hasil pencarian dalam objek
+    results.each(function() {
+      const title = $(this).find('h2 a').text().trim();
+      const link = $(this).find('h2 a').attr('href');
+
+      // Menampilkan hasil pencarian
+      console.log('Title:', title);
+      console.log('Link:', link);
+      console.log('---');
     });
-
-    if (response.status === 200) {
-      const $ = cheerio.load(response.data);
-      
-      let index = 1;  // Start indexing from 1 for simplicity
-      $('li.serp-item').each((_, element) => {
-        const title = $(element).find('h2 a').text();
-        const link = $(element).find('h2 a').attr('href');
-        const description = $(element).find('.text').text();
-
-        result[`result_${index}`] = {
-          title,
-          link,
-          description
-        };
-        index++;
-      });
-
-      // Log each result without array-like brackets
-      Object.values(result).forEach(item => {
-        console.log(item);
-      });
-    } else {
-      console.log('Error: Unable to fetch results from Yandex');
-    }
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error('Error fetching search results:', error);
   }
 }
 
