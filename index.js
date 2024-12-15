@@ -380,7 +380,7 @@ const retatube = {
         }
       });
       
-      const ext = (regex) => (data.match(regex) || [])[1] || '';
+      const ext = (regex) => (data.match(regex) || ", ")[1] || '';
       const fans = ext(/<p><strong>Fans：<\/strong>(\d+)/);
       const views = ext(/<p><strong>Views:：<\/strong>(\d+)/);
       const shares = ext(/<p><strong>Shares：<\/strong>(\d+)/);
