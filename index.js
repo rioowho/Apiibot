@@ -1453,17 +1453,28 @@ function youtubeSearch(query) {
 
 async function sfileSearch(query, page = 1) {
   let res = await fetch(
-    `https://sfile.mobi/search.php?q=${query}&page=${page}`,
+    `https://sfile.mobi/search.php?q=${query}&page=${page}`
   );
   let $ = cheerio.load(await res.text());
-  let result = ", ";
+  let result = ""; // Initialize result as a string
+
   $("div.list").each(function () {
     let title = $(this).find("a").text();
     let size = $(this).text().trim().split("(")[1];
     let link = $(this).find("a").attr("href");
-    if (link) result.push({ title, size: size.replace(")", ""), link });
+
+    // Safely handle the size extraction
+    if (size) {
+      size = size.replace(")", "");
+    }
+
+    if (link) {
+      // Concatenate the results into a string
+      result += `Title: ${title}, Size: ${size}, Link: ${link}\n`;
+    }
   });
-  return result;
+
+  return result || "No results found"; // Return the concatenated result
 }
 async function sfileDl(url) {
   let res = await fetch(url);
