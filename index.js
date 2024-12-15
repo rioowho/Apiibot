@@ -432,8 +432,6 @@ const retatube = {
     }
   }
 };
-const fetch = require("node-fetch");
-const cheerio = require("cheerio");
 
 async function bingimg(keyword, numImages) {
   const url = `https://www.bing.com/images/search?q=${encodeURIComponent(keyword)}`;
