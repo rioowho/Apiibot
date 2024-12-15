@@ -38,19 +38,18 @@ app.use(cors());
 async function searchYandex(query) {
   const url = `https://yandex.com/search/?text=${encodeURIComponent(query)}`;
 
-  let result = {}; 
+  let result = {};  // Keep result as an object
   try {
     const response = await axios.get(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
       }
     });
-    
+
     if (response.status === 200) {
       const $ = cheerio.load(response.data);
       
-
-      let index = 10; 
+      let index = 1;  // Start indexing from 1 for simplicity
       $('li.serp-item').each((_, element) => {
         const title = $(element).find('h2 a').text();
         const link = $(element).find('h2 a').attr('href');
@@ -64,9 +63,10 @@ async function searchYandex(query) {
         index++;
       });
 
-      for (const key in result) {
-        console.log(result[key]);
-      }
+      // Log each result without array-like brackets
+      Object.values(result).forEach(item => {
+        console.log(item);
+      });
     } else {
       console.log('Error: Unable to fetch results from Yandex');
     }
