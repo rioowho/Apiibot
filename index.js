@@ -1451,12 +1451,12 @@ function youtubeSearch(query) {
   })
 }
 
+const cheerio = require('cheerio');
+
 async function sfileSearch(query, page = 1) {
-  let res = await fetch(
-    `https://sfile.mobi/search.php?q=${query}&page=${page}`
-  );
+  let res = await fetch(`https://sfile.mobi/search.php?q=${query}&page=${page}`);
   let $ = cheerio.load(await res.text());
-  let result = ""; // Initialize result as a string
+  let results = ""; // Use an array to store results
 
   $("div.list").each(function () {
     let title = $(this).find("a").text();
@@ -1467,7 +1467,13 @@ async function sfileSearch(query, page = 1) {
     if (size) {
       size = size.replace(")", "");
     }
-return { title, size, link };
+
+    // Push the result to the array
+    results.push({ title, size, link });
+  });
+
+  // Return the array of results after processing
+  return results;
 }
 async function sfileDl(url) {
   let res = await fetch(url);
