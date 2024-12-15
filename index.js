@@ -1451,8 +1451,6 @@ function youtubeSearch(query) {
   })
 }
 
-const cheerio = require('cheerio');
-
 async function sfileSearch(query, page = 1) {
   let res = await fetch(`https://sfile.mobi/search.php?q=${query}&page=${page}`);
   let $ = cheerio.load(await res.text());
