@@ -1454,9 +1454,9 @@ function youtubeSearch(query) {
 async function sfileSearch(query, page = 1) {
   let res = await fetch(`https://sfile.mobi/search.php?q=${query}&page=${page}`);
   let $ = cheerio.load(await res.text());
-  let results = []; // Menyimpan hasil dalam array objek
+  let results = {}; // Menggunakan objek untuk menyimpan hasil
 
-  $("div.list").each(function () {
+  $("div.list").each(function (index) {
     let title = $(this).find("a").text();
     let size = $(this).text().trim().split("(")[1];
     let link = $(this).find("a").attr("href");
@@ -1468,15 +1468,15 @@ async function sfileSearch(query, page = 1) {
 
     // Memastikan title dan link valid sebelum memasukkan hasil
     if (title && link) {
-      results.push({
+      results[index] = { // Menyimpan hasil dengan key berdasarkan index
         namafile: title,    // Menggunakan title sebagai filename
         filesize: size || 'N/A', // Menggunakan size sebagai filesize
         download: link      // Menggunakan link sebagai download URL
-      });
+      };
     }
   });
 
-  // Mengembalikan array hasil dalam bentuk objek
+  // Mengembalikan objek hasil
   return results;
 }
 async function sfileDl(url) {
