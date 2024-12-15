@@ -38,7 +38,7 @@ app.use(cors());
 async function searchYandex(query) {
   const url = `https://yandex.com/search/?text=${encodeURIComponent(query)}`;
 
-  let result = {};  // Keep result as an object
+  let result = "";  // Keep result as an object
   try {
     const response = await axios.get(url, {
       headers: {
