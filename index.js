@@ -35,6 +35,46 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
+async function searchYandex(query) {
+  const url = `https://yandex.com/search/?text=${encodeURIComponent(query)}`;
+
+  let result = {}; 
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
+      }
+    });
+    
+    if (response.status === 200) {
+      const $ = cheerio.load(response.data);
+      
+
+      let index = 10; 
+      $('li.serp-item').each((_, element) => {
+        const title = $(element).find('h2 a').text();
+        const link = $(element).find('h2 a').attr('href');
+        const description = $(element).find('.text').text();
+
+        result[`result_${index}`] = {
+          title,
+          link,
+          description
+        };
+        index++;
+      });
+
+      for (const key in result) {
+        console.log(result[key]);
+      }
+    } else {
+      console.log('Error: Unable to fetch results from Yandex');
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+}
+
 const audioQualityy = [320, 256, 192, 128, 64];
 
 const ytdlToAudio = async (url, quality = 128) => {
@@ -2841,6 +2881,22 @@ app.get('/api/search-sfile', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
     const response = await sfileSearch(query);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/search-yandex', async (req, res) => {
+  try {
+    const query = req.query.message;
+    if (!query) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await searchYandex(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
