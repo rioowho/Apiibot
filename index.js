@@ -45,7 +45,7 @@ async function scrapeYandex(query) {
         const $ = cheerio.load(data);
 
         // Extract search result titles and links
-        const results = " ";
+        let results = {};
         $('.serp-item').each((index, element) => {
             const title = $(element).find('.organic__title').text();
             const link = $(element).find('.link').attr('href');
