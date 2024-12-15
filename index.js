@@ -1469,8 +1469,9 @@ async function sfileSearch(query, page = 1) {
     }
 
     if (link) {
-      // Concatenate the results into a string
-      result += `Title: ${title}, Size: ${size}, Link: ${link}\n`;
+      result += `Title: ${title} `
+      result += `Size: ${size}`
+      result += `Link: ${link}`
     }
   });
 
