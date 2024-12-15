@@ -2884,7 +2884,7 @@ app.get('/api/search-yandex', async (req, res) => {
     if (!query) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await searchYandex(query);
+    const response = await scrapeYandex(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
