@@ -35,32 +35,39 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-async function searchYandex(query) {
-  try {
+const axios = require('axios');
+const cheerio = require('cheerio');
+
+// Function to scrape Yandex search results
+async function scrapeYandex(query) {
     const url = `https://yandex.com/search/?text=${encodeURIComponent(query)}`;
-    const response = await axios.get(url);
 
-    // Muat halaman HTML dengan cheerio
-    const $ = cheerio.load(response.data);
+    try {
+        // Fetch the HTML of the page
+        const { data } = await axios.get(url);
 
-    // Mengambil hasil pencarian dari halaman
-    const results = $('.serp-item');
+        // Load the HTML into cheerio
+        const $ = cheerio.load(data);
 
-    // Menyimpan hasil pencarian dalam objek
-    results.each(function() {
-      const title = $(this).find('h2 a').text().trim();
-      const link = $(this).find('h2 a').attr('href');
+        // Extract search result titles and links
+        const results = " ";
+        $('.serp-item').each((index, element) => {
+            const title = $(element).find('.organic__title').text();
+            const link = $(element).find('.link').attr('href');
 
-      // Menampilkan hasil pencarian
-      console.log('Title:', title);
-      console.log('Link:', link);
-      console.log('---');
-    });
-  } catch (error) {
-    console.error('Error fetching search results:', error);
-  }
+            if (title && link) {
+                results.push({ title, link });
+            }
+        });
+
+       return results;
+    } catch (error) {
+        console.error('Error scraping Yandex:', error);
+    }
 }
 
+// Use the function with a search query
+scrapeYandex('bokep'); // Replace with a valid query
 const audioQualityy = [320, 256, 192, 128, 64];
 
 const ytdlToAudio = async (url, quality = 128) => {
