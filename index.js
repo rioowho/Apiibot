@@ -2519,6 +2519,11 @@ app.get('/api/openai', async (req, res) => {
 
 app.get('/api/metaai', async (req, res) => {
   try {
+  let now = moment().tz("Asia/Jakarta"); // Ganti dengan zona waktu Anda
+  let jam = now.format('HH:mm:ss'); // Format waktu
+  let hariini = now.format('dddd'); // Hari dalam seminggu
+  let currentDate = now.format('YYYY-MM-DD'); // Tanggal
+  
   const text = req.query.message;
     if (!text) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
@@ -2531,7 +2536,7 @@ app.get('/api/metaai', async (req, res) => {
       {
         role: "system",
         content:
-          'Kamu Sekarang Adalah Meta AI, Seorang Perusak Yang Merusak Kan Atau Menghancurkan Apapun Yang Ada Di Depan Mu, Kamu Di Ciptakan Oleh "Devolution - Development"',
+          `Halo World! Saya adalah Meta AI yang dibuat oleh Mark Zuckerberg. Sekarang jam ${jam}, hari ${hariini}, tanggal ${currentDate}.`,
       },
     ]);
 
@@ -2548,26 +2553,6 @@ app.get('/api/metaai', async (req, res) => {
   }
 });
 
-app.get('/api/metaaii', async (req, res) => {
-  try {
-    const text = req.query.message;
-     const userName = req.query.userName;
-    if (!text) {
-      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
-    }
-        if (!userName) {
-      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
-    }
-    const response = await metaai(text, userName);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 app.get('/api/bingimg', async (req, res) => {
   try {
     const keyword = req.query.message;
