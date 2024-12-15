@@ -35,35 +35,31 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-async function scrapeYandex(query) {
+
+const searchYandex = async (query) => {
     const url = `https://yandex.com/search/?text=${encodeURIComponent(query)}`;
 
     try {
-        // Fetch the HTML of the page
-        const { data } = await axios.get(url);
+        const response = await axios.get(url);
+        const html = response.data;
+        const $ = cheerio.load(html);
+        const results = $('.serp-item');
 
-        // Load the HTML into cheerio
-        const $ = cheerio.load(data);
-
-        // Extract search result titles and links
-        let results = {};
-        $('.serp-item').each((index, element) => {
-            const title = $(element).find('.organic__title').text();
-            const link = $(element).find('.link').attr('href');
-
-            if (title && link) {
-                results.push({ title, link });
-            }
+        results.each(function() {
+            const title = $(this).find('.link.link_theme_normal').text();
+            const link = $(this).find('.link.link_theme_normal').attr('href');
+            const snippet = $(this).find('.text-container').text();
+            
+            console.log('Title:', title);
+            console.log('Link:', link);
+            console.log('Snippet:', snippet);
+            console.log('-------------------------');
         });
-
-       return results;
     } catch (error) {
-        console.error('Error scraping Yandex:', error);
+        console.error('Error fetching data:', error);
     }
-}
+};
 
-// Use the function with a search query
-scrapeYandex('bokep'); // Replace with a valid query
 const audioQualityy = [320, 256, 192, 128, 64];
 
 const ytdlToAudio = async (url, quality = 128) => {
@@ -2519,12 +2515,12 @@ app.get('/api/openai', async (req, res) => {
 
 app.get('/api/metaai', async (req, res) => {
   try {
-  let now = moment().tz("Asia/Jakarta"); // Ganti dengan zona waktu Anda
-  let jam = now.format('HH:mm:ss'); // Format waktu
-  let hariini = now.format('dddd'); // Hari dalam seminggu
-  let currentDate = now.format('YYYY-MM-DD'); // Tanggal
+    let now = moment().tz("Asia/Jakarta"); // Ganti dengan zona waktu Anda
+    let jam = now.format('HH:mm:ss'); // Format waktu
+    let hariini = now.format('dddd'); // Hari dalam seminggu
+    let currentDate = now.format('YYYY-MM-DD'); // Tanggal
   
-  const text = req.query.message;
+    const text = req.query.message;
     if (!text) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
@@ -2552,6 +2548,7 @@ app.get('/api/metaai', async (req, res) => {
     });
   }
 });
+
 
 app.get('/api/bingimg', async (req, res) => {
   try {
@@ -2902,7 +2899,7 @@ app.get('/api/search-yandex', async (req, res) => {
     if (!query) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await scrapeYandex(query);
+    const response = await searchYandex(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
