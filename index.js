@@ -26,6 +26,7 @@ const client = new Groq({ apiKey: 'gsk_SQTrJ3oq5xvaIlLlF0D9WGdyb3FYngASmptvYXaIu
 const https = require('https');
 const jsobfus = require('javascript-obfuscator')
 const mediafire = require('./lib/mediafire')
+const metaaii = require('./lib/metaai')
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -2515,7 +2516,39 @@ app.get('/api/openai', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 app.get('/api/metaai', async (req, res) => {
+  const { text } = req.query;
+
+  try {
+    if (!text) throw new Error("> Masukan pernyataan nya");
+
+    const data = await metaaii([
+      {
+        role: "user",
+        content: text,
+      },
+      {
+        role: "system",
+        content:
+          'Kamu Sekarang Adalah Meta AI, Seorang Perusak Yang Merusak Kan Atau Menghancurkan Apapun Yang Ada Di Depan Mu, Kamu Di Ciptakan Oleh "Devolution - Development"',
+      },
+    ]);
+
+    res.status(200).json({
+      success: 200,
+      creator: "RiooXdzz",
+      result: data
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+app.get('/api/metaaii', async (req, res) => {
   try {
     const text = req.query.message;
      const userName = req.query.userName;
