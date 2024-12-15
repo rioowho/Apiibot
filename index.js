@@ -2519,7 +2519,7 @@ app.get('/api/openai', async (req, res) => {
 
 app.get('/api/metaai', async (req, res) => {
   try {
-  const { text } = req.query;
+  const text = req.query.message;
     if (!text) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
