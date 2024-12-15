@@ -395,16 +395,22 @@ const retatube = {
       const image = element.find('img').attr('src');
 
       const dlink = $('a.button.primary.expand')
-        .map((_, el) => {
-          const link = $(el).attr('href');
-          if (link === 'javascript:void(0);') return null;
-          const teks = $(el).find('span').text().replace('Download', '').trim().toLowerCase()
-            .replace(/[]/g, '').replace(/\s+/g, '_')
-            .split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-          return { title: teks, link };
-        })
-        .get()
-        .filter(Boolean);
+  .map((_, el) => {
+    const link = $(el).attr('href');
+    if (link === 'javascript:void(0);') return null;
+    const teks = $(el).find('span').text()
+      .replace('Download', '')
+      .replace(/|/g, '') // Menghapus tanda [] tanpa menyebabkan error
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+    return { title: teks, link };
+  })
+  .get()
+  .filter(Boolean);
 
       return { title, owner, fans, views, shares, image, dlink };
     } catch (error) {
