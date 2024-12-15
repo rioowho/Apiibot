@@ -397,20 +397,23 @@ const retatube = {
       const dlink = $('a.button.primary.expand')
   .map((_, el) => {
     const link = $(el).attr('href');
-    if (link === 'javascript:void(0);') return null;
-    const teks = $(el).find('span').text()
+    if (!link || link === 'javascript:void(0);') return null; // Skip jika href tidak valid
+
+    const teks = $(el)
+      .find('span')
+      .text()
       .replace('Download', '')
-      .replace(/", "/g, ", ") // Menghapus tanda [] tanpa menyebabkan error
       .trim()
       .toLowerCase()
-      .replace(/\s+/g, '_')
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-    return { title: teks, link };
+      .replace(/\s+/g, '_') // Ubah spasi menjadi underscore
+      .split('_') // Pecah string berdasarkan underscore
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Kapitalisasi tiap kata
+      .join(' '); // Gabungkan kembali dengan spasi
+
+    return { title: teks || 'Unknown Title', link }; // Jika title kosong, beri fallback
   })
   .get()
-  .filter(Boolean);
+  .filter(Boolean); // Hapus nilai `null` atau undefined
 
       return { title, owner, fans, views, shares, image, dlink };
     } catch (error) {
