@@ -2518,11 +2518,11 @@ app.get('/api/openai', async (req, res) => {
 });
 
 app.get('/api/metaai', async (req, res) => {
-  const { text } = req.query;
-
   try {
-    if (!text) throw new Error("> Masukan pernyataan nya");
-
+  const { text } = req.query;
+    if (!text) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
     const data = await metaaii([
       {
         role: "user",
