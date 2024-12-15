@@ -432,9 +432,12 @@ const retatube = {
     }
   }
 };
+const fetch = require('node-fetch'); // Pastikan untuk menginstal node-fetch
+const cheerio = require('cheerio'); // Pastikan untuk menginstal cheerio
+
 async function bingimg(keyword) {
   const url = `https://www.bing.com/images/search?q=${encodeURIComponent(keyword)}`;
-  let imageUrls = ""; // Gunakan array untuk menyimpan URL gambar
+  let imageUrls = ""; // Menggunakan string untuk menyimpan URL gambar
 
   try {
     const response = await fetch(url, {
@@ -450,13 +453,19 @@ async function bingimg(keyword) {
     $("img.mimg").each((index, img) => {
       const imageUrl = $(img).attr("data-src") || $(img).attr("src");
       if (imageUrl) {
-        imageUrls.push(imageUrl); // Menambahkan URL gambar ke array
+        imageUrls += imageUrl + ","; // Menambahkan URL gambar ke string, dipisahkan dengan koma
       }
     });
 
+    // Menghapus koma terakhir jika ada
+    if (imageUrls.length > 0) {
+      imageUrls = imageUrls.slice(0, -1); // Menghapus koma terakhir
+    }
+
     // Mengacak urutan URL gambar
-    if (imageUrls.length > 25) {
-      const randomImageUrl = imageUrls[Math.floor(Math.random() * imageUrls.length)]; // Ambil 1 URL acak
+    const imageArray = imageUrls.split(","); // Mengubah string kembali menjadi array
+    if (imageArray.length > 25) {
+      const randomImageUrl = imageArray[Math.floor(Math.random() * imageArray.length)]; // Ambil 1 URL acak
       return randomImageUrl;
     } else {
       return "No images found";
