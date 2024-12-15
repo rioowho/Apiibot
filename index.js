@@ -1454,23 +1454,25 @@ function youtubeSearch(query) {
 async function sfileSearch(query, page = 1) {
   let res = await fetch(`https://sfile.mobi/search.php?q=${query}&page=${page}`);
   let $ = cheerio.load(await res.text());
-  let results = ""; // Use an array to store results
+  let results = ""; // Menyimpan hasil sebagai string
 
   $("div.list").each(function () {
     let title = $(this).find("a").text();
     let size = $(this).text().trim().split("(")[1];
     let link = $(this).find("a").attr("href");
 
-    // Safely handle the size extraction
+    // Pastikan ukuran ada dan diolah dengan benar
     if (size) {
       size = size.replace(")", "");
     }
 
-    // Push the result to the array
-    results.push({ title, size, link });
+    // Jika data valid, tambahkan hasil ke dalam string
+    if (title && link) {
+      results += JSON.stringify({ title, size, link }) + "\n"; // Menambahkan objek dalam format JSON
+    }
   });
 
-  // Return the array of results after processing
+  // Mengembalikan string hasil pencarian
   return results;
 }
 async function sfileDl(url) {
