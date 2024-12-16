@@ -566,11 +566,15 @@ async function llama(query) {
   // Gunakan variabel untuk membuat konten sistem
   const chatCompletion = await client.chat.completions.create({
     messages: [
+        {
+        role: "user",
+        content: query,
+      },
       {
         role: "system",
-        content: `Halo World! Saya adalah Meta AI yang dibuat oleh Mark Zuckerberg. Sekarang jam ${jam}, hari ${hariini}, tanggal ${currentDate}.`
-      },
-      { role: "user", content: query }
+        content: 
+       `Halo World! Saya adalah llama AI, yang dibuat oleh Mark Zuckerberg. Sekarang jam ${jam}, hari ${hariini}, tanggal ${currentDate}.`
+      }
     ],
     model: 'llama3-8b-8192'
   });
