@@ -37,9 +37,10 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-registerFont('./lib/arialnarrow.ttf', { family: 'ArialNarrow' });
+
 
 async function BratGenerator(teks) {
+registerFont('./lib/arialnarrow.ttf', { family: 'ArialNarrow' });
     const canvas = createCanvas(512, 512);
     const ctx = canvas.getContext('2d');
 
