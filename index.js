@@ -37,30 +37,30 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-
-async function sendEmail(emailContent, text) {
+async function sendEmail(recipientEmail, text) {
+    // Konfigurasi transporter
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        service: "gmail",
         auth: {
-            user: 'riooapii@gmail.com', 
-            pass: 'kftkrgnziwwumkwq',
+            user: "riooapii@gmail.com", // Ambil dari environment variables
+            pass: "twyhgjliuzaiqxsz", // Ambil dari environment variables
         },
     });
 
     // Konfigurasi email
     const mailOptions = {
-      from: {
-        name: "Rioo Api's - SendGmail",
-        address: "riooapii@gmail.com",
-      },
-      to: emailContent,
-      subject: "Email Verification",
-      html: `<!DOCTYPE html>
+        from: {
+            name: "Rioo Api's - SendGmail",
+            address: "riooapii@gmail.com",
+        },
+        to: recipientEmail,
+        subject: "Email Verification",
+        html: `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Apa?</title>
+    <title>Email Verification</title>
 </head>
 <body>
     <h1 style="color: blue;">${text}</h1>
@@ -72,11 +72,12 @@ async function sendEmail(emailContent, text) {
 
     try {
         const info = await transporter.sendMail(mailOptions);
-        console.log('Email sent: ' + info.response);
+        console.log('Email sent successfully: ' + info.response);
     } catch (error) {
-        console.error('Error during email sending:', error);
+        console.error('Error during email sending:', error.message);
     }
 }
+
 
 const audioQualityy = [320, 256, 192, 128, 64];
 
@@ -3168,15 +3169,15 @@ app.get('/api/encrypt', async (req, res) => {
 });
 app.get('/api/sendmail', async (req, res) => {
   try {
-    const emailContent = req.query.email;
+    const recipientEmail = req.query.email;
     const text = req.query.text;
-    if (!emailContent) {
+    if (!recipientEmail) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
     if (!text) {
       return res.status(403).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await sendEmail(emailContent, text);
+    const response = await sendEmail(recipientEmail, text);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
