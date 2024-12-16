@@ -14,6 +14,8 @@ const qs = require("qs");
 const nodemailer = require('nodemailer');
 const { chromium } = require('playwright');
 const { Buffer } = require('buffer');
+const { createCanvas, registerFont } = require('canvas');
+const Jimp = require('jimp');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
@@ -38,9 +40,6 @@ app.use(cors());
 
 
 async function BratGenerator(teks) {
-let { createCanvas, registerFont } = require('canvas');
-let Jimp = require('jimp');
-
   const width = 1024; // Resolusi tinggi
   const height = 1024;
   const margin = 40; // Margin lebih luas
