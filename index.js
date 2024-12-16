@@ -38,82 +38,96 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-
 async function BratGenerator(teks) {
-  const width = 512;
-  const height = 512;
-  const margin = 20;
-  const wordSpacing = 50;
+    registerFont('./lib/arialnarrow.ttf', { family: 'ArialNarrow' }); // Pastikan lokasi font sesuai
 
-  const canvas = createCanvas(width, height);
-  const ctx = canvas.getContext('2d');
+    const canvas = createCanvas(512, 512);
+    const ctx = canvas.getContext('2d');
 
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, width, height);
+    // Set background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  let fontSize = 80;
-  const lineHeightMultiplier = 1.3;
+    // Function to find optimal font size
+    const findOptimalFontSize = (text, maxWidth, maxHeight) => {
+        let fontSize = 280;
+        ctx.font = `bold ${fontSize}px ArialNarrow`;
 
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
-  ctx.fillStyle = 'black';
+        const words = text.split(' ');
+        let lines = [];
 
-  const words = teks.split(' ');
-  let lines = [];
+        while (fontSize > 0) {
+            lines = [];
+            let currentLine = [];
+            let currentWidth = 0;
+            ctx.font = `bold ${fontSize}px ArialNarrow`;
 
-  const rebuildLines = () => {
-    lines = [];
-    let currentLine = '';
+            for (const word of words) {
+                const wordWidth = ctx.measureText(word + ' ').width;
+                if (currentWidth + wordWidth <= maxWidth) {
+                    currentLine.push(word);
+                    currentWidth += wordWidth;
+                } else {
+                    if (currentLine.length > 0) {
+                        lines.push(currentLine);
+                    }
+                    currentLine = [word];
+                    currentWidth = wordWidth;
+                }
+            }
+            if (currentLine.length > 0) {
+                lines.push(currentLine);
+            }
 
-    for (let word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const lineWidth =
-        ctx.measureText(testLine).width + (currentLine.split(' ').length - 1) * wordSpacing;
+            const totalHeight = lines.length * (fontSize + 10);
+            if (totalHeight <= maxHeight) {
+                break;
+            }
+            fontSize -= 2;
+        }
+        return { fontSize, lines };
+    };
 
-      if (lineWidth < width - 2 * margin) {
-        currentLine = testLine;
-      } else {
-        lines.push(currentLine);
-        currentLine = word;
-      }
-    }
+    // Calculate optimal font size and line arrangement
+    const padding = 48;
+    const maxWidth = canvas.width - (padding * 2);
+    const maxHeight = canvas.height - (padding * 2);
+    const { fontSize, lines } = findOptimalFontSize(teks, maxWidth, maxHeight);
 
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-  };
+    // Draw justified text
+    ctx.fillStyle = '#000000';
+    ctx.font = `bold ${fontSize}px ArialNarrow`;
 
-  ctx.font = `${fontSize}px Sans-serif`;
-  rebuildLines();
+    const lineHeight = fontSize + 10;
+    const totalHeight = lines.length * lineHeight;
+    const startY = (canvas.height - totalHeight) / 2 + fontSize / 2;
 
-  while (lines.length * fontSize * lineHeightMultiplier > height - 2 * margin) {
-    fontSize -= 2;
-    ctx.font = `${fontSize}px Sans-serif`;
-    rebuildLines();
-  }
+    lines.forEach((line, i) => {
+        if (i === lines.length - 1 && line.length === 1) {
+            // If it's the last line with single word, center it
+            ctx.textAlign = 'center';
+            ctx.fillText(line.join(' '), canvas.width / 2, startY + (i * lineHeight));
+        } else {
+            // Justify text
+            ctx.textAlign = 'start';
+            const totalSpacing = maxWidth - line.reduce((acc, word) => acc + ctx.measureText(word).width, 0);
+            const spaceBetween = line.length > 1 ? totalSpacing / (line.length - 1) : 0;
 
-  const lineHeight = fontSize * lineHeightMultiplier;
-  let y = margin;
+            let currentX = padding;
+            line.forEach((word, j) => {
+                ctx.fillText(word, currentX, startY + (i * lineHeight));
+                currentX += ctx.measureText(word).width + spaceBetween;
+            });
+        }
+    });
 
-  for (const line of lines) {
-    const wordsInLine = line.split(' ');
-    let x = margin;
+    // Generate blurred image
+    const buffer = canvas.toBuffer();
+    let image = await Jimp.read(buffer);
+    image.blur(2);
+    let blurredBuffer = await image.getBufferAsync(Jimp.MIME_PNG);
 
-    for (const word of wordsInLine) {
-      ctx.fillText(word, x, y);
-      x += ctx.measureText(word).width + wordSpacing;
-    }
-
-    y += lineHeight;
-  }
-
-  const buffer = canvas.toBuffer('image/png');
-  const image = await Jimp.read(buffer);
-
-  image.blur(3);
-  const blurredBuffer = await image.getBufferAsync(Jimp.MIME_PNG);
-
-  return blurredBuffer;
+    return blurredBuffer;
 }
 
 
