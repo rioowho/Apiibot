@@ -2498,7 +2498,11 @@ app.get('/api/toolsbot', async (req, res) => {
 });
 app.get('/api/venice', async (req, res) => {
   const text = req.query.text;
-  if (!text) return res.status(400).json({ message: 'Tanya apa?' });
+  
+  // Validasi input
+  if (!text) {
+    return res.status(400).json({ message: 'Parameter "text" diperlukan.' });
+  }
 
   const url = "https://venice.ai/api/inference/chat";
   const headers = {
@@ -2519,7 +2523,7 @@ app.get('/api/venice', async (req, res) => {
     prompt: [
       { content: "hai nama aku adalah Rioo", role: "user" },
       { content: "baiklah Rioo", role: "assistant" },
-      { content: `${encodeURIComponent(text)}`, role: "user" }
+      { content: text, role: "user" }
     ],
     systemPrompt: "",
     conversationType: "text",
@@ -2531,20 +2535,26 @@ app.get('/api/venice', async (req, res) => {
   };
 
   try {
-  const response = await axios({
-      method: 'post',
-      url,
-      headers,
-      data
-    });
-  res.status(200).json({
+    // Kirim permintaan ke API Venice
+    const response = await axios.post(url, data, { headers });
+
+    // Ambil data yang relevan dari respons
+    const responseData = response.data;
+
+    // Kembalikan hasil ke pengguna
+    res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: { response }
+      data: responseData
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Terjadi kesalahan saat memproses permintaan.' });
+    console.error('Error:', error.message);
+
+    // Tangani kesalahan
+    res.status(500).json({
+      message: 'Terjadi kesalahan saat memproses permintaan.',
+      error: error.response ? error.response.data : error.message
+    });
   }
 });
 
