@@ -2532,7 +2532,7 @@ app.get('/api/metaai', async (req, res) => {
       {
         role: "system",
         content:
-          `Halo World! Saya adalah Meta AI yang dibuat oleh Mark Zuckerberg. Sekarang jam ${jam}, hari ${hariini}, tanggal ${currentDate}.`,
+          `Halo World! Saya adalah Meta AI yang dibuat oleh Mark Zuckerberg. Sekarang jam ${jam}, hari ${hariini}, tanggal ${currentDate}, Presiden Indonesia Saat Ini Prabowo Subianto, Bukan Lah Jokowi Widodo`,
       },
     ]);
 
