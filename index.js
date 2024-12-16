@@ -2531,15 +2531,17 @@ app.get('/api/venice', async (req, res) => {
   };
 
   try {
-    const response = await axios({
+  const response = await axios({
       method: 'post',
-      status: 200,
-      creator: "RiooXdzz",
       url,
       headers,
       data
     });
-    res.json(response.data);
+  res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response.data }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Terjadi kesalahan saat memproses permintaan.' });
