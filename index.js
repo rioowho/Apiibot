@@ -1,5 +1,4 @@
 __path = process.cwd()
-const { createCanvas } = require('canvas');
 const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
