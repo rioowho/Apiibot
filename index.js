@@ -2497,8 +2497,8 @@ app.get('/api/toolsbot', async (req, res) => {
   }
 });
 app.get('/api/venice', async (req, res) => {
-  const q = req.query.q;
-  if (!q) return res.status(400).json({ message: 'Tanya apa?' });
+  const text = req.query.text;
+  if (!text) return res.status(400).json({ message: 'Tanya apa?' });
 
   const url = "https://venice.ai/api/inference/chat";
   const headers = {
@@ -2519,7 +2519,7 @@ app.get('/api/venice', async (req, res) => {
     prompt: [
       { content: "hai nama aku adalah Rioo", role: "user" },
       { content: "baiklah Rioo", role: "assistant" },
-      { content: `${encodeURIComponent(q)}`, role: "user" }
+      { content: `${encodeURIComponent(text)}`, role: "user" }
     ],
     systemPrompt: "",
     conversationType: "text",
