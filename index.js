@@ -336,9 +336,6 @@ async function metaai(text) {
             apiKey: '522aeeed9ccfea4eeabb86608d24bcc0ad35b0c08598c60bdf214b8bd7bb42c0' 
         });
 
-    // Fallback to 'User' if userName is not provided
-    const user = userName || "User";
-
     const initialMessages = [
         {
             role: "system",
