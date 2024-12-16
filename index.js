@@ -13,8 +13,6 @@ const cheerio = require('cheerio');
 const qs = require("qs");
 const nodemailer = require('nodemailer');
 const { chromium } = require('playwright');
-const { createCanvas } = require('canvas');
-const Jimp = require('jimp');
 const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
@@ -40,96 +38,166 @@ app.use(cors());
 
 
 async function BratGenerator(teks) {
-registerFont('./lib/arialnarrow.ttf', { family: 'ArialNarrow' });
-    const canvas = createCanvas(512, 512);
-    const ctx = canvas.getContext('2d');
+let { createCanvas, registerFont } = require('canvas');
+let Jimp = require('jimp');
 
-    // Set background
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const width = 1024; // Resolusi tinggi
+  const height = 1024;
+  const margin = 40; // Margin lebih luas
+  const wordSpacing = 20; // Spasi antar kata lebih rapat
 
-    // Function to find optimal font size
-    const findOptimalFontSize = (text, maxWidth, maxHeight) => {
-        let fontSize = 280;
-        ctx.font = `bold ${fontSize}px ArialNarrow`;
+  // Pilih font berkualitas (daftarkan font jika perlu)
+  registerFont('./lib/arialnarrow.ttf', { family: 'ArialNarrow' });
+  const fontFamily = 'ArialNarrow'; // Gunakan font custom
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext('2d');
 
-        const words = text.split(' ');
-        let lines = [];
+  // Background putih
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, width, height);
 
-        while (fontSize > 0) {
-            lines = [];
-            let currentLine = [];
-            let currentWidth = 0;
-            ctx.font = `bold ${fontSize}px ArialNarrow`;
+  // Atur font
+  let fontSize = 100;
+  let lineHeightMultiplier = 1.3;
 
-            for (const word of words) {
-                const wordWidth = ctx.measureText(word + ' ').width;
-                if (currentWidth + wordWidth <= maxWidth) {
-                    currentLine.push(word);
-                    currentWidth += wordWidth;
-                } else {
-                    if (currentLine.length > 0) {
-                        lines.push(currentLine);
-                    }
-                    currentLine = [word];
-                    currentWidth = wordWidth;
-                }
-            }
-            if (currentLine.length > 0) {
-                lines.push(currentLine);
-            }
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = 'black';
 
-            const totalHeight = lines.length * (fontSize + 10);
-            if (totalHeight <= maxHeight) {
-                break;
-            }
-            fontSize -= 2;
-        }
-        return { fontSize, lines };
-    };
+  // Proses memecah teks menjadi baris
+  let words = teks.split(' ');
+  let lines = [];
 
-    // Calculate optimal font size and line arrangement
-    const padding = 48;
-    const maxWidth = canvas.width - (padding * 2);
-    const maxHeight = canvas.height - (padding * 2);
-    const { fontSize, lines } = findOptimalFontSize(teks, maxWidth, maxHeight);
+  const rebuildLines = () => {
+    lines = [];
+    let currentLine = '';
 
-    // Draw justified text
-    ctx.fillStyle = '#000000';
-    ctx.font = `bold ${fontSize}px ArialNarrow`;
+    for (let word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const lineWidth = ctx.measureText(testLine).width;
 
-    const lineHeight = fontSize + 10;
-    const totalHeight = lines.length * lineHeight;
-    const startY = (canvas.height - totalHeight) / 2 + fontSize / 2;
+      if (lineWidth < width - 2 * margin) {
+        currentLine = testLine;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
 
-    lines.forEach((line, i) => {
-        if (i === lines.length - 1 && line.length === 1) {
-            // If it's the last line with single word, center it
-            ctx.textAlign = 'center';
-            ctx.fillText(line.join(' '), canvas.width / 2, startY + (i * lineHeight));
-        } else {
-            // Justify text
-            ctx.textAlign = 'start';
-            const totalSpacing = maxWidth - line.reduce((acc, word) => acc + ctx.measureText(word).width, 0);
-            const spaceBetween = line.length > 1 ? totalSpacing / (line.length - 1) : 0;
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+  };
 
-            let currentX = padding;
-            line.forEach((word, j) => {
-                ctx.fillText(word, currentX, startY + (i * lineHeight));
-                currentX += ctx.measureText(word).width + spaceBetween;
-            });
-        }
-    });
+  ctx.font = `${fontSize}px ${fontFamily}`;
+  rebuildLines();
 
-    // Generate blurred image
-    const buffer = canvas.toBuffer();
-    let image = await Jimp.read(buffer);
-    image.blur(2);
-    let blurredBuffer = await image.getBufferAsync(Jimp.MIME_PNG);
+  // Perkecil font jika teks melebihi batas
+  while (lines.length * fontSize * lineHeightMultiplier > height - 2 * margin) {
+    fontSize -= 2;
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    rebuildLines();
+  }
 
-    return blurredBuffer;
+  // Render teks
+  const lineHeight = fontSize * lineHeightMultiplier;
+  let y = margin;
+
+  for (let line of lines) {
+    ctx.fillText(line, margin, y);
+    y += lineHeight;
+  }
+
+  // Konversi ke buffer dengan Jimp
+  const buffer = canvas.toBuffer('image/png');
+  const image = await Jimp.read(buffer);
+
+  // Kurangi tingkat blur agar teks tajam
+  image.blur(1); // Blur minimal untuk efek halus
+  const finalBuffer = await image.getBufferAsync(Jimp.MIME_PNG);
+
+  return finalBuffer;
 }
 
+async function BratGenerator(teks) {
+let { createCanvas } = require('canvas');
+let Jimp = require('jimp');
+    const canvas = createCanvas(512, 512);
+  let width = 512;
+  let height = 512;
+  let margin = 20;
+  let wordSpacing = 50; 
+  
+  let canvas = createCanvas(width, height);
+  let ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, width, height);
+
+  let fontSize = 80;
+  let lineHeightMultiplier = 1.3;
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = 'black';
+
+  let words = teks.split(' ');
+  let lines = [];
+
+  let rebuildLines = () => {
+    lines = [];
+    let currentLine = '';
+
+    for (let word of words) {
+      let testLine = currentLine ? `${currentLine} ${word}` : word;
+      let lineWidth =
+        ctx.measureText(testLine).width + (currentLine.split(' ').length - 1) * wordSpacing;
+
+      if (lineWidth < width - 2 * margin) {
+        currentLine = testLine;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+  };
+
+  ctx.font = `${fontSize}px Sans-serif`;
+  rebuildLines();
+
+  while (lines.length * fontSize * lineHeightMultiplier > height - 2 * margin) {
+    fontSize -= 2;
+    ctx.font = `${fontSize}px Sans-serif`;
+    rebuildLines();
+  }
+  
+  let lineHeight = fontSize * lineHeightMultiplier;
+  let y = margin;
+
+  for (let line of lines) {
+    let wordsInLine = line.split(' ');
+    let x = margin;
+
+    for (let word of wordsInLine) {
+      ctx.fillText(word, x, y);
+      x += ctx.measureText(word).width + wordSpacing;
+    }
+    
+    y += lineHeight;
+  }
+
+  let buffer = canvas.toBuffer('image/png');
+  let image = await Jimp.read(buffer);
+
+  image.blur(3);
+  let blurredBuffer = await image.getBufferAsync(Jimp.MIME_PNG);
+
+  return blurredBuffer;
+}
 
 async function sendEmail(recipientEmail, text) {
     // Konfigurasi transporter
