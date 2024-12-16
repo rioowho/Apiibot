@@ -2496,6 +2496,56 @@ app.get('/api/toolsbot', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.get('/api/venice', async (req, res) => {
+  const q = req.query.q;
+  if (!q) return res.status(400).json({ message: 'Tanya apa?' });
+
+  const url = "https://venice.ai/api/inference/chat";
+  const headers = {
+    "Content-Type": "application/json",
+    "Accept": "*/*",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36",
+    "Origin": "https://venice.ai",
+    "Referer": "https://venice.ai/chat/-HHJm0iVraY6pseSLqhW1",
+    "X-Venice-Version": "20241212.161154",
+    "Sec-CH-UA": "\"Google Chrome\";v=\"129\", \"Not=A?Brand\";v=\"8\", \"Chromium\";v=\"129\"",
+    "Sec-CH-UA-Mobile": "?1",
+    "Sec-CH-UA-Platform": "\"Android\""
+  };
+
+  const data = {
+    requestId: "Rioo?",
+    modelId: "llama-3.3-70b",
+    prompt: [
+      { content: "hai nama aku adalah Rioo", role: "user" },
+      { content: "baiklah Rioo", role: "assistant" },
+      { content: `${encodeURIComponent(q)}`, role: "user" }
+    ],
+    systemPrompt: "",
+    conversationType: "text",
+    temperature: 0.8,
+    webEnabled: true,
+    topP: 0.9,
+    isCharacter: false,
+    clientProcessingTime: 634
+  };
+
+  try {
+    const response = await axios({
+      method: 'post',
+      status: 200,
+      creator: "RiooXdzz",
+      url,
+      headers,
+      data
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat memproses permintaan.' });
+  }
+});
+
 app.get('/api/openai', async (req, res) => {
   try {
     const text = req.query.message;
