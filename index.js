@@ -330,7 +330,7 @@ const ytdl = async (url) => {
   }
 };
 
-async function metaai(text, userName) {
+async function metaai(text) {
     const Together = require("together-ai")
     const together = new Together({ 
             apiKey: '522aeeed9ccfea4eeabb86608d24bcc0ad35b0c08598c60bdf214b8bd7bb42c0' 
@@ -342,8 +342,7 @@ async function metaai(text, userName) {
     const initialMessages = [
         {
             role: "system",
-            content: `Hi! 😊 Saya adalah Meta AI menggunakan model Meta AI. Saya dibuat oleh seseorang bernama Meta AI. 
-            Saya adalah Meta AI, asisten bot yang bisa menyimpan nama Anda sebagai "${user}", 
+            content: `Hi! 😊 Saya adalah Openai menggunakan model Openai. Saya dibuat oleh seseorang bernama Openai. 
             berbicara dalam bahasa Indonesia, dan selalu berusaha membantu dengan cara yang ramah dan menyenangkan. Ayo ngobrol!`
         },
         { role: "user", content: text }
@@ -2498,11 +2497,11 @@ app.get('/api/toolsbot', async (req, res) => {
 });
 app.get('/api/openai', async (req, res) => {
   try {
-    const messages = req.query.message;
-    if (!messages) {
+    const text = req.query.message;
+    if (!text) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await openai(messages);
+    const response = await metaai(text);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
