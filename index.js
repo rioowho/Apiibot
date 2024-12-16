@@ -14,6 +14,8 @@ const cheerio = require('cheerio');
 const qs = require("qs");
 const nodemailer = require('nodemailer');
 const { chromium } = require('playwright');
+const { createCanvas } = require('canvas');
+const Jimp = require('jimp');
 const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
@@ -36,6 +38,85 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+
+
+async function BratGenerator(teks) {
+  const width = 512;
+  const height = 512;
+  const margin = 20;
+  const wordSpacing = 50;
+
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, width, height);
+
+  let fontSize = 80;
+  const lineHeightMultiplier = 1.3;
+
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillStyle = 'black';
+
+  const words = teks.split(' ');
+  let lines = [];
+
+  const rebuildLines = () => {
+    lines = [];
+    let currentLine = '';
+
+    for (let word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const lineWidth =
+        ctx.measureText(testLine).width + (currentLine.split(' ').length - 1) * wordSpacing;
+
+      if (lineWidth < width - 2 * margin) {
+        currentLine = testLine;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+  };
+
+  ctx.font = `${fontSize}px Sans-serif`;
+  rebuildLines();
+
+  while (lines.length * fontSize * lineHeightMultiplier > height - 2 * margin) {
+    fontSize -= 2;
+    ctx.font = `${fontSize}px Sans-serif`;
+    rebuildLines();
+  }
+
+  const lineHeight = fontSize * lineHeightMultiplier;
+  let y = margin;
+
+  for (const line of lines) {
+    const wordsInLine = line.split(' ');
+    let x = margin;
+
+    for (const word of wordsInLine) {
+      ctx.fillText(word, x, y);
+      x += ctx.measureText(word).width + wordSpacing;
+    }
+
+    y += lineHeight;
+  }
+
+  const buffer = canvas.toBuffer('image/png');
+  const image = await Jimp.read(buffer);
+
+  image.blur(3);
+  const blurredBuffer = await image.getBufferAsync(Jimp.MIME_PNG);
+
+  return blurredBuffer;
+}
+
 
 async function sendEmail(recipientEmail, text) {
     // Konfigurasi transporter
@@ -2427,6 +2508,24 @@ app.get('/pro', (req, res) => {
 });
 app.get('/ttdlzx', (req, res) => {
 	res.sendFile(__path + "/views/tiktokdl.html");
+});
+// Endpoint API (GET)
+app.get('/api/brat', async (req, res) => {
+  try {
+    const text = req.query.text;
+
+    if (!text) {
+      return res.status(400).send({ error: 'Text query parameter is required' });
+    }
+
+    const imageBuffer = await BratGenerator(text);
+
+    res.setHeader('Content-Type', 'image/png');
+    res.send(imageBuffer);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: 'Something went wrong' });
+  }
 });
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
