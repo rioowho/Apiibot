@@ -37,10 +37,9 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+registerFont('./lib/arialnarrow.ttf', { family: 'ArialNarrow' });
 
 async function BratGenerator(teks) {
-    registerFont('./lib/arialnarrow.ttf', { family: 'ArialNarrow' }); // Pastikan lokasi font sesuai
-
     const canvas = createCanvas(512, 512);
     const ctx = canvas.getContext('2d');
 
@@ -2524,21 +2523,22 @@ app.get('/ttdlzx', (req, res) => {
 });
 // Endpoint API (GET)
 app.get('/api/brat', async (req, res) => {
-  try {
-    const text = req.query.text;
+    try {
+        const { text } = req.query;
 
-    if (!text) {
-      return res.status(400).send({ error: 'Text query parameter is required' });
+        if (!text) {
+            return res.status(400).json({ error: 'Text parameter is required' });
+        }
+
+        const imageBuffer = await BratGenerator(text);
+
+        // Send image buffer as response
+        res.setHeader('Content-Type', 'image/png');
+        res.send(imageBuffer);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-
-    const imageBuffer = await BratGenerator(text);
-
-    res.setHeader('Content-Type', 'image/png');
-    res.send(imageBuffer);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: 'Something went wrong' });
-  }
 });
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
