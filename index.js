@@ -2540,7 +2540,7 @@ app.get('/api/venice', async (req, res) => {
   res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: { response.data }
+      data: { response }
     });
   } catch (error) {
     console.error(error);
