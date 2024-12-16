@@ -12,6 +12,7 @@ const FormData = require('form-data');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const qs = require("qs");
+const nodemailer = require('nodemailer');
 const { chromium } = require('playwright');
 const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
@@ -36,29 +37,46 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-const searchYandex = async (query) => {
-    const url = `https://yandex.com/search/?text=${encodeURIComponent(query)}`;
+
+async function sendEmail(emailContent, text) {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'riooapii@gmail.com', 
+            pass: 'kftkrgnziwwumkwq',
+        },
+    });
+
+    // Konfigurasi email
+    const mailOptions = {
+      from: {
+        name: "Rioo Api's - SendGmail",
+        address: "riooapii@gmail.com",
+      },
+      to: emailContent,
+      subject: "Email Verification",
+      html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Apa?</title>
+</head>
+<body>
+    <h1 style="color: blue;">${text}</h1>
+    <p>Create By Rioo Api's</p>
+    <p>Semoga harimu menyenangkan!</p>
+</body>
+</html>`,
+    };
 
     try {
-        const response = await axios.get(url);
-        const html = response.data;
-        const $ = cheerio.load(html);
-        const results = $('.serp-item');
-
-        results.each(function() {
-            const title = $(this).find('.link.link_theme_normal').text();
-            const link = $(this).find('.link.link_theme_normal').attr('href');
-            const snippet = $(this).find('.text-container').text();
-            
-            console.log('Title:', title);
-            console.log('Link:', link);
-            console.log('Snippet:', snippet);
-            console.log('-------------------------');
-        });
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent: ' + info.response);
     } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error during email sending:', error);
     }
-};
+}
 
 const audioQualityy = [320, 256, 192, 128, 64];
 
@@ -2955,22 +2973,7 @@ app.get('/api/search-sfile', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/search-yandex', async (req, res) => {
-  try {
-    const query = req.query.message;
-    if (!query) {
-      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
-    }
-    const response = await searchYandex(query);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+
 app.get('/api/ytmp4', async (req, res) => {
   try {
     const url = req.query.url;
@@ -3163,7 +3166,26 @@ app.get('/api/encrypt', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+app.get('/api/sendmail', async (req, res) => {
+  try {
+    const emailContent = req.query.email;
+    const text = req.query.text;
+    if (!emailContent) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    if (!text) {
+      return res.status(403).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await sendEmail(emailContent, text);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 app.get('/api/status', async (req, res) => {
 function muptime(seconds) {
 	function pad(s) {
