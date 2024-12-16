@@ -27,6 +27,7 @@
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "node-fetch": "^2.6.7",
+    "nodemailer": "^6.9.12",
     "cheerio": "github:Tiooxy/cheerio",
     "node-cache": "^5.1.2",
     "jimp": "^0.22.10",
