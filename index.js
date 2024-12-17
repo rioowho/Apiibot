@@ -12,6 +12,7 @@ const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const qs = require("qs");
 const nodemailer = require('nodemailer');
+const { uuidv4 } = require('uuid');
 const { chromium } = require('playwright');
 const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
@@ -36,6 +37,63 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+
+
+const felo = {
+  ask: async function(query) {
+    const headers = {
+      "Accept": "*/*",
+      "User-Agent": "Postify/1.0.0",
+      "Content-Encoding": "gzip, deflate, br, zstd",
+      "Content-Type": "application/json",
+    };
+
+    const payload = {
+      query,
+      search_uuid: uuidv4().replace(/-/g, ''),
+      search_options: { langcode: "id-MM" },
+      search_video: true,
+    };
+
+    const request = (badi) => {
+      const result = { answer: '', source: [] };
+      badi.split('\n').forEach(line => {
+        if (line.startsWith('data:')) {
+          try {
+            const data = JSON.parse(line.slice(5).trim());
+            if (data.data) {
+              if (data.data.text) {
+                result.answer = data.data.text.replace(/\d+/g, '');
+              }
+              if (data.data.sources) {
+                result.source = data.data.sources;
+              }
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      });
+      return result;
+    };
+
+    try {
+      const response = await axios.post("https://api.felo.ai/search/threads", payload, {
+        headers,
+        timeout: 30000,
+        responseType: 'text',
+      });
+
+      return request(response.data);
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+};
+
+
+
 async function stickersearch(query) {
 return new Promise((resolve) => {
 axios.get(`https://getstickerpack.com/stickers?query=${query}`).then(({ data }) => {
@@ -2661,68 +2719,24 @@ app.get('/api/toolsbot', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/venice', async (req, res) => {
-  const text = req.query.text;
-  
-  // Validasi input
-  if (!text) {
-    return res.status(400).json({ message: 'Parameter "text" diperlukan.' });
+app.get('/api/felo', async (req, res) => {
+try {
+  const query = req.query.query;
+
+  if (!query) {
+    return res.status(400).json({ error: 'Query parameter is required' });
   }
 
-  const url = "https://venice.ai/api/inference/chat";
-  const headers = {
-    "Content-Type": "application/json",
-    "Accept": "*/*",
-    "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36",
-    "Origin": "https://venice.ai",
-    "Referer": "https://venice.ai/chat/-HHJm0iVraY6pseSLqhW1",
-    "X-Venice-Version": "20241212.161154",
-    "Sec-CH-UA": "\"Google Chrome\";v=\"129\", \"Not=A?Brand\";v=\"8\", \"Chromium\";v=\"129\"",
-    "Sec-CH-UA-Mobile": "?1",
-    "Sec-CH-UA-Platform": "\"Android\""
-  };
-
-  const data = {
-    requestId: "Rioo?",
-    modelId: "llama-3.3-70b",
-    prompt: [
-      { content: "hai nama aku adalah Rioo", role: "user" },
-      { content: "baiklah Rioo", role: "assistant" },
-      { content: text, role: "user" }
-    ],
-    systemPrompt: "",
-    conversationType: "text",
-    temperature: 0.8,
-    webEnabled: true,
-    topP: 0.9,
-    isCharacter: false,
-    clientProcessingTime: 634
-  };
-
-  try {
-    // Kirim permintaan ke API Venice
-    const response = await axios.post(url, data, { headers });
-
-    // Ambil data yang relevan dari respons
-    const responseData = response.data;
-
-    // Kembalikan hasil ke pengguna
+  const result = await felo.ask(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: responseData
+      result: result 
     });
   } catch (error) {
-    console.error('Error:', error.message);
-
-    // Tangani kesalahan
-    res.status(500).json({
-      message: 'Terjadi kesalahan saat memproses permintaan.',
-      error: error.response ? error.response.data : error.message
-    });
+    res.status(500).json({ error: error.message });
   }
 });
-
 app.get('/api/openai', async (req, res) => {
   try {
     const text = req.query.message;
