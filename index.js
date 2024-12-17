@@ -62,7 +62,7 @@ class Claude {
     };
   }
 
-  getOrganizationId() {
+  async getOrganizationId() {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch("https://claude.ai/api/organizations", {
@@ -77,7 +77,7 @@ class Claude {
     });
   }
 
-  create() {
+  async create() {
     return new Promise(async (resolve, reject) => {
       try {
         const organizationId = await this.getOrganizationId();
@@ -101,7 +101,7 @@ class Claude {
     });
   }
 
-  chat(text) {
+ async chat(text) {
     return new Promise(async (resolve, reject) => {
       try {
         const chat = await this.create();
