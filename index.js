@@ -38,7 +38,32 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-
+async function gpt35turbo(inputValue) {
+    try {
+        const chatApiUrl = 'https://api.chatanywhere.com.cn/v1/chat/completions';
+        const chatResponse = await fetch(chatApiUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer sk-pu4PasDkEf284PIbVr1r5jn9rlvbAJESZGpPbK7OFYYR6m9g',
+                'Content-Type': 'application/json;charset=UTF-8',
+            },
+            body: JSON.stringify({
+                model: "gpt-3.5-turbo",
+                messages: [{
+                    role: "system",
+                    content: "hallo world, Kamu adalah AI asisten. siap membantu segala hal dengan senang hati. kamu diciptakan oleh Rioo dan Rioo adalah pemula bot yang sudah lama Di Bully Sama Sepuh Kek Kalian ini. gunakan emoji sesuai dengan jawaban di setiap kalimat."
+                }, {
+                    role: "user",
+                    content: inputValue
+                }]
+            }),
+        });
+        const chatData = await chatResponse.json();
+        return chatData.choices[0].message.content;
+    } catch (error) {
+        throw error;
+    }
+}
 const felo = {
   ask: async function(query) {
     const headers = {
@@ -2809,11 +2834,11 @@ app.get('/api/bingimg', async (req, res) => {
 });
 app.get('/api/gptturbo', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const inputValue = req.query.message;
+    if (!inputValue) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await gptturbo(message);
+    const response = await gpt35turbo(inputValue);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
