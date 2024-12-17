@@ -574,7 +574,40 @@ return textt
     throw error;
   }
 }
+async function geminiimg(prompt, imageUrl) {
+  try {
+    const safetySettings = [
+      {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+      },
+    ];
 
+    const modello = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      safetySettings: safetySettings,
+    });
+
+    // Menyiapkan input prompt dan URL gambar
+    const inputContent = [
+      { type: "text", text: prompt }, // Menambahkan teks prompt
+      { type: "image_url", url: imageUrl }, // Menambahkan URL gambar
+    ];
+
+    // Mengirim input ke model
+    const resultt = await modello.generateContent(inputContent);
+    const responsek = await resultt.response;
+    const textt = responsek.text();
+    return textt;
+  } catch (error) {
+    console.error("Error generating content:", error);
+    throw error;
+  }
+}
 async function llama(query) {
   // Dapatkan waktu, hari, dan tanggal saat ini
   const now = moment().tz("Asia/Jakarta"); // Ganti dengan zona waktu Anda
@@ -2486,7 +2519,26 @@ app.get('/api/gemini', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+app.get('/api/geminiimg', async (req, res) => {
+  try {
+    const prompt = req.query.message;
+    const imageUrl = req.query.imageUrl;
+    if (!prompt) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+        if (!imageUrl) {
+      return res.status(403).json({ error: 'Parameter "imageUrl" tidak ditemukan' });
+    }
+    const response = await geminiimg(prompt, imageUrl);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 // Endpoint untuk degreeGuru
 app.get('/api/degreeguru', async (req, res) => {
   try {
