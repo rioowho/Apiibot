@@ -3159,7 +3159,7 @@ app.get('/api/igdl', async (req, res) => {
   }
 });
 app.get('/api/remini', async (req, res) => {
-    const { url } = req.query;
+    const url = req.query.url;
 
     if (!url) {
         return res.status(400).json({ error: 'imageUrl parameter is required' });
@@ -3167,13 +3167,29 @@ app.get('/api/remini', async (req, res) => {
 
     try {
         const response = await fetch(`https://pxpic.com/callPhotoEnhancer?imageUrl=${encodeURIComponent(url)}`, {
-            method: 'GET',
+            method: 'POST',
         });
+        
+        // Check if the response is OK (status 200-299)
+        if (!response.ok) {
+            return res.status(response.status).json({ error: 'Failed to fetch image enhancement' });
+        }
+
         const result = await response.json();
-        res.json({ resultImageUrl: result.resultImageUrl });
+
+        if (result.resultImageUrl) {
+            res.json({ resultImageUrl: result.resultImageUrl });
+        } else {
+            res.status(500).json({ error: 'No result image URL returned' });
+        }
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Failed to fetch image enhancement' });
     }
+});
+
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
 });
 
 app.get('/api/encrypt', async (req, res) => {
