@@ -3159,21 +3159,23 @@ app.get('/api/igdl', async (req, res) => {
   }
 });
 app.get('/api/remini', async (req, res) => {
-  try {
-    const url = req.query.url;
-    if (!url) {
-      return res.status(400).json({ error: 'Parameter "image" tidak ditemukan' });
+    const { imageUrl } = req.query;
+
+    if (!imageUrl) {
+        return res.status(400).json({ error: 'imageUrl parameter is required' });
     }
-    const response = await imagetohd(url);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+
+    try {
+        const response = await fetch(`https://pxpic.com/callPhotoEnhancer?imageUrl=${encodeURIComponent(imageUrl)}`, {
+            method: 'GET',
+        });
+        const result = await response.json();
+        res.json({ resultImageUrl: result.resultImageUrl });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch image enhancement' });
+    }
 });
+
 app.get('/api/encrypt', async (req, res) => {
   try {
     const query = req.query.message;
