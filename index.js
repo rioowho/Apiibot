@@ -2428,23 +2428,26 @@ app.get('/pro', (req, res) => {
 app.get('/ttdlzx', (req, res) => {
 	res.sendFile(__path + "/views/tiktokdl.html");
 });
-// Endpoint API (GET)
-// Define the API endpoint (using GET)
+
 app.get('/api/brat', async (req, res) => {
   try {
     const teks = req.query.text; // Get 'teks' from the query parameter
     if (!teks) {
-      return res.status(400).json({ error: 'Text (teks) query parameter is required' });
+      return res.status(400).json({ error: 'Text (text) query parameter is required' });
     }
 
-    // Call BratGenerator to generate the image
+    // Ensure the text is not empty
+    if (teks.trim().length === 0) {
+      return res.status(400).json({ error: 'Text cannot be empty' });
+    }
+
     const imageBuffer = await BratGenerator(teks);
 
     // Send the generated image buffer as a response
     res.set('Content-Type', 'image/png');
     res.send(imageBuffer);
   } catch (error) {
-    console.error(error);
+    console.error('Error generating image:', error);
     res.status(500).json({ error: 'An error occurred while generating the image' });
   }
 });
