@@ -2512,7 +2512,7 @@ app.get('/ttdlzx', (req, res) => {
 // Endpoint API (GET)
 app.get('/api/brat', async (req, res) => {
     try {
-        const { text } = req.query;
+        const text = req.query.text;
 
         if (!text) {
             return res.status(400).json({ error: 'Text parameter is required' });
