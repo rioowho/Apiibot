@@ -3082,7 +3082,7 @@ app.get('/api/search-sticker', async (req, res) => {
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: { response }
+      result: response 
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
