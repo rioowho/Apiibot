@@ -14,8 +14,8 @@ const qs = require("qs");
 const nodemailer = require('nodemailer');
 const { chromium } = require('playwright');
 const { Buffer } = require('buffer');
-const { createCanvas, registerFont } = require('canvas');
-const Jimp = require('jimp');
+let { createCanvas } = require('canvas');
+let Jimp = require('jimp');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
@@ -37,40 +37,36 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-// Function to generate the image
 async function BratGenerator(teks) {
-  registerFont('./lib/arialnarrow.ttf', { family: 'ArialNarrow' });
-  const width = 1024; // Resolusi tinggi
-  const height = 1024;
-  const margin = 40; // Margin lebih luas
+  let width = 512;
+  let height = 512;
+  let margin = 20;
+  let wordSpacing = 50; 
+  
+  let canvas = createCanvas(width, height);
+  let ctx = canvas.getContext('2d');
 
-  const fontFamily = 'ArialNarrow'; // Gunakan font custom
-  const canvas = createCanvas(width, height);
-  const ctx = canvas.getContext('2d');
-
-  // Background putih
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, width, height);
 
-  // Atur font
-  let fontSize = 100;
+  let fontSize = 80;
   let lineHeightMultiplier = 1.3;
 
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
   ctx.fillStyle = 'black';
 
-  // Proses memecah teks menjadi baris
   let words = teks.split(' ');
   let lines = [];
 
-  const rebuildLines = () => {
+  let rebuildLines = () => {
     lines = [];
     let currentLine = '';
 
     for (let word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const lineWidth = ctx.measureText(testLine).width;
+      let testLine = currentLine ? `${currentLine} ${word}` : word;
+      let lineWidth =
+        ctx.measureText(testLine).width + (currentLine.split(' ').length - 1) * wordSpacing;
 
       if (lineWidth < width - 2 * margin) {
         currentLine = testLine;
@@ -85,37 +81,39 @@ async function BratGenerator(teks) {
     }
   };
 
-  ctx.font = `${fontSize}px ${fontFamily}`;
+  ctx.font = `${fontSize}px Sans-serif`;
   rebuildLines();
 
-  // Perkecil font jika teks melebihi batas
   while (lines.length * fontSize * lineHeightMultiplier > height - 2 * margin) {
     fontSize -= 2;
-    ctx.font = `${fontSize}px ${fontFamily}`;
+    ctx.font = `${fontSize}px Sans-serif`;
     rebuildLines();
   }
-
-  // Render teks
-  const lineHeight = fontSize * lineHeightMultiplier;
+  
+  let lineHeight = fontSize * lineHeightMultiplier;
   let y = margin;
 
   for (let line of lines) {
-    ctx.fillText(line, margin, y);
+    let wordsInLine = line.split(' ');
+    let x = margin;
+
+    for (let word of wordsInLine) {
+      ctx.fillText(word, x, y);
+      x += ctx.measureText(word).width + wordSpacing;
+    }
+    
     y += lineHeight;
   }
 
-  // Konversi ke buffer
-  const buffer = canvas.toBuffer('image/png');
-  
-  // Jika Anda ingin melakukan pengolahan gambar lebih lanjut, bisa menggunakan Jimp
-  const image = await Jimp.read(buffer);
+  let buffer = canvas.toBuffer('image/png');
+  let image = await Jimp.read(buffer);
 
-  // Jika Anda ingin mengurangi blur, lakukan pengolahan lain jika perlu
-  image.blur(1); // Blur minimal untuk efek halus
-  const finalBuffer = await image.getBufferAsync(Jimp.MIME_PNG);
+  image.blur(3);
+  let blurredBuffer = await image.getBufferAsync(Jimp.MIME_PNG);
 
-  return finalBuffer;
+  return blurredBuffer;
 }
+
 
 async function sendEmail(recipientEmail, text) {
     // Konfigurasi transporter
