@@ -37,16 +37,13 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-
-
+// Function to generate the image
 async function BratGenerator(teks) {
+  registerFont('./lib/arialnarrow.ttf', { family: 'ArialNarrow' });
   const width = 1024; // Resolusi tinggi
   const height = 1024;
   const margin = 40; // Margin lebih luas
-  const wordSpacing = 20; // Spasi antar kata lebih rapat
 
-  // Pilih font berkualitas (daftarkan font jika perlu)
-  registerFont('./lib/arialnarrow.ttf', { family: 'ArialNarrow' });
   const fontFamily = 'ArialNarrow'; // Gunakan font custom
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
@@ -107,11 +104,13 @@ async function BratGenerator(teks) {
     y += lineHeight;
   }
 
-  // Konversi ke buffer dengan Jimp
+  // Konversi ke buffer
   const buffer = canvas.toBuffer('image/png');
+  
+  // Jika Anda ingin melakukan pengolahan gambar lebih lanjut, bisa menggunakan Jimp
   const image = await Jimp.read(buffer);
 
-  // Kurangi tingkat blur agar teks tajam
+  // Jika Anda ingin mengurangi blur, lakukan pengolahan lain jika perlu
   image.blur(1); // Blur minimal untuk efek halus
   const finalBuffer = await image.getBufferAsync(Jimp.MIME_PNG);
 
@@ -2510,23 +2509,24 @@ app.get('/ttdlzx', (req, res) => {
 	res.sendFile(__path + "/views/tiktokdl.html");
 });
 // Endpoint API (GET)
+// Define the API endpoint (using GET)
 app.get('/api/brat', async (req, res) => {
-    try {
-        const text = req.query.text;
-
-        if (!text) {
-            return res.status(400).json({ error: 'Text parameter is required' });
-        }
-
-        const imageBuffer = await BratGenerator(text);
-
-        // Send image buffer as response
-        res.setHeader('Content-Type', 'image/png');
-        res.send(imageBuffer);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal server error' });
+  try {
+    const teks = req.query.text; // Get 'teks' from the query parameter
+    if (!teks) {
+      return res.status(400).json({ error: 'Text (teks) query parameter is required' });
     }
+
+    // Call BratGenerator to generate the image
+    const imageBuffer = await BratGenerator(teks);
+
+    // Send the generated image buffer as a response
+    res.set('Content-Type', 'image/png');
+    res.send(imageBuffer);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while generating the image' });
+  }
 });
 // Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
