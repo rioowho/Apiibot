@@ -3159,14 +3159,14 @@ app.get('/api/igdl', async (req, res) => {
   }
 });
 app.get('/api/remini', async (req, res) => {
-    const { imageUrl } = req.query;
+    const { url } = req.query;
 
-    if (!imageUrl) {
+    if (!url) {
         return res.status(400).json({ error: 'imageUrl parameter is required' });
     }
 
     try {
-        const response = await fetch(`https://pxpic.com/callPhotoEnhancer?imageUrl=${encodeURIComponent(imageUrl)}`, {
+        const response = await fetch(`https://pxpic.com/callPhotoEnhancer?imageUrl=${encodeURIComponent(url)}`, {
             method: 'GET',
         });
         const result = await response.json();
