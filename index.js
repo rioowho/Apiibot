@@ -2440,7 +2440,7 @@ async function bardd(query) {
         const answer = parsedResponse[4][0][1];
 
         // Kembalikan jawaban
-        return "data" + answer;
+        return answer;
     } catch (error) {
         console.error("Terjadi kesalahan:", error.message);
         return "Gagal mendapatkan respons dari server.";
