@@ -3188,10 +3188,6 @@ app.get('/api/remini', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
-
 app.get('/api/encrypt', async (req, res) => {
   try {
     const query = req.query.message;
