@@ -2769,10 +2769,9 @@ app.get('/api/brat', async (req, res) => {
     const imageBuffer = await BratGenerator(teks);
 
     // Send the generated image buffer as a response
-    res.set('Content-Type', 'image/png');
+    res.set('Content-Type', 'image/jpg');
     res.send(imageBuffer);
   } catch (error) {
-    console.error('Error generating image:', error);
     res.status(500).json({ error: 'An error occurred while generating the image' });
   }
 });
