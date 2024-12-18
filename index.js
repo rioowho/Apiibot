@@ -3533,7 +3533,7 @@ app.get('/api/igdl', async (req, res) => {
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: { response }
+      data: response 
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
