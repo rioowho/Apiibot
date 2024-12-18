@@ -37,104 +37,151 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-class Claude {
-  constructor(cookie) {
-    this.cookie = cookie;
-    this.organizationId = undefined;
-  }
 
-  getHeaders() {
-    return {
-      accept: "text/event-stream, text/event-stream",
-      "accept-language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
-      baggage:
-        "sentry-environment=production,sentry-release=7056d48863ef1ff17036d5f9a9ce84133c63abfc,sentry-public_key=58e9b9d0fc244061a1b54fe288b0e483,sentry-trace_id=963e5c5cde6a43219b5c61e9fd8b5be6",
-      "content-type": "application/json",
-      "sec-ch-ua": '"Not_A Brand";v="8", "Chromium";v="120"',
-      "sec-ch-ua-mobile": "?1",
-      "sec-ch-ua-platform": '"Android"',
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      "sentry-trace": "963e5c5cde6a43219b5c61e9fd8b5be6-b9f5b45af75131c2-0",
-      cookie: this.cookie,
-      Referer: "https://claude.ai/chats",
-    };
-  }
+const appleMusic = {
+ search: async (query) => {
+ const url = `https://music.apple.com/us/search?term=${query}`;
+ try {
+ const { data } = await axios.get(url);
+ const $ = cheerio.load(data);
+ const results = [];
+ $('.desktop-search-page .section[data-testid="section-container"] .grid-item').each((index, element) => {
+ const title = $(element).find('.top-search-lockup__primary__title').text().trim();
+ const subtitle = $(element).find('.top-search-lockup__secondary').text().trim();
+ const link = $(element).find('.click-action').attr('href');
 
-  async getOrganizationId() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const response = await fetch("https://claude.ai/api/organizations", {
-          headers: this.getHeaders(),
-        });
-        const res = await response.json();
-      //  const uuid = res[0].uuid;
-        resolve(res);
-      } catch (e) {
-        reject(e);
-      }
-    });
-  }
+ results.push({
+ title,
+ subtitle,
+ link
+ });
+ });
 
-  async create() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const organizationId = await this.getOrganizationId();
-        this.organizationId = organizationId;
-        const response = await fetch(
-          `https://claude.ai/api/organizations/4cc4ea19-f8da-4afa-8a97-ce3e15c61d6d/chat_conversations`,
-          {
-            headers: this.getHeaders(),
-            method: "POST",
-            body: JSON.stringify({
-              uuid: uuidv4(),
-              name: "",
-            }),
-          },
-        );
-        const res = await response.json();
-        resolve(res);
-      } catch (e) {
-        reject(e);
-      }
-    });
-  }
+ return results;
+ } catch (error) {
+ console.error("Error:", error.response ? error.response.data : error.message);
+ return { success: false, message: error.message };
+ }
+ },
+ detail: async (url) => {
+ try {
+ const { data } = await axios.get(url);
+ const $ = cheerio.load(data);
+ const albumTitle = $('h1[data-testid="non-editable-product-title"]').text().trim();
+ const artistName = $('a[data-testid="click-action"]').first().text().trim();
+ const releaseInfo = $('div.headings__metadata-bottom').text().trim();
+ const description = $('div[data-testid="description"]').text().trim();
 
- async chat(text) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const chat = await this.create();
-        const response = await fetch(
-          `https://claude.ai/api/organizations/4cc4ea19-f8da-4afa-8a97-ce3e15c61d6d/chat_conversations/de37331e-19d3-4bb6-9e39-18f9400b9ac1/completion`,
-          {
-            headers: this.getHeaders(),
-            method: "POST",
-            body: JSON.stringify({
-              prompt: text,
-              timezone: "Asia/Jakarta",
-              model: "claude-2.1",
-              attachments: [],
-              files: [],
-            }),
-          },
-        );
-        const data = await response.text();
-        console.log(data)
-        const regex = /"completion":"(.*?)"/g;
-        let matches = [];
-        let match;
+ const result = {
+ albumTitle,
+ artistName,
+ releaseInfo,
+ description
+ };
 
-        while ((match = regex.exec(data)) !== null) {
-          matches.push(match[1]);
-        }
-        const textResult = matches.join("").replace(/ +/g, " ").trim();
-        resolve({result: textResult.replace(/\\n/g, '\n')});
-      } catch (e) {
-        reject(e);
-      }
-    });
-  }
+ return result;
+ } catch (error) {
+ console.error("Error:", error.response ? error.response.data : error.message);
+ return { success: false, message: error.message };
+ }
+ }
+}
+
+const appledown = {
+ getData: async (urls) => {
+ const url = `https://aaplmusicdownloader.com/api/applesearch.php?url=${urls}`;
+ try {
+ const response = await axios.get(url, {
+ headers: {
+ 'Accept': 'application/json, text/javascript, */*; q=0.01',
+ 'X-Requested-With': 'XMLHttpRequest',
+ 'User-Agent': 'MyApp/1.0',
+ 'Referer': 'https://aaplmusicdownloader.com/'
+ }
+ });
+ return response.data;
+ } catch (error) {
+ return { success: false, message: error.message };
+ console.error("Error:", error.response ? error.response.data : error.message);
+ }
+ },
+ getAudio: async (trackName, artist, urlMusic, token) => {
+ const url = 'https://aaplmusicdownloader.com/api/composer/swd.php';
+ const data = {
+ song_name: trackName,
+ artist_name: artist,
+ url: urlMusic,
+ token: token
+ };
+ const headers = {
+ 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+ 'Accept': 'application/json, text/javascript, */*; q=0.01',
+ 'X-Requested-With': 'XMLHttpRequest',
+ 'User-Agent': 'MyApp/1.0',
+ 'Referer': 'https://aaplmusicdownloader.com/song.php#'
+ };
+ try {
+ const response = await axios.post(url, qs.stringify(data), { headers });
+ const downloadLink = response.data.dlink;
+ return downloadLink;
+ } catch (error) {
+ return { success: false, message: error.message };
+ console.error("Error:", error.response ? error.response.data : error.message);
+ }
+ },
+ download: async (urls) => {
+ const musicData = await appledown.getData(urls);
+ if (musicData) {
+ const encodedData = encodeURIComponent(JSON.stringify([
+ musicData.name,
+ musicData.albumname,
+ musicData.artist,
+ musicData.thumb,
+ musicData.duration,
+ musicData.url
+ ]));
+ const url = 'https://aaplmusicdownloader.com/song.php';
+ const headers = {
+ 'authority': 'aaplmusicdownloader.com',
+ 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+ 'accept-language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+ 'cache-control': 'max-age=0',
+ 'content-type': 'application/x-www-form-urlencoded',
+ 'origin': 'https://aaplmusicdownloader.com',
+ 'referer': 'https://aaplmusicdownloader.com/',
+ 'user-agent': 'MyApp/1.0'
+ };
+ const data = `data=${encodedData}`;
+ try {
+ const response = await axios.post(url, data, { headers });
+ const htmlData = response.data;
+ const $ = cheerio.load(htmlData);
+ const trackName = $('td:contains("Track Name:")').next().text();
+ const albumName = $('td:contains("Album:")').next().text();
+ const duration = $('td:contains("Duration:")').next().text();
+ const artist = $('td:contains("Artist:")').next().text();
+ const thumb = $('figure.image img').attr('src');
+ const urlMusic = urls;
+ const token = $('a#download_btn').attr('token');
+ const downloadLink = await appledown.getAudio(trackName, artist, urlMusic, token);
+
+ const extractedData = {
+ name: trackName,
+ albumname: albumName,
+ artist: artist,
+ url: urlMusic,
+ thumb: thumb,
+ duration: duration,
+ token: token,
+ download: downloadLink
+ };
+ return extractedData;
+ } catch (error) {
+ return { success: false, message: error.message };
+ console.error("Error:", error.response ? error.response.data : error.message); 
+ }
+ }
+ }
 }
 async function gpt35turbo(inputValue) {
     try {
@@ -3218,6 +3265,22 @@ app.get('/api/search-tiktok', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+app.get('/api/search-applemusic', async (req, res) => {
+  try {
+    const message = req.query.message;
+    if (!message) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await appleMusic.search(message);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      result: response 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 app.get('/api/search-sticker', async (req, res) => {
   try {
     const query = req.query.text;
@@ -3294,6 +3357,38 @@ app.get('/api/ytmp4', async (req, res) => {
       status: 200,
       creator: "RiooXdzz",
       data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/appledl', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await appledown.download(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      result: response 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/appleaudio', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    }
+    const response = await appledown.getAudio(url);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      result: response 
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
