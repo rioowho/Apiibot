@@ -3265,13 +3265,14 @@ app.get('/api/search-tiktok', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/search-applemusic', async (req, res) => {
+
+app.get('/api/search-sticker', async (req, res) => {
   try {
-    const message = req.query.message;
-    if (!message) {
+    const query = req.query.text;
+    if (!query) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await appleMusic.search(message);
+    const response = await stickersearch(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -3281,13 +3282,13 @@ app.get('/api/search-applemusic', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/search-sticker', async (req, res) => {
+app.get('/api/search-applemusic', async (req, res) => {
   try {
-    const query = req.query.text;
+    const query = req.query.query;
     if (!query) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await stickersearch(query);
+    const response = await appleMusic.search(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
