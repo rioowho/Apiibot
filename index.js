@@ -1495,30 +1495,23 @@ async function obfus(query) {
 			})
 		}
 async function ytmp3(linkurl) {
-  try {
-    const response = await axios.post(
-      "https://c.blahaj.ca/", // Pastikan endpoint ini valid
-      {
-        url: linkurl, // Menggunakan linkurl langsung
-        downloadMode: 'audio', // Pilihan mode download
-      },
-      {
-        headers: {
-         'Accept': 'application/json, text/plain, */*',
-           "Content-Type": "application/json",
-            "Accept": "application/json",
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
-            'Referer': 'https://c.blahaj.ca/',
-        },
+try {
+const response = await axios.post("https://cobalt.siputzx.my.id/", {
+      url: linkurl,
+      downloadMode: "audio",
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
       }
-    );
+    });
 
-    // Mengembalikan response data yang didapatkan
-    return response.data; 
+    return response.data
     } catch (error) {
         console.error("Terjadi kesalahan:", error);
     }
 }
+
 async function body(url, body) {
     try {
         var response = await fetch(url, {
