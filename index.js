@@ -37,6 +37,43 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+const express = require('express');
+const axios = require('axios');
+
+const app = express();
+const port = 3000;
+
+const headers = {
+    'authority': 'api.sylica.eu.org',
+    'origin': 'https://www.kauruka.com',
+    'referer': 'https://www.kauruka.com/',
+    'user-agent': 'Postify/1.0.0'
+};
+
+function extractId(link) {
+    const match = link.match(/s\/([a-zA-Z0-9]+)$|surl=([a-zA-Z0-9]+)$/);
+    return match ? (match[1] || match[2]) : null;
+}
+
+function response(data, includeDL = false) {
+    const responseObj = {
+        filename: data.filename,
+        size: data.size,
+        shareid: data.shareid,
+        uk: data.uk,
+        sign: data.sign,
+        timestamp: data.timestamp,
+        createTime: data.create_time,
+        fsId: data.fs_id,
+        message: data.message || 'Gak tau 🙂‍↔️'
+    };
+
+    if (includeDL) {
+        responseObj.dlink = data.downloadLink;
+    }
+
+    return responseObj;
+}
 
 const appleMusic = {
  search: async (query) => {
@@ -1161,54 +1198,6 @@ function extractId(link) {
     return match ? (match[1] || match[2]) : null;
 }
 
-
-const terabox = {
-    detail: async function(link) {
-        const id = extractId(link);
-        if (!id) throw new Error('Masukin link terabox nya yang bener!!! Gua colok juga nanti mata sia 🫵');
-
-        try {
-            const { data } = await axios.get(`https://api.sylica.eu.org/terabox/?id=${id}`, { headers });
-            return response(data.data);
-        } catch (error) {
-            console.error(error);
-            throw new Error('Error ceunah bree 🗿');
-        }
-    },
-
-    dl: async function(link) {
-        const id = extractId(link);
-        if (!id) throw new Error('Masukin link terabox nya yang bener!!! Gua colok juga nanti mata sia 🫵');
-
-        try {
-            const { data } = await axios.get(`https://api.sylica.eu.org/terabox/?id=${id}&download=1`, { headers });
-            return response(data.data, true);
-        } catch (error) {
-            console.error(error);
-            throw new Error('Error ceunah bree 🗿');
-        }
-    }
-};
-
-function response(data, includeDL = false) {
-    const response = {
-        filename: data.filename,
-        size: data.size,
-        shareid: data.shareid,
-        uk: data.uk,
-        sign: data.sign,
-        timestamp: data.timestamp,
-        createTime: data.create_time,
-        fsId: data.fs_id,
-        message: data.message || 'Gak tau 🙂‍↔️'
-    };
-
-    if (includeDL) {
-        response.dlink = data.downloadLink;
-    }
-
-    return response;
-}
 
 async function LetmeGpt(query) {
   const encodedQuery = encodeURIComponent(query);
@@ -3507,20 +3496,23 @@ app.get('/api/aio', async (req, res) => {
   }
 });
 app.get('/api/terabox', async (req, res) => {
-  try {
-    const url = req.query.url;
-    if (!url) {
-      return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
+    const link = req.query.url;
+    if (!link) {
+        return res.status(400).json({ error: 'Link parameter is required.' });
     }
-    const response = await terabox.dl(url);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+
+    const id = extractId(link);
+    if (!id) {
+        return res.status(400).json({ error: 'Invalid Terabox link.' });
+    }
+
+    try {
+        const { data } = await axios.get(`https://api.sylica.eu.org/terabox/?id=${id}&download=1`, { headers });
+        res.json(response(data.data, true));
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error retrieving Terabox download link.' });
+    }
 });
 app.get('/api/spotify', async (req, res) => {
   try {
