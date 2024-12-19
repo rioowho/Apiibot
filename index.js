@@ -1180,18 +1180,6 @@ async function bard(prompt) {
         return null;
     }
 }
-const headers = {
-    'authority': 'api.sylica.eu.org',
-    'origin': 'https://www.kauruka.com',
-    'referer': 'https://www.kauruka.com/',
-    'user-agent': 'Postify/1.0.0'
-};
-
-
-function extractId(link) {
-    const match = link.match(/s\/([a-zA-Z0-9]+)$|surl=([a-zA-Z0-9]+)$/);
-    return match ? (match[1] || match[2]) : null;
-}
 
 
 async function LetmeGpt(query) {
