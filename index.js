@@ -1148,36 +1148,68 @@ async function bard(prompt) {
         return null;
     }
 }
-async function terabox(url) {
-return new Promise(async(resolve, reject) => {
-await axios.post('https://teradl-api.dapuntaratya.com/generate_file', {
-   mode: 1,
-   url: url
-}).then(async(a) => {
-const array = ", "
-for (let x of a.data.list) {
-let dl = await axios.post('https://teradl-api.dapuntaratya.com/generate_link', {
-       js_token: a.data.js_token,
-       cookie: a.data.cookie,
-       sign: a.data.sign,
-       timestamp: a.data.timestamp,
-       shareid: a.data.shareid,
-       uk: a.data.uk,
-       fs_id: x.fs_id
-     }).then(i => i.data).catch(e => e.response)
-;
-  if (!dl.download_link) return
-    array.push({
-           fileName: x.name,
-          type: x.type,
-          thumb: x.image,
-          ...dl.download_link
-         });
-      }
-      resolve(array);
-    }).catch(e => reject(e.response.data));
- })
+const headers = {
+    'authority': 'api.sylica.eu.org',
+    'origin': 'https://www.kauruka.com',
+    'referer': 'https://www.kauruka.com/',
+    'user-agent': 'Postify/1.0.0'
+};
+
+
+function extractId(link) {
+    const match = link.match(/s\/([a-zA-Z0-9]+)$|surl=([a-zA-Z0-9]+)$/);
+    return match ? (match[1] || match[2]) : null;
 }
+
+
+const terabox = {
+    detail: async function(link) {
+        const id = extractId(link);
+        if (!id) throw new Error('Masukin link terabox nya yang bener!!! Gua colok juga nanti mata sia 🫵');
+
+        try {
+            const { data } = await axios.get(`https://api.sylica.eu.org/terabox/?id=${id}`, { headers });
+            return response(data.data);
+        } catch (error) {
+            console.error(error);
+            throw new Error('Error ceunah bree 🗿');
+        }
+    },
+
+    dl: async function(link) {
+        const id = extractId(link);
+        if (!id) throw new Error('Masukin link terabox nya yang bener!!! Gua colok juga nanti mata sia 🫵');
+
+        try {
+            const { data } = await axios.get(`https://api.sylica.eu.org/terabox/?id=${id}&download=1`, { headers });
+            return response(data.data, true);
+        } catch (error) {
+            console.error(error);
+            throw new Error('Error ceunah bree 🗿');
+        }
+    }
+};
+
+function response(data, includeDL = false) {
+    const response = {
+        filename: data.filename,
+        size: data.size,
+        shareid: data.shareid,
+        uk: data.uk,
+        sign: data.sign,
+        timestamp: data.timestamp,
+        createTime: data.create_time,
+        fsId: data.fs_id,
+        message: data.message || 'Gak tau 🙂‍↔️'
+    };
+
+    if (includeDL) {
+        response.dlink = data.downloadLink;
+    }
+
+    return response;
+}
+
 async function LetmeGpt(query) {
   const encodedQuery = encodeURIComponent(query);
   const url = `https://letmegpt.com/search?q=${encodedQuery}`;
@@ -2769,7 +2801,7 @@ app.get('/api/brat', async (req, res) => {
     const imageBuffer = await BratGenerator(teks);
 
     // Send the generated image buffer as a response
-    res.set('Content-Type', 'image/jpg');
+    res.set('Content-Type', 'image/png');
     res.send(imageBuffer);
   } catch (error) {
     res.status(500).json({ error: 'An error occurred while generating the image' });
@@ -3480,7 +3512,7 @@ app.get('/api/terabox', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await terabox(url);
+    const response = await terabox.dl(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
