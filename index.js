@@ -72,7 +72,7 @@ async function MediaFireh(url) {
       .text()
       .trim();
     return {
-      download: downloadUrl || alternativeUrl,
+      link: downloadUrl || alternativeUrl,
       alternativeUrl: alternativeUrl,
       name: filename,
       filetype: filetype,
