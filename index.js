@@ -18,6 +18,7 @@ const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
+const mime = require('mime-types');
 const moment = require('moment-timezone');
 const Groq = require('groq-sdk')
 const client = new Groq({ apiKey: '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' });
@@ -1866,7 +1867,43 @@ async function sfileSearch(query, page = 1) {
   // Mengembalikan objek hasil
   return results;
 }
-async function sfileDl(url) {
+
+async function sfiledl(url) {
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    const $ = cheerio.load(response.data);
+    const downloadLink =
+      $('a#download').attr('href') || $('a.download-link').attr('href');
+    const filename =
+      $('span.file-name').text().trim() ||
+      $('title').text().split('-')[0].trim() ||
+      'Unknown Filename';
+    let mimetype = mime.lookup(path.extname(filename)); 
+    if (!mimetype) {
+      mimetype = 'Unknown Mimetype';
+    }
+
+    if (downloadLink) {
+      return {
+        success: true,
+        downloadLink,
+        filename,
+        mimetype
+      };
+    } else {
+      return { success: false, message: 'Link download tidak ditemukan.' };
+    }
+  } catch (error) {
+    return { success: false, message: 'Terjadi kesalahan saat scraping.', error: error.message };
+  }
+}
+
+
+async function sfileDll(url) {
   let res = await fetch(url);
   let $ = cheerio.load(await res.text());
   let filename = $("div.w3-row-padding").find("img").attr("alt");
