@@ -1882,10 +1882,7 @@ async function sfiledl(url) {
       $('span.file-name').text().trim() ||
       $('title').text().split('-')[0].trim() ||
       'Unknown Filename';
-    let mimetype = mime.lookup(path.extname(filename)); 
-    if (!mimetype) {
-      mimetype = 'Unknown Mimetype';
-    }
+  const mimetype = $("div.list").text().split(" - ")[1].split("\n")[0];
 
     if (downloadLink) {
       return {
