@@ -2991,20 +2991,60 @@ app.get('/api/claude', async (req, res) => {
 });
 app.get('/api/gptturbo', async (req, res) => {
   try {
+const Together = require('together-ai');
+
+const client = new Together();
+    // Ambil parameter 'message' dari query
     const inputValue = req.query.message;
+
+    // Validasi apakah parameter 'message' ada
     if (!inputValue) {
-      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+      return res.status(400).json({ 
+        status: 400, 
+        error: 'Parameter "message" tidak ditemukan' 
+      });
     }
-    const response = await gpt35turbo(inputValue);
+
+    // Validasi panjang input (opsional, sesuai kebutuhan)
+    if (inputValue.length > 500) {
+      return res.status(400).json({ 
+        status: 400, 
+        error: 'Panjang "message" tidak boleh lebih dari 500 karakter' 
+      });
+    }
+
+    // Gunakan Together untuk menghasilkan respons
+    const stream = await client.chat.completions.create({
+      messages: [{ role: 'user', content: inputValue }],
+      model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+      stream: true,
+    });
+
+    // Kumpulkan hasil streaming
+    const responses = [];
+    for await (const chatCompletionChunk of stream) {
+      responses.push(chatCompletionChunk.choices);
+    }
+
+    // Kirim respons dalam format yang diminta
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: { response }
+      data: { responses },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    // Log error untuk debugging
+    console.error('Error processing chat:', error);
+
+    // Kirimkan error generik jika terjadi masalah
+    res.status(500).json({ 
+      status: 500, 
+      error: 'Internal server error', 
+      details: error.message || 'Unknown error occurred' 
+    });
   }
 });
+
 app.get('/api/gptlogic', async (req, res) => {
   try {
     const text = req.query.message;
