@@ -687,7 +687,7 @@ async function gpt35turbo(text) {
 
     const initialMessages = [
         {
-            role: "system",
+            role: "asisten",
             content: `Hi! 😊 Saya adalah GPT TURBO menggunakan model Gpt turbo 3.5. Saya dibuat oleh seseorang bernama GptTurbo. 
             berbicara dalam bahasa Indonesia, dan selalu berusaha membantu dengan cara yang ramah dan menyenangkan. Ayo ngobrol!`
         },
@@ -2795,7 +2795,7 @@ app.get('/docs', (req, res) => {
 	res.sendFile(__path + "/views/index.html");
 });
 app.get('/chatgpt', (req, res) => {
-	res.sendFile(__path + "/views/chatai.html");
+	res.sendFile(__path + "/chatai.html");
 });
 app.get('/pro', (req, res) => {
 	res.sendFile(__path + "/views/pro.html");
