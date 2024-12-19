@@ -679,6 +679,52 @@ async function metaai(text) {
         return "Terjadi kesalahan saat memproses permintaan Anda. Mohon coba lagi nanti. 😔";
     }
 }
+async function gptturbo(text) {
+    const Together = require("together-ai")
+    const together = new Together({ 
+            apiKey: '522aeeed9ccfea4eeabb86608d24bcc0ad35b0c08598c60bdf214b8bd7bb42c0' 
+        });
+
+    const initialMessages = [
+        {
+            role: "system",
+            content: `Hi! 😊 Saya adalah GPT TURBO menggunakan model Gpt turbo 3.5. Saya dibuat oleh seseorang bernama GptTurbo. 
+            berbicara dalam bahasa Indonesia, dan selalu berusaha membantu dengan cara yang ramah dan menyenangkan. Ayo ngobrol!`
+        },
+        { role: "user", content: text }
+    ];
+
+    try {
+        const response = await together.chat.completions.create({
+            messages: initialMessages,
+            model: "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+            max_tokens: null, // Set a reasonable token limit
+            temperature: 0.7,
+            top_p: 0.7,
+            top_k: 50,
+            repetition_penalty: 1,
+            stop: ["<|eot_id|>", "<|eom_id|>"],
+            stream: true
+        });
+
+        let generatedResponse = "";
+        for await (const token of response) {
+            if (token.choices && token.choices[0] && token.choices[0].delta && token.choices[0].delta.content) {
+                generatedResponse += token.choices[0].delta.content;
+            }
+        }
+
+        if (!generatedResponse.trim()) {
+            generatedResponse = "Maaf, saya tidak bisa memberikan jawaban untuk pertanyaan Anda. 😔";
+        }
+        
+        generatedResponse += " 👋";
+        return generatedResponse;
+    } catch (error) {
+        console.error("Error during the API call:", error);
+        return "Terjadi kesalahan saat memproses permintaan Anda. Mohon coba lagi nanti. 😔";
+    }
+}
 const retatube = {
   getPrefix: async () => {
     try {
@@ -2991,57 +3037,18 @@ app.get('/api/claude', async (req, res) => {
 });
 app.get('/api/gptturbo', async (req, res) => {
   try {
-const Together = require('together-ai');
-
-const client = new Together();
-    // Ambil parameter 'message' dari query
-    const inputValue = req.query.message;
-
-    // Validasi apakah parameter 'message' ada
-    if (!inputValue) {
-      return res.status(400).json({ 
-        status: 400, 
-        error: 'Parameter "message" tidak ditemukan' 
-      });
+    const query = req.query.message;
+    if (!query) {
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-
-    // Validasi panjang input (opsional, sesuai kebutuhan)
-    if (inputValue.length > 500) {
-      return res.status(400).json({ 
-        status: 400, 
-        error: 'Panjang "message" tidak boleh lebih dari 500 karakter' 
-      });
-    }
-
-    // Gunakan Together untuk menghasilkan respons
-    const stream = await client.chat.completions.create({
-      messages: [{ role: 'user', content: inputValue }],
-      model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
-      stream: true,
-    });
-
-    // Kumpulkan hasil streaming
-    const responses = [];
-    for await (const chatCompletionChunk of stream) {
-      responses.push(chatCompletionChunk.choices);
-    }
-
-    // Kirim respons dalam format yang diminta
+    const response = await gptturbo(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: { responses },
+      data: { response }
     });
   } catch (error) {
-    // Log error untuk debugging
-    console.error('Error processing chat:', error);
-
-    // Kirimkan error generik jika terjadi masalah
-    res.status(500).json({ 
-      status: 500, 
-      error: 'Internal server error', 
-      details: error.message || 'Unknown error occurred' 
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
