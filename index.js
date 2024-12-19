@@ -37,11 +37,6 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-const express = require('express');
-const axios = require('axios');
-
-const app = express();
-const port = 3000;
 
 const headers = {
     'authority': 'api.sylica.eu.org',
