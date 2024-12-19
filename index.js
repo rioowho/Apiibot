@@ -38,6 +38,81 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+async function MediaFireh(url) {
+  try {
+    const data = await fetch(
+      `https://www-mediafire-com.translate.goog/${url.replace("https://www.mediafire.com/", "")}?_x_tr_sl=en&_x_tr_tl=fr&_x_tr_hl=en&_x_tr_pto=wapp`,
+      {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.5481.178 Safari/537.36",
+        },
+      },
+    ).then((res) => res.text());
+    const $ = cheerio.load(data);
+    const downloadUrl = ($("#downloadButton").attr("href") || "").trim();
+    const alternativeUrl = (
+      $("#download_link > a.retry").attr("href") || ""
+    ).trim();
+    const $intro = $("div.dl-info > div.intro");
+    const filename = $intro.find("div.filename").text().trim();
+    const filetype = $intro.find("div.filetype > span").eq(0).text().trim();
+    const ext =
+      /\(\.(.*?)\)/
+        .exec($intro.find("div.filetype > span").eq(1).text())?.[1]
+        ?.trim() || "bin";
+    const uploaded = $("div.dl-info > ul.details > li")
+      .eq(1)
+      .find("span")
+      .text()
+      .trim();
+    const filesize = $("div.dl-info > ul.details > li")
+      .eq(0)
+      .find("span")
+      .text()
+      .trim();
+    return {
+      download: downloadUrl || alternativeUrl,
+      alternativeUrl: alternativeUrl,
+      name: filename,
+      filetype: filetype,
+      mime: ext,
+      uploaded: uploaded,
+      size: filesize,
+    };
+  } catch (error) {
+    console.error(error);
+  }
+}
+async function Aoyo(content) {
+  try {
+    const response = await fetch("https://aoyo.ai/Api/AISearch/AISearch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent":
+          "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36",
+        Referer: `https://aoyo.ai/search/?q=${content}&t=${Date.now()}`,
+      },
+      body: new URLSearchParams({
+        content: content,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+    const data = await response.text();
+    const extractJson = (text) => {
+      const startIndex = text.indexOf("[START]");
+      if (startIndex === -1) throw new Error("[START] not found");
+      return JSON.parse(text.substring(startIndex + 7).trim());
+    };
+    return extractJson(data)?.data?.Response || "No response";
+  } catch (error) {
+    console.error("Error:", error);
+    return null;
+  }
+}
 
 const headers = {
     'authority': 'api.sylica.eu.org',
@@ -3124,11 +3199,11 @@ app.get('/api/llama', async (req, res) => {
 });
 app.get('/api/aisearch', async (req, res) => {
   try {
-    const query = req.query.message;
-    if (!query) {
+    const content = req.query.message;
+    if (!content) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await LetmeGpt(query);
+    const response = await Aoyo(content);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -3600,7 +3675,7 @@ app.get('/api/mediafire', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await mediafire(url);
+    const response = await MediaFireh(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
