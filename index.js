@@ -679,7 +679,7 @@ async function metaai(text) {
         return "Terjadi kesalahan saat memproses permintaan Anda. Mohon coba lagi nanti. 😔";
     }
 }
-async function gptturbo(text) {
+async function gpt35turbo(text) {
     const Together = require("together-ai")
     const together = new Together({ 
             apiKey: '522aeeed9ccfea4eeabb86608d24bcc0ad35b0c08598c60bdf214b8bd7bb42c0' 
@@ -3041,7 +3041,7 @@ app.get('/api/gptturbo', async (req, res) => {
     if (!query) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await gptturbo(query);
+    const response = await gpt35turbo(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
