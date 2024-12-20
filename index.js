@@ -39,37 +39,62 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-const chatbot = {
+const gptt355turbo = {
   send: async (message, model = "gpt-3.5-turbo") => {
     try {
       const validModels = ["gpt-3.5-turbo", "gpt-3.5-turbo-0125", "gpt-4o-mini", "gpt-4o"];
       if (!validModels.includes(model)) {
-        throw new Error(`❌ Model tidak valid! Pilih salah satu: ${validModels.join(', ')}`);
+        throw new Error(`Model tidak valid! Pilih salah satu: ${validModels.join(', ')}`);
       }
+
       const payload = {
-        messages: [{
-          role: "user",
-          content: message
-        }],
+        messages: [{ role: "user", content: message }],
         model: model
       };
+
       const response = await axios.post("https://mpzxsmlptc4kfw5qw2h6nat6iu0hvxiw.lambda-url.us-east-2.on.aws/process", payload, {
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': 'Postify/1.0.0'
         }
       });
-      return response.data;
+
+      // Ekstrak hanya konten teks dari respons API
+      return response.data.choices[0].message.content;
     } catch (error) {
-      console.error("❌ Terjadi kesalahan saat mengirim pesan:", error.message);
-      throw new Error('❌ Tidak dapat memproses permintaan chatbot.');
+      console.error("Terjadi kesalahan saat mengirim pesan:", error.message);
+      throw new Error('Tidak dapat memproses permintaan chatbot.');
     }
-  },
-  getModels: () => {
-    return ["gpt-3.5-turbo", "gpt-3.5-turbo-0125", "gpt-4o-mini", "gpt-4o"];
   }
 };
+const gpt4omini = {
+  send: async (message, model = "gpt-4o-mini") => {
+    try {
+      const validModels = ["gpt-3.5-turbo", "gpt-3.5-turbo-0125", "gpt-4o-mini", "gpt-4o"];
+      if (!validModels.includes(model)) {
+        throw new Error(`Model tidak valid! Pilih salah satu: ${validModels.join(', ')}`);
+      }
 
+      const payload = {
+        messages: [{ role: "user", content: message }],
+        model: model
+      };
+
+      const response = await axios.post("https://mpzxsmlptc4kfw5qw2h6nat6iu0hvxiw.lambda-url.us-east-2.on.aws/process", payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Postify/1.0.0'
+        }
+      });
+
+      // Ekstrak hanya konten teks dari respons API
+      return response.data.choices[0].message.content;
+    } catch (error) {
+      console.error("Terjadi kesalahan saat mengirim pesan:", error.message);
+      throw new Error('Tidak dapat memproses permintaan chatbot.');
+    }
+  }
+};
 async function MediaFireh(url) {
   try {
     const data = await fetch(
@@ -3182,7 +3207,23 @@ app.get('/api/gptturbo', async (req, res) => {
     if (!query) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await chatbot.send(query);
+    const response = await gptt355turbo.send(query);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/gpt4o-mini', async (req, res) => {
+  try {
+    const query = req.query.message;
+    if (!query) {
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
+    }
+    const response = await gpt4omini.send(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
