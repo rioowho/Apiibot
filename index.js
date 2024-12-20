@@ -3217,7 +3217,7 @@ app.get('/api/gptturbo', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/gpt4o-mini', async (req, res) => {
+app.get('/api/gpt4omini', async (req, res) => {
   try {
     const query = req.query.message;
     if (!query) {
