@@ -40,7 +40,7 @@ global.creator = "@riooxdzz"
 app.use(cors());
 
 const chatbot = {
-  send: async (message, model = "gpt-3.5-turbo-0125") => {
+  send: async (message, model = "gpt-3.5-turbo") => {
     try {
       const validModels = ["gpt-3.5-turbo", "gpt-3.5-turbo-0125", "gpt-4o-mini", "gpt-4o"];
       if (!validModels.includes(model)) {
