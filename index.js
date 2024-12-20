@@ -95,6 +95,34 @@ const gpt4omini = {
     }
   }
 };
+const gpt4o = {
+  send: async (message, model = "gpt-4o") => {
+    try {
+      const validModels = ["gpt-3.5-turbo", "gpt-3.5-turbo-0125", "gpt-4o-mini", "gpt-4o"];
+      if (!validModels.includes(model)) {
+        throw new Error(`Model tidak valid! Pilih salah satu: ${validModels.join(', ')}`);
+      }
+
+      const payload = {
+        messages: [{ role: "user", content: message }],
+        model: model
+      };
+
+      const response = await axios.post("https://mpzxsmlptc4kfw5qw2h6nat6iu0hvxiw.lambda-url.us-east-2.on.aws/process", payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Postify/1.0.0'
+        }
+      });
+
+      // Ekstrak hanya konten teks dari respons API
+      return response.data.choices[0].message.content;
+    } catch (error) {
+      console.error("Terjadi kesalahan saat mengirim pesan:", error.message);
+      throw new Error('Tidak dapat memproses permintaan chatbot.');
+    }
+  }
+};
 async function MediaFireh(url) {
   try {
     const data = await fetch(
@@ -3185,13 +3213,13 @@ app.get('/api/bingimg', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/claude', async (req, res) => {
+app.get('/api/gpt4o', async (req, res) => {
   try {
     const text = req.query.text;
     if (!text) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await Claude.chat(text);
+    const response = await gpt4o.send(text);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
