@@ -38,36 +38,53 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-const express = require('express');
-const YouTube = require('./YouTube');
+class YouTube {
+  static async download(url, type = 'video') {
+    try {
+      if (!url) throw new Error('URL is required');
+      if (!['video', 'audio'].includes(type)) throw new Error('Type must be either "video" or "audio"');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+      const endpoint =
+        type === 'video'
+          ? 'https://free-api-call.aiseo.ai/youtube-video-info'
+          : 'https://free-api-call.aiseo.ai/youtube-audio-info';
 
-app.use(express.json());
+      const response = await fetch(`${endpoint}?url=${encodeURIComponent(url)}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-app.get('/api/download', async (req, res) => {
-  const { url, type } = req.query;
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
 
-  if (!url) {
-    return res.status(400).json({ error: 'URL is required' });
+      if (type === 'video') {
+        if (!data.formats || !data.formats.length) throw new Error('No video formats found');
+        return {
+          title: data.title,
+          duration: data.duration,
+          viewCount: data.view_count,
+          description: data.description,
+          thumbnail: data.thumbnail,
+          formats: data.formats.map((format) => ({
+            resolution: format.resolution,
+            quality: format.quality,
+            type: format.type,
+            url: format.url,
+            ext: format.ext,
+          })),
+        };
+      }
+
+      if (type === 'audio') {
+        if (!data.file_url) throw new Error('No audio URL found');
+        return { url: data.file_url };
+      }
+    } catch (error) {
+      throw new Error(`Download failed: ${error.message}`);
+    }
   }
-
-  if (!['video', 'audio'].includes(type)) {
-    return res.status(400).json({ error: 'Type must be either "video" or "audio"' });
-  }
-
-  try {
-    const result = await YouTube.download(url, type);
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+}
 class YoutubeConverter {
     constructor() {
         this.headers = {
