@@ -37,6 +37,31 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+async function googleImage(query) {
+  const response = await fetch(
+    `https://www.google.com/search?q=${encodeURIComponent(query)}&tbm=isch`,
+    {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error("Network response was not ok " + response.statusText);
+  }
+  const data = await response.text();
+  const $ = cheerio.load(data);
+  const pattern =
+    /\[1,\[0,"(?<id>[\d\w\-_]+)",\["https?:\/\/(?:[^"]+)",\d+,\d+\]\s?,\["(?<url>https?:\/\/(?:[^"]+))",\d+,\d+\]/gm;
+  const matches = $.html().matchAll(pattern);
+  const decodeUrl = (url) => decodeURIComponent(JSON.parse(`"${url}"`));
+  return [...matches]
+    .map(({ groups }) => decodeUrl(groups?.url))
+    .filter((v) => /.*\.(jpe?g|png)$/gi.test(v));
+}
 const chatsandbox = {  
     chatbot: async (question, model) => {
         const validModels = ["openai", "llama", "mistral", "mistral-large"];
@@ -3481,6 +3506,22 @@ app.get('/api/search-google', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
     const response = await google(query);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/search-googleimage', async (req, res) => {
+  try {
+    const query = req.query.query;
+    if (!query) {
+      return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
+    }
+    const response = await googleImage(query);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
