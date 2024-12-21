@@ -122,7 +122,7 @@ class YoutubeConverter {
         }
     }
 
-    async convert(youtubeUrl, type = 'mp3') {
+    async convert(youtubeUrl, type) {
         try {
             const videoId = this._extractVideoId(youtubeUrl);
             let currentUrl = await this._fetchConvertUrl();
@@ -3836,7 +3836,7 @@ app.get('/api/ytdl', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
          const converter = new YoutubeConverter();
-        const downloadUrl = await converter.convert(youtubeUrl, type);
+        const downloadUrl = await converter.convert(youtubeUrl, type = 'mp3');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
