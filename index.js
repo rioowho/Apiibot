@@ -1,5 +1,4 @@
 __path = process.cwd()
-p
 const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
@@ -3088,7 +3087,7 @@ function openai(messages) {
 app.get('/', (req, res) => {
 	res.sendFile(__path + '/views/home.html');
 });
-app.get('/docs', (req, res) => {
+app.get("/docs", (req, res) => {
 	res.sendFile(__path + "/views/index.html");
 });
 app.get('/chatgpt', (req, res) => {
