@@ -85,6 +85,11 @@ class YouTube {
     }
   }
 }
+async function scraperrytdl(url) {
+let sigma = new Youtube()
+let data = await sigma.download(url, type = 'audio')
+return data
+}
 class YoutubeConverter {
     constructor() {
         this.headers = {
@@ -3883,7 +3888,7 @@ app.get('/api/ytdl', async (req, res) => {
     }
     let sigma = new Youtube()
     const result = await sigma.download(url, type = 'video', 'audio');
-   const response = await ytmp33(url);
+   const response = await result(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
