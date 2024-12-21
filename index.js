@@ -3831,8 +3831,8 @@ app.get('/api/ytmp3', async (req, res) => {
 });
 app.get('/api/ytdl', async (req, res) => {
   try {
-    const url = req.query.url;
-    if (!url) {
+    const youtubeUrl = req.query.url;
+    if (!youtubeUrl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
          const converter = new YoutubeConverter();
