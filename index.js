@@ -39,9 +39,6 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-
-
-// Masukkan class YoutubeConverter di sini
 class YoutubeConverter {
     constructor() {
         this.headers = {
@@ -110,9 +107,10 @@ class YoutubeConverter {
 
     async _fetchConvertUrl() {
         try {
+            const token = await this._getToken();
             const response = await axios.get('https://cc.ecoe.cc/api/v1/init', {
                 params: {
-                    k: await this._getToken(),
+                    k: token,
                     _: Math.random()
                 },
                 headers: this.headers
@@ -124,7 +122,7 @@ class YoutubeConverter {
         }
     }
 
-    async convert(youtubeUrl, type) {
+    async convert(youtubeUrl, type = 'mp3') {
         try {
             const videoId = this._extractVideoId(youtubeUrl);
             let currentUrl = await this._fetchConvertUrl();
@@ -156,6 +154,8 @@ class YoutubeConverter {
         }
     }
 }
+
+module.exports = YoutubeConverter;
 
 async function googleImage(query) {
   const response = await fetch(
