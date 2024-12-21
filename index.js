@@ -1,4 +1,3 @@
-__path = process.cwd()
 const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
@@ -3015,7 +3014,6 @@ app.get('/', (req, res) => {
 app.get('/docs', (req, res) => {
 	res.sendFile(__path + "/views/index.html");
 });
-
 app.get('/chatgpt', (req, res) => {
 	res.sendFile(__path + "/chatai.html");
 });
