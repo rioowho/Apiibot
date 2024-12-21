@@ -155,7 +155,6 @@ class YoutubeConverter {
     }
 }
 
-module.exports = YoutubeConverter;
 
 async function googleImage(query) {
   const response = await fetch(
@@ -3815,11 +3814,11 @@ app.get('/api/appleaudio', async (req, res) => {
 });
 app.get('/api/ytmp3', async (req, res) => {
   try {
-    const linkurl = req.query.url; // Ambil parameter dari query
-    if (!linkurl) {
+    const url = req.query.url; // Ambil parameter dari query
+    if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const result = await ytdlToAudio(linkurl);
+  const result = await converter.convert(url, format = 'mp3');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -3829,13 +3828,14 @@ app.get('/api/ytmp3', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 app.get('/api/ytdl', async (req, res) => {
   try {
     const url = req.query.url;
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-   const response = await ytmp3(url);
+   const response = await ytmp33(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
