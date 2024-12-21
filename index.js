@@ -1770,8 +1770,6 @@ URL: {link}`,
   }
 };
 
-const axios = require('axios');
-
 const SaveTubee = {
     qualities: {
         audio: { 1: '32', 2: '64', 3: '128', 4: '192' }
