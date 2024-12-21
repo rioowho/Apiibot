@@ -1769,7 +1769,6 @@ URL: {link}`,
     throw error;
   }
 };
-
 const SaveTubee = {
     qualities: {
         audio: { 1: '32', 2: '64', 3: '128', 4: '192' }
@@ -1787,9 +1786,9 @@ const SaveTubee = {
         return Math.floor(Math.random() * 11) + 51;
     },
 
-    checkQuality(qualityIndex) {
-        if (!(qualityIndex in this.qualities.audio)) {
-            throw new Error(`❌ Kualitas audio tidak valid. Pilih salah satu: ${Object.keys(this.qualities.audio).join(', ')}`);
+    checkQuality(type, qualityIndex) {
+        if (!this.qualities[type] || !(qualityIndex in this.qualities[type])) {
+            throw new Error(`❌ Kualitas ${type} tidak valid. Pilih salah satu: ${Object.keys(this.qualities[type]).join(', ')}`);
         }
     },
 
@@ -1812,13 +1811,16 @@ const SaveTubee = {
         }
     },
 
-    dLink(cdnUrl, quality, videoKey) {
-        return `https://${cdnUrl}/download?type=audio&quality=${quality}&key=${videoKey}`;
+    dLink(cdnUrl, type, quality, videoKey) {
+        return `https://${cdnUrl}/download?type=${type}&quality=${quality}&key=${videoKey}`;
     },
 
-    async dl(dl, qualityIndex) {
-        SaveTube.checkQuality(qualityIndex);
-        const quality = SaveTube.qualities.audio[qualityIndex];
+    async dl(dl, qualityIndex, typeIndex) {
+        const type = typeIndex === 1 ? 'audio';
+        if (!type) throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
+
+        SaveTube.checkQuality(type, qualityIndex);
+        const quality = SaveTube.qualities[type][qualityIndex];
 
         const cdnNumber = SaveTube.cdn();
         const cdnUrl = `cdn${cdnNumber}.savetube.su`;
@@ -1836,7 +1838,7 @@ const SaveTubee = {
         };
 
         // Fetch download link
-        const dlRes = await SaveTube.fetchData(SaveTube.dLink(cdnUrl, quality, videoInfo.data.key), cdnNumber, badi);
+        const dlRes = await SaveTube.fetchData(SaveTube.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, badi);
         if (!dlRes || !dlRes.data) {
             throw new Error('❌ Gagal mendapatkan link download.');
         }
@@ -1858,6 +1860,7 @@ const SaveTubee = {
         };
     }
 };
+
 function ytdlnew(url, format = 'mp3') {
     return new Promise(async(resolve, reject) => {
  
@@ -3875,7 +3878,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const downloadInfo = await SaveTubee.dl(url, qualityIndex = '2');
+  const downloadInfo = await SaveTubee.dl(url, qualityIndex);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
