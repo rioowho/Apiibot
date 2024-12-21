@@ -3087,9 +3087,10 @@ function openai(messages) {
 app.get('/', (req, res) => {
 	res.sendFile(__path + '/views/home.html');
 });
-app.get("/docs", (req, res) => {
-	res.sendFile(__path + "/views/index.html");
-});
+app.get('/docs', (req, res) => {
+    res.sendFile(process.cwd() + '/views/index.html')
+})
+
 app.get('/chatgpt', (req, res) => {
 	res.sendFile(__path + "/chatai.html");
 });
