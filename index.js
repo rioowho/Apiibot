@@ -1999,11 +1999,11 @@ async function obfus(query) {
 				}
 			})
 		}
-async function ytmp3(linkurl) {
+async function ytmp33(linkurl) {
 try {
-const response = await axios.post("https://cobalt-api.kwiatekmiki.com/", {
-      url: linkurl,
-      downloadMode: "audio",
+const response = await axios.post('https://cobalt-api.kwiatekmiki.com', {
+       url: url,
+       downloadMode: "audio"
     }, {
       headers: {
         "Content-Type": "application/json",
@@ -3819,7 +3819,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!linkurl) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const result = await ytmp3(linkurl);
+    const result = await ytdlToAudio(linkurl);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
