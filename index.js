@@ -38,7 +38,83 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+const chatsandbox = {  
+    chatbot: async (question, model) => {
+        const validModels = ["openai", "llama", "mistral", "mistral-large"];
+        if (!validModels.includes(model)) {
+            return {
+                error: `Invalid model selected. Please choose one of: ${validModels.join(', ')}`
+            };
+        }
+        const data = JSON.stringify({
+            "messages": [question],
+            "character": model
+        });    
+        const config = {
+            method: 'POST',
+            url: 'https://chatsandbox.com/api/chat',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Android 10; Mobile; rv:131.0) Gecko/131.0 Firefox/131.0',
+                'Content-Type': 'application/json',
+                'accept-language': 'id-ID',
+                'referer': `https://chatsandbox.com/chat/${model}`,
+                'origin': 'https://chatsandbox.com',
+                'alt-used': 'chatsandbox.com',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'same-origin',
+                'priority': 'u=0',
+                'te': 'trailers',
+                'Cookie': '_ga_V22YK5WBFD=GS1.1.1734654982.3.0.1734654982.0.0.0; _ga=GA1.1.803874982.1734528677'
+            },
+            data: data
+        };
+        try {
+            const response = await axios.request(config);
+            return response.data;    
+        } catch (error) {
+            return { error: error.message };
+        }  
+    },
+    text2img: async (prompt) => {
+        const data = JSON.stringify({
+            "messages": [prompt],
+            "character": "ai-image-generator"
+        });    
+        const config = {
+            method: 'POST',
+            url: 'https://chatsandbox.com/api/chat',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Android 10; Mobile; rv:131.0) Gecko/131.0 Firefox/131.0',
+                'Content-Type': 'application/json',
+                'accept-language': 'id-ID',
+                'referer': 'https://chatsandbox.com/ai-image-generator',
+                'origin': 'https://chatsandbox.com',
+                'alt-used': 'chatsandbox.com',
+                'sec-fetch-dest': 'empty',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-site': 'same-origin',
+                'priority': 'u=0',
+                'te': 'trailers',
+                'Cookie': '_ga_V22YK5WBFD=GS1.1.1734654982.3.0.1734654982.0.0.0; _ga=GA1.1.803874982.1734528677'
+            },
+            data: data
+        };
+        try {
+            const response = await axios.request(config);
+            const htmlString = response.data;
 
+            const urlMatch = htmlString.match(/src="([^"]+)"/);
+            if (urlMatch) {
+                return urlMatch[1];
+            } else {
+                return { error: "Could not extract image URL from response."};
+            }
+        } catch (error) {
+            return { error: error.message };
+        }
+    }
+};
 async function audio2text(url) {
     const formData = new FormData()
     const response = await axios.get(url, { responseType: 'stream' })
@@ -3218,13 +3294,13 @@ app.get('/api/bingimg', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/gpt4o', async (req, res) => {
+app.get('/api/mistral', async (req, res) => {
   try {
     const text = req.query.text;
     if (!text) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await gpt4o.send(text);
+    const response = await chatsandbox.chatbot(text, "mistral-large");
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -3266,23 +3342,6 @@ app.get('/api/aiaudio2text', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.get('/api/gpt4omini', async (req, res) => {
-  try {
-    const query = req.query.message;
-    if (!query) {
-      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
-    }
-    const response = await gpt4omini.send(query);
-    res.status(200).json({
-      status: 200,
-      creator: "RiooXdzz",
-      data: { response }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
 app.get('/api/gptlogic', async (req, res) => {
   try {
     const text = req.query.message;
