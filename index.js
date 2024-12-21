@@ -3835,7 +3835,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-        const downloadUrl = await ytmp3(url);
+   const response = await ytmp3(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
