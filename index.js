@@ -3886,9 +3886,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    let sigma = new Youtube()
-    const result = await sigma.download(url, type = 'video', 'audio');
-   const response = await result(url);
+   const response = await scraperrytdl(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
