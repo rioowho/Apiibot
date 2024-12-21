@@ -1770,12 +1770,13 @@ URL: {link}`,
   }
 };
 
-const savetubee = {
+const axios = require('axios');
+
+const SaveTubee = {
     qualities: {
-        audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
-        video: { 1: '360', 2: '480', 3: '720', 4: '1080' }  // Added video qualities
+        audio: { 1: '32', 2: '64', 3: '128', 4: '192' }
     },
-    
+
     headers: {
         accept: '*/*',
         referer: 'https://ytshorts.savetube.me/',
@@ -1788,9 +1789,9 @@ const savetubee = {
         return Math.floor(Math.random() * 11) + 51;
     },
 
-    checkQuality(type, qualityIndex) {
-        if (!this.qualities[type] || !(qualityIndex in this.qualities[type])) {
-            throw new Error(`❌ Kualitas ${type} tidak valid. Pilih salah satu: ${Object.keys(this.qualities[type]).join(', ')}`);
+    checkQuality(qualityIndex) {
+        if (!(qualityIndex in this.qualities.audio)) {
+            throw new Error(`❌ Kualitas audio tidak valid. Pilih salah satu: ${Object.keys(this.qualities.audio).join(', ')}`);
         }
     },
 
@@ -1813,46 +1814,37 @@ const savetubee = {
         }
     },
 
-    dLink(cdnUrl, type, quality, videoKey) {
-        return `https://${cdnUrl}/download?type=${type}&quality=${quality}&key=${videoKey}`;
+    dLink(cdnUrl, quality, videoKey) {
+        return `https://${cdnUrl}/download?type=audio&quality=${quality}&key=${videoKey}`;
     },
 
-    async dl(dl, qualityIndex, typeIndex) {
-        let type;
-        if (typeIndex === 1) {
-            type = 'audio';
-        } else if (typeIndex === 2) {
-            type = 'video';
-        } else {
-            throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
-        }
+    async dl(dl, qualityIndex) {
+        SaveTube.checkQuality(qualityIndex);
+        const quality = SaveTube.qualities.audio[qualityIndex];
 
-        this.checkQuality(type, qualityIndex);
-        const quality = this.qualities[type][qualityIndex];
-
-        const cdnNumber = this.cdn();
+        const cdnNumber = SaveTube.cdn();
         const cdnUrl = `cdn${cdnNumber}.savetube.su`;
 
         // Fetch video information
-        const videoInfo = await this.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: dl });
+        const videoInfo = await SaveTube.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: dl });
         if (!videoInfo || !videoInfo.data) {
             throw new Error('❌ Gagal mendapatkan informasi video.');
         }
 
         const badi = {
-            downloadType: type,
+            downloadType: 'audio',
             quality: quality,
             key: videoInfo.data.key
         };
 
         // Fetch download link
-        const dlRes = await this.fetchData(this.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, badi);
+        const dlRes = await SaveTube.fetchData(SaveTube.dLink(cdnUrl, quality, videoInfo.data.key), cdnNumber, badi);
         if (!dlRes || !dlRes.data) {
             throw new Error('❌ Gagal mendapatkan link download.');
         }
 
         return {
-            dl: dlRes.data.downloadUrl,
+            url: dlRes.data.downloadUrl,
             duration: videoInfo.data.duration,
             durationLabel: videoInfo.data.durationLabel,
             fromCache: videoInfo.data.fromCache,
@@ -1864,11 +1856,10 @@ const savetubee = {
             titleSlug: videoInfo.data.titleSlug,
             videoUrl: videoInfo.data.url,
             quality,
-            type
+            type: 'audio'
         };
     }
 };
-
 function ytdlnew(url, format = 'mp3') {
     return new Promise(async(resolve, reject) => {
  
@@ -3886,11 +3877,11 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-   const response = await SaveTube.dl(url, type = '2');
+  const downloadInfo = await SaveTubee.dl(url, qualityIndex = '2');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: response
+      data: downloadInfo
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
