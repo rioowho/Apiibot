@@ -3498,7 +3498,7 @@ app.get('/api/iask', async (req, res) => {
     if (!query) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await iask(query);
+    const response = await chatsandbox.chatbot(query, "openai");
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
