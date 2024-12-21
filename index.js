@@ -38,7 +38,36 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+const express = require('express');
+const YouTube = require('./YouTube');
 
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+
+app.get('/api/download', async (req, res) => {
+  const { url, type } = req.query;
+
+  if (!url) {
+    return res.status(400).json({ error: 'URL is required' });
+  }
+
+  if (!['video', 'audio'].includes(type)) {
+    return res.status(400).json({ error: 'Type must be either "video" or "audio"' });
+  }
+
+  try {
+    const result = await YouTube.download(url, type);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
 class YoutubeConverter {
     constructor() {
         this.headers = {
@@ -3835,6 +3864,8 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
+    let sigma = new Youtube()
+    const result = await sigma.download(url, type = 'video', 'audio');
    const response = await ytmp33(url);
     res.status(200).json({
       status: 200,
