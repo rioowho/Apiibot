@@ -12,6 +12,7 @@ const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const qs = require("qs");
 const nodemailer = require('nodemailer');
+const url = require('url');
 const { v4: uuidv4 } = require('uuid');
 const { chromium } = require('playwright');
 const { Buffer } = require('buffer');
@@ -37,6 +38,125 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+
+
+
+// Masukkan class YoutubeConverter di sini
+class YoutubeConverter {
+    constructor() {
+        this.headers = {
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept-language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+            'user-agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+            'Connection': 'keep-alive',
+            'Origin': 'https://ytmp3.cc',
+            'Referer': 'https://ytmp3.cc/',
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'cross-site',
+            'sec-ch-ua': '"Not-A.Brand";v="99", "Chromium";v="124"',
+            'sec-ch-ua-mobile': '?1',
+            'sec-ch-ua-platform': '"Android"'
+        };
+    }
+
+    _k(gC) {
+        const numbers = gC[1].split(',');
+        const charset = gC[2] > 0 ? gC[0].split('').reverse().join('') : gC[0];
+        const result = numbers.map(num => charset[num]).join('');
+        return gC[3] > 0 ? result.substring(0, gC[3]) : result;
+    }
+
+    _generateToken(gC) {
+        const baseToken = `${gC[5]}-${gC[4]}-${this._k(gC)}`;
+        return Buffer.from(baseToken).toString('base64');
+    }
+
+    async _getToken() {
+        try {
+            const response = await axios.get('https://ytmp3.cc/en-OpQF/', { headers: this.headers });
+            const $ = cheerio.load(response.data);
+            const scriptContent = $('script').html();
+            const atobMatch = scriptContent.match(/evalatob'([^']+)'/);
+
+            if (atobMatch?.[1]) {
+                const decodedContent = Buffer.from(atobMatch[1], 'base64').toString();
+                const gCMatch = decodedContent.match(/var\s+gC\s*=\s*(.*?)/);
+                if (gCMatch?.[1]) return this._generateToken(eval(`[${gCMatch[1]}]`));
+            }
+            return null;
+        } catch (error) {
+            console.error('Error getting token:', error);
+            return null;
+        }
+    }
+
+    _extractVideoId(inputUrl) {
+        const parsedUrl = url.parse(inputUrl, true);
+        const extractors = [
+            () => parsedUrl.query.v,
+            () => parsedUrl.pathname.match(/\/([^\/]+)$/)?.[1],
+            () => parsedUrl.hostname === 'music.youtube.com' ? parsedUrl.pathname.match(/\/watch\/v\/([^\/]+)/)?.[1] : null,
+            () => parsedUrl.hostname === 'www.youtube.com' && parsedUrl.pathname.startsWith('/shorts/') ?
+                parsedUrl.pathname.match(/\/shorts\/([^\/]+)/)?.[1] : null
+        ];
+
+        for (const extractor of extractors) {
+            const result = extractor();
+            if (result) return result;
+        }
+        throw new Error('Video ID not found');
+    }
+
+    async _fetchConvertUrl() {
+        try {
+            const response = await axios.get('https://cc.ecoe.cc/api/v1/init', {
+                params: {
+                    k: await this._getToken(),
+                    _: Math.random()
+                },
+                headers: this.headers
+            });
+            return response.data.convertURL;
+        } catch (error) {
+            console.error('Error fetching convert URL:', error);
+            return null;
+        }
+    }
+
+    async convert(youtubeUrl, type) {
+        try {
+            const videoId = this._extractVideoId(youtubeUrl);
+            let currentUrl = await this._fetchConvertUrl();
+            let downloadURL = null;
+
+            while (!downloadURL && currentUrl) {
+                const response = await axios.get(currentUrl, {
+                    params: {
+                        v: `https://www.youtube.com/watch?v=${videoId}`,
+                        f: type,
+                        _: Math.random()
+                    },
+                    headers: this.headers
+                });
+
+                if (response.data.downloadURL) {
+                    downloadURL = response.data.downloadURL;
+                    return downloadURL;
+                } else if (response.data.redirectURL) {
+                    currentUrl = response.data.redirectURL;
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                } else {
+                    throw new Error('No download or redirect URL found');
+                }
+            }
+        } catch (error) {
+            console.error('Conversion error:', error);
+            return null;
+        }
+    }
+}
+
 async function googleImage(query) {
   const response = await fetch(
     `https://www.google.com/search?q=${encodeURIComponent(query)}&tbm=isch`,
@@ -3715,7 +3835,8 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytdlToAudio(url);
+         const converter = new YoutubeConverter();
+        const downloadUrl = await converter.convert(youtubeUrl, type);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
