@@ -3885,7 +3885,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const downloadInfo = await SaveTubee.dl(url, qualityIndex = '1');
+  const downloadInfo = await SaveTubee.dl(url, qualityIndex, typeIndex = '1');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
