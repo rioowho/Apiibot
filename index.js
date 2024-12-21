@@ -39,6 +39,33 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
+async function audio2text(url) {
+    const formData = new FormData()
+    const response = await axios.get(url, { responseType: 'stream' })
+    const roar = url.split('/').pop()
+    formData.append('file', response.data, {
+      filename: roar,
+      contentType: 'audio/mpeg'
+    })
+    const config = {
+      headers: {
+        ...formData.getHeaders(),
+        'authority': 'api.talknotes.io',
+        'accept': '*/*',
+        'accept-encoding': 'gzip, deflate, br',
+        'origin': 'https://talknotes.io',
+        'referer': 'https://talknotes.io/',
+        'User-Agent': 'Postify/1.0.0'
+      },
+      maxBodyLength: Infinity
+    }
+    const respons = await axios.post(
+      'https://api.talknotes.io/tools/converter',
+      formData,
+      config
+    )
+    return respons.data
+}
 const gptt355turbo = {
   send: async (message, model = "gpt-3.5-turbo") => {
     try {
@@ -2986,7 +3013,7 @@ app.get('/', (req, res) => {
 	res.sendFile(__path + '/views/home.html');
 });
 app.get('/docs', (req, res) => {
-	res.sendFile(__path + '/views/index.html');
+	res.sendFile(__path + "/views/index.html")
 });
 app.get('/chatgpt', (req, res) => {
 	res.sendFile(__path + "/chatai.html");
@@ -3236,6 +3263,22 @@ app.get('/api/gptturbo', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
     const response = await gptt355turbo.send(query);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/aiaudio2text', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url) {
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
+    }
+    const response = await audio2text(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
