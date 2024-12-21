@@ -3030,7 +3030,7 @@ app.get('/', (req, res) => {
 	res.sendFile(__path + '/views/home.html');
 });
 app.get('/docs', (req, res) => {
-    res.sendFile(__path + '/views/index.html')
+    res.sendFile(__path + p'/views/index.html')
 })
 
 app.get('/chatgpt', (req, res) => {
