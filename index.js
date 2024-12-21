@@ -1645,7 +1645,7 @@ const SaveTube = {
         }
 
         return {
-            dl: dlRes.data.downloadUrl,
+            url: dlRes.data.downloadUrl,
             duration: videoInfo.data.duration,
             durationLabel: videoInfo.data.durationLabel,
             fromCache: videoInfo.data.fromCache,
@@ -3886,7 +3886,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-   const response = await SaveTube.dl(url, type = '1');
+   const response = await SaveTube.dl(url, type = 'audio');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
