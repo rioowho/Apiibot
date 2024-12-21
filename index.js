@@ -30,7 +30,6 @@ const https = require('https');
 const jsobfus = require('javascript-obfuscator')
 const mediafire = require('./lib/mediafire')
 const metaaii = require('./lib/metaai')
-const BratGenerator = require('./lib/brat')
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -3026,28 +3025,6 @@ app.get('/ttdlzx', (req, res) => {
 	res.sendFile(__path + "/views/tiktokdl.html");
 });
 
-app.get('/api/brat', async (req, res) => {
-  try {
-    const teks = req.query.text; // Get 'teks' from the query parameter
-    if (!teks) {
-      return res.status(400).json({ error: 'Text (text) query parameter is required' });
-    }
-
-    // Ensure the text is not empty
-    if (teks.trim().length === 0) {
-      return res.status(400).json({ error: 'Text cannot be empty' });
-    }
-
-    const imageBuffer = await BratGenerator(teks);
-
-    // Send the generated image buffer as a response
-    res.set('Content-Type', 'image/png');
-    res.send(imageBuffer);
-  } catch (error) {
-    res.status(500).json({ error: 'An error occurred while generating the image' });
-  }
-});
-// Endpoint untuk LuminAI
 app.get('/api/luminai', async (req, res) => {
   try {
     const { message }= req.query;
