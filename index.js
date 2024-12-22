@@ -38,7 +38,31 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-
+async function onlyaudio(url) {
+const response = await axios.post('https://cobalt.siputzx.my.id', {
+                    url: url,                     downloadMode: "audio"
+                }, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                })
+const responsen = await axios.post('https://cobalt.siputzx.my.id', {
+                    url: url,   
+filenameStyle: 'pretty', 
+                   videoQuality: `720`
+                }, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                })
+                 return {
+creator: 'Siputzx',
+mp3: response.data.url, 
+mp4: responsen.data.url
+}
+}
 async function ytdlaudio(url) {
 const response = await axios.post('https://cobalt.siputzx.my.id', {
                     url: url,                     downloadMode: "audio"
@@ -59,6 +83,7 @@ filenameStyle: 'pretty',
                     },
                 })
                  return {
+creator: 'Siputzx',
 mp3: response.data.url, 
 mp4: responsen.data.url
 }
@@ -4023,7 +4048,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await ytdlaudio(url);
+  const response = await onlyaudio(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
