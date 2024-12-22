@@ -1661,6 +1661,98 @@ const SaveTube = {
         };
     }
 };
+const SaveTubee = {
+    qualities: {
+        audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
+        video: { 1: '144', 2: '240', 3: '360', 4: '480', 5: '720', 6: '1080', 7: '1440', 8: '2160' }
+    },
+
+    headers: {
+        accept: '*/*',
+        referer: 'https://ytshorts.savetube.me/',
+        origin: 'https://ytshorts.savetube.me/',
+        'user-agent': 'Postify/1.0.0',
+        'Content-Type': 'application/json'
+    },
+
+    cdn() {
+        return Math.floor(Math.random() * 11) + 51;
+    },
+
+    checkQuality(type, qualityIndex) {
+        if (!this.qualities[type] || !(qualityIndex in this.qualities[type])) {
+            throw new Error(`❌ Kualitas ${type} tidak valid. Pilih salah satu: ${Object.keys(this.qualities[type]).join(', ')}`);
+        }
+    },
+
+    async fetchData(url, cdn, body = {}) {
+        const headers = {
+            ...this.headers,
+            authority: `cdn${cdn}.savetube.su`
+        };
+
+        try {
+            const response = await axios.post(url, body, { headers });
+            if (response && response.data) {
+                return response.data;
+            } else {
+                throw new Error('Respon API tidak valid.');
+            }
+        } catch (error) {
+            console.error('Fetch Data Error:', error.message);
+            throw error;
+        }
+    },
+
+    dLink(cdnUrl, type, quality, videoKey) {
+        return `https://${cdnUrl}/download?type=${type}&quality=${quality}&key=${videoKey}`;
+    },
+
+    async dl(dl, qualityIndex, typeIndex) {
+        const type = typeIndex === 1 ? 'audio' : 'video';
+        if (!type) throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
+
+        SaveTubee.checkQuality(type, qualityIndex);
+        const quality = SaveTubee.qualities[type][qualityIndex];
+
+        const cdnNumber = SaveTubee.cdn();
+        const cdnUrl = `cdn${cdnNumber}.savetube.su`;
+
+        // Fetch video information
+        const videoInfo = await SaveTubee.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: dl });
+        if (!videoInfo || !videoInfo.data) {
+            throw new Error('❌ Gagal mendapatkan informasi video.');
+        }
+
+        const badi = {
+            downloadType: type,
+            quality: quality,
+            key: videoInfo.data.key
+        };
+
+        // Fetch download link
+        const dlRes = await SaveTubee.fetchData(SaveTubee.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, badi);
+        if (!dlRes || !dlRes.data) {
+            throw new Error('❌ Gagal mendapatkan link download.');
+        }
+
+        return {
+            url: dlRes.data.downloadUrl,
+            duration: videoInfo.data.duration,
+            durationLabel: videoInfo.data.durationLabel,
+            fromCache: videoInfo.data.fromCache,
+            id: videoInfo.data.id,
+            key: videoInfo.data.key,
+            thumbnail: videoInfo.data.thumbnail,
+            thumbnail_formats: videoInfo.data.thumbnail_formats,
+            title: videoInfo.data.title,
+            titleSlug: videoInfo.data.titleSlug,
+            videoUrl: videoInfo.data.url,
+            quality,
+            type
+        };
+    }
+};
 async function bard(prompt) {
     const apiKey = 'AIzaSyBxYESR_ThUTwm8yghLqfp6LzWV_uMdlFU'; // Masukkan API Key Anda
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
@@ -1769,105 +1861,6 @@ URL: {link}`,
     throw error;
   }
 };
-const SaveTubee = {
-    qualities: {
-        audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
-        video: { 1: '360p', 2: '480p', 3: '720p', 4: '1080p' }
-    },
-
-    headers: {
-        accept: '*/*',
-        referer: 'https://ytshorts.savetube.me/',
-        origin: 'https://ytshorts.savetube.me/',
-        'user-agent': 'Postify/1.0.0',
-        'Content-Type': 'application/json'
-    },
-
-    cdn() {
-        return Math.floor(Math.random() * 11) + 51;
-    },
-
-    checkQuality(type, qualityIndex) {
-        if (!this.qualities[type] || !(qualityIndex in this.qualities[type])) {
-            throw new Error(`❌ Kualitas ${type} tidak valid. Pilih salah satu: ${Object.keys(this.qualities[type]).join(', ')}`);
-        }
-    },
-
-    async fetchData(url, cdn, body = {}) {
-        const headers = {
-            ...this.headers,
-            authority: `cdn${cdn}.savetube.su`
-        };
-
-        try {
-            const response = await axios.post(url, body, { headers });
-            if (response && response.data) {
-                return response.data;
-            } else {
-                throw new Error('Respon API tidak valid.');
-            }
-        } catch (error) {
-            console.error('Fetch Data Error:', error.message);
-            throw error;
-        }
-    },
-
-    dLink(cdnUrl, type, quality, videoKey) {
-        return `https://${cdnUrl}/download?type=${type}&quality=${quality}&key=${videoKey}`;
-    },
-
-    async dl(dl, qualityIndex, typeIndex) {
-        let type = '';
-        if (typeIndex === 1) {
-            type = 'audio';
-        } else if (typeIndex === 2) {
-            type = 'video';
-        } else {
-            throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
-        }
-
-        SaveTubee.checkQuality(type, qualityIndex);
-        const quality = SaveTubee.qualities[type][qualityIndex];
-
-        const cdnNumber = SaveTubee.cdn();
-        const cdnUrl = `cdn${cdnNumber}.savetube.su`;
-
-        // Fetch video information
-        const videoInfo = await SaveTubee.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: dl });
-        if (!videoInfo || !videoInfo.data) {
-            throw new Error('❌ Gagal mendapatkan informasi video.');
-        }
-
-        const badi = {
-            downloadType: type,
-            quality: quality,
-            key: videoInfo.data.key
-        };
-
-        // Fetch download link
-        const dlRes = await SaveTubee.fetchData(SaveTubee.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, badi);
-        if (!dlRes || !dlRes.data) {
-            throw new Error('❌ Gagal mendapatkan link download.');
-        }
-
-        return {
-            url: dlRes.data.downloadUrl,
-            duration: videoInfo.data.duration,
-            durationLabel: videoInfo.data.durationLabel,
-            fromCache: videoInfo.data.fromCache,
-            id: videoInfo.data.id,
-            key: videoInfo.data.key,
-            thumbnail: videoInfo.data.thumbnail,
-            thumbnail_formats: videoInfo.data.thumbnail_formats,
-            title: videoInfo.data.title,
-            titleSlug: videoInfo.data.titleSlug,
-            videoUrl: videoInfo.data.url,
-            quality,
-            type
-        };
-    }
-};
-
 function ytdlnew(url, format = 'mp3') {
     return new Promise(async(resolve, reject) => {
  
@@ -3820,7 +3813,7 @@ app.get('/api/ytmp4', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await Ytdl(url);
+    const response = await SaveTubee.dl(url, type = '1');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -3868,7 +3861,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const result = await converter.convert(url, format = 'mp3');
+  const result = await SaveTube.dl(url, type = '1');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -3885,7 +3878,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const downloadInfo = await SaveTube.dl(url, type = '1');
+  const downloadInfo = await SaveTubee.dl(url, type = '1', '2');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
