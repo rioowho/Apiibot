@@ -3512,7 +3512,7 @@ app.get('/api/openai', async (req, res) => {
     if (!text) {
       return res.status(400).json({ error: 'Parameter "message" tidak ditemukan' });
     }
-    const response = await metaai(text);
+    const response = await openai(text);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
