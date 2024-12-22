@@ -1617,7 +1617,7 @@ const SaveTube = {
     },
 
     async dl(dl, qualityIndex, typeIndex) {
-        const type = typeIndex === 1 ? 'video' : 'audio';
+        const type = typeIndex === 1 ? 'audio' : 'video';
         if (!type) throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
 
         SaveTube.checkQuality(type, qualityIndex);
@@ -1626,39 +1626,43 @@ const SaveTube = {
         const cdnNumber = SaveTube.cdn();
         const cdnUrl = `cdn${cdnNumber}.savetube.su`;
 
-        // Fetch video information
-        const videoInfo = await SaveTube.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: dl });
-        if (!videoInfo || !videoInfo.data) {
-            throw new Error('❌ Gagal mendapatkan informasi video.');
+        try {
+            // Fetch video info in parallel with download link
+            const videoInfoPromise = SaveTube.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: dl });
+            const downloadLinkPromise = videoInfoPromise.then(videoInfo => {
+                const badi = {
+                    downloadType: type,
+                    quality: quality,
+                    key: videoInfo.data.key
+                };
+                return SaveTube.fetchData(SaveTube.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, badi);
+            });
+
+            const [videoInfo, dlRes] = await Promise.all([videoInfoPromise, downloadLinkPromise]);
+
+            if (!videoInfo || !videoInfo.data || !dlRes || !dlRes.data) {
+                throw new Error('❌ Gagal mendapatkan informasi atau link download.');
+            }
+
+            return {
+                link: dlRes.data.downloadUrl,
+                duration: videoInfo.data.duration,
+                durationLabel: videoInfo.data.durationLabel,
+                fromCache: videoInfo.data.fromCache,
+                id: videoInfo.data.id,
+                key: videoInfo.data.key,
+                thumbnail: videoInfo.data.thumbnail,
+                thumbnail_formats: videoInfo.data.thumbnail_formats,
+                title: videoInfo.data.title,
+                titleSlug: videoInfo.data.titleSlug,
+                videoUrl: videoInfo.data.url,
+                quality,
+                type
+            };
+        } catch (error) {
+            console.error('Download Error:', error.message);
+            throw new Error('❌ Gagal mendapatkan video.');
         }
-
-        const badi = {
-            downloadType: type,
-            quality: quality,
-            key: videoInfo.data.key
-        };
-
-        // Fetch download link
-        const dlRes = await SaveTube.fetchData(SaveTube.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, badi);
-        if (!dlRes || !dlRes.data) {
-            throw new Error('❌ Gagal mendapatkan link download.');
-        }
-
-        return {
-            link: dlRes.data.downloadUrl,
-            duration: videoInfo.data.duration,
-            durationLabel: videoInfo.data.durationLabel,
-            fromCache: videoInfo.data.fromCache,
-            id: videoInfo.data.id,
-            key: videoInfo.data.key,
-            thumbnail: videoInfo.data.thumbnail,
-            thumbnail_formats: videoInfo.data.thumbnail_formats,
-            title: videoInfo.data.title,
-            titleSlug: videoInfo.data.titleSlug,
-            videoUrl: videoInfo.data.url,
-            quality,
-            type
-        };
     }
 };
 const SaveTubee = {
@@ -3861,7 +3865,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await SaveTube.dl(url, type = '2');
+  const response = await SaveTube.dl(url, type = '4');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
