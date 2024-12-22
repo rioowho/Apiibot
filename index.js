@@ -3865,7 +3865,7 @@ app.get('/api/ytmp3', async (req, res) => {
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      result: resss
+      data: { resss }
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
