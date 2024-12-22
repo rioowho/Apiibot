@@ -1617,7 +1617,7 @@ const SaveTube = {
     },
 
     async dl(dl, qualityIndex, typeIndex) {
-        const type = typeIndex === 1 ? 'audio' : 'video';
+        const type = typeIndex === 1 ? 'video' : 'audio';
         if (!type) throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
 
         SaveTube.checkQuality(type, qualityIndex);
