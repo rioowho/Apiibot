@@ -1645,7 +1645,7 @@ const SaveTube = {
         }
 
         return {
-            url: dlRes.data.downloadUrl,
+            link: dlRes.data.downloadUrl,
             duration: videoInfo.data.duration,
             durationLabel: videoInfo.data.durationLabel,
             fromCache: videoInfo.data.fromCache,
@@ -1737,7 +1737,7 @@ const SaveTubee = {
         }
 
         return {
-            url: dlRes.data.downloadUrl,
+            link: dlRes.data.downloadUrl,
             duration: videoInfo.data.duration,
             durationLabel: videoInfo.data.durationLabel,
             fromCache: videoInfo.data.fromCache,
@@ -3861,11 +3861,11 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const resss = await SaveTube.dl(url, type = '2');
+  const response = await SaveTube.dl(url, type = '2');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: { resss }
+      data: { response }
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -3878,11 +3878,11 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const downloadInfo = await SaveTubee.dl(url, type = '1', '2');
+  const response = await SaveTubee.dl(url, type = '1', '2');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: downloadInfo
+      data: { response }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
