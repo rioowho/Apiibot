@@ -39,29 +39,20 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 async function onlyaudio(url) {
-const response = await axios.post('https://cobalt.siputzx.my.id', {
-                    url: url,                     downloadMode: "audio"
-                }, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                })
-const responsen = await axios.post('https://cobalt.siputzx.my.id', {
-                    url: url,   
-filenameStyle: 'pretty', 
-                   videoQuality: `720`
-                }, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                })
-                 return {
-creator: 'Siputzx',
-mp3: response.data.url, 
-mp4: responsen.data.url
-}
+    const response = await axios.post('https://cobalt.siputzx.my.id', {
+        url: url,
+        downloadMode: "audio"
+    }, {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+    });
+
+    return {
+        creator: 'Siputzx',
+        link: response.data.url
+    };
 }
 async function ytdlaudio(url) {
 const response = await axios.post('https://cobalt.siputzx.my.id', {
