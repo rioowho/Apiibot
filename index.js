@@ -1575,17 +1575,17 @@ const SaveTube = {
         video: { 1: '144', 2: '240', 3: '360', 4: '480', 5: '720', 6: '1080', 7: '1440', 8: '2160' }
     },
 
-headers: {
-    accept: 'application/json, text/plain, */*', 
-    referer: 'https://ytshorts.savetube.me/', 
-    origin: 'https://ytshorts.savetube.me/',
-    'user-agent': 'Postify/1.0.0 (compatible; SavetubeBot/1.0)', 
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'Connection': 'keep-alive',
-    'Upgrade-Insecure-Requests': '1'
-},
+    headers: {
+        accept: 'application/json, text/plain, */*', 
+        referer: 'https://ytshorts.savetube.me/', 
+        origin: 'https://ytshorts.savetube.me/',
+        'user-agent': 'Postify/1.0.0 (compatible; SavetubeBot/1.0)', 
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1'
+    },
 
     cdn() {
         return Math.floor(Math.random() * 11) + 51;
@@ -1604,9 +1604,15 @@ headers: {
         };
 
         try {
-            const response = await axios.post(url, body, { headers });
-            if (response && response.data) {
-                return response.data;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(body)
+            });
+            const data = await response.json();
+
+            if (response.ok && data) {
+                return data;
             } else {
                 throw new Error('Respon API tidak valid.');
             }
@@ -1664,8 +1670,7 @@ headers: {
                 type
             };
         } catch (error) {
-            console.error('Download Error:', error.message);
-            throw new Error('❌ Gagal mendapatkan video.');
+            throw new Error('❌ Gagal mendapatkan Audio.');
         }
     }
 };
