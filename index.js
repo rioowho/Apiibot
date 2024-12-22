@@ -1617,7 +1617,7 @@ const SaveTube = {
     },
 
     async dl(dl, qualityIndex, typeIndex) {
-        const type = typeIndex === 2 ? 'audio' : 'video';
+        const type = typeIndex === 1 ? 'video' : 'audio';
         if (!type) throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
 
         SaveTube.checkQuality(type, qualityIndex);
@@ -3885,7 +3885,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const downloadInfo = await SaveTube.dl(url);
+  const downloadInfo = await SaveTube.dl(url, type = '1');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
