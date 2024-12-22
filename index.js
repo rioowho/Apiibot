@@ -85,11 +85,7 @@ class YouTube {
     }
   }
 }
-async function scraperrytdl(url) {
-let sigma = new Youtube()
-let data = await sigma.download(url, type = 'audio')
-return data
-}
+
 class YoutubeConverter {
     constructor() {
         this.headers = {
@@ -3891,7 +3887,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await SaveTubee.dl(url, type = '1', '2');
+  const response = await YouTube.download(url, "audio");
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
