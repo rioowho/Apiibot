@@ -3861,11 +3861,11 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const result = await SaveTube.dl(url, type = '2');
+  const resss = await SaveTube.dl(url, type = '2');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
-      data: result
+      result: resss
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
