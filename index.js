@@ -1575,13 +1575,17 @@ const SaveTube = {
         video: { 1: '144', 2: '240', 3: '360', 4: '480', 5: '720', 6: '1080', 7: '1440', 8: '2160' }
     },
 
-    headers: {
-        accept: '*/*',
-        referer: 'https://ytshorts.savetube.me/',
-        origin: 'https://ytshorts.savetube.me/',
-        'user-agent': 'Postify/1.0.0',
-        'Content-Type': 'application/json'
-    },
+headers: {
+    accept: 'application/json, text/plain, */*', 
+    referer: 'https://ytshorts.savetube.me/', 
+    origin: 'https://ytshorts.savetube.me/',
+    'user-agent': 'Postify/1.0.0 (compatible; SavetubeBot/1.0)', 
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1'
+},
 
     cdn() {
         return Math.floor(Math.random() * 11) + 51;
