@@ -1913,7 +1913,7 @@ function ytdlnew(url, format = 'mp3') {
                 let currentProgress = 0;
                 let title = '';
  
-                while (currentProgress < 300) {
+                while (currentProgress < 3) {
                     try {
                         const response = await axios.get(url, {
                             headers: hr
@@ -1930,7 +1930,7 @@ function ytdlnew(url, format = 'mp3') {
                         currentProgress = data.progress;
                         title = data.title
  
-                        if (currentProgress < 300) {
+                        if (currentProgress < 3) {
                             await new Promise(resolve => setTimeout(resolve, 200));
                         }
                     } catch (error) {
@@ -3878,7 +3878,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await ytdlnew(url);
+  const response = await ytdlnew(url, format = 'mp3');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
