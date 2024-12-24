@@ -118,7 +118,7 @@ const y2save = {
         throw new Error('Kagak ada 🫵');
       }
       const fmt = this.getfmt(resultx);
-      let converts = format === 'mp4' ? resultx.data.convert_links.video : resultx.data.convert_links.audio;
+      let converts = format === 'mp3' ? resultx.data.convert_links.video : resultx.data.convert_links.audio;
       const vo = converts.find(v => v.quality === quality);
       
       if (!vo) {
