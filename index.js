@@ -30,6 +30,7 @@ const https = require('https');
 const jsobfus = require('javascript-obfuscator')
 const mediafire = require('./lib/mediafire')
 const metaaii = require('./lib/metaai')
+const YouTube = require('./lib/ytdl');
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.enable("trust proxy");
@@ -4039,7 +4040,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await onlyaudio(url);
+  const response = await YouTube.download(url, type);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
