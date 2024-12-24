@@ -108,7 +108,7 @@ const y2save = {
     return formats;
   },
   
-  main: async function(link, format = 'mp4', quality = '480P') {
+  main: async function(link, format = 'mp3', quality = '128kbps') {
     try {
       if (!this.fmt.includes(format)) {
         throw new Error(`Formatnya kagak valid! Pilih aja salah satu: ${this.fmt.join(', ')}`);
