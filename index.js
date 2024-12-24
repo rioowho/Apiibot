@@ -4040,7 +4040,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await YouTube.download(url, type);
+  const response = await YouTube.download(url, type = 'audio');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
