@@ -30,6 +30,8 @@
     "node-fetch": "^2.6.7",
     "cheerio": "github:Tiooxy/cheerio",
     "node-cache": "^5.1.2",
+    "axios-cookiejar-support": "^5.0.5",
+    "tough-cookie": "^5.0.0",
     "nodemailer": "^6.9.12",
     "jimp": "^0.16.2",
     "millify": "^6.1.0",
