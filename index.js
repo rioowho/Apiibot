@@ -108,7 +108,7 @@ const y2save = {
     return formats;
   },
   
-  main: async function(link, format = 'mp3', quality = '128kbps') {
+  main: async function(link, format = 'mp4', quality = '720p') {
     try {
       if (!this.fmt.includes(format)) {
         throw new Error(`Formatnya kagak valid! Pilih aja salah satu: ${this.fmt.join(', ')}`);
@@ -118,7 +118,7 @@ const y2save = {
         throw new Error('Kagak ada 🫵');
       }
       const fmt = this.getfmt(resultx);
-      let converts = format === 'mp3' ? resultx.data.convert_links.video : resultx.data.convert_links.audio;
+      let converts = format === 'mp4' ? resultx.data.convert_links.video : resultx.data.convert_links.audio;
       const vo = converts.find(v => v.quality === quality);
       
       if (!vo) {
