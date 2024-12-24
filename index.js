@@ -39,70 +39,77 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+const express = require('express');
+const axios = require('axios');
+
+const app = express();
+
 const formatAudio = ['mp3', 'm4a', 'webm', 'acc', 'flac', 'opus', 'ogg', 'wav'];
 const formatVideo = ['360', '480', '720', '1080', '1440', '4k'];
 
 const ddownr = {
   download: async (url, format) => {
     if (!formatAudio.includes(format) && !formatVideo.includes(format)) {
-        throw new Error('Format nya gk support wak, coba cek lagi listnya.');
+      throw new Error('Format tidak didukung. Cek daftar format yang valid.');
     }
 
     const config = {
-        method: 'GET',
-        url: `https://p.oceansaver.in/ajax/download.php?format=${format}&url=${encodeURIComponent(url)}&api=dfcb6d76f2f6a9894gjkege8a4ab232222`,
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
+      method: 'GET',
+      url: `https://p.oceansaver.in/ajax/download.php?format=${format}&url=${encodeURIComponent(url)}&api=dfcb6d76f2f6a9894gjkege8a4ab232222`,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      },
     };
 
     try {
-        const response = await axios.request(config);
+      const response = await axios.request(config);
 
-        if (response.data && response.data.success) {
-            const { id, title, info } = response.data;
-            const { image } = info;
-            const downloadUrl = await ddownr.cekProgress(id);
+      if (response.data && response.data.success) {
+        const { id, title, info } = response.data;
+        const { image } = info;
+        const downloadUrl = await ddownr.cekProgress(id);
 
-            return {
-                id: id,
-                image: image,
-                title: title,
-                downloadUrl: downloadUrl
-            };
-        } else {
-            throw new Error('Failed to fetch video details.');
-        }
+        return {
+          id,
+          image,
+          title,
+          downloadUrl,
+        };
+      } else {
+        throw new Error('Gagal mendapatkan detail video.');
+      }
     } catch (error) {
-        console.error('Error:', error);
-        throw error;
+      console.error('Error:', error.message);
+      throw new Error('Terjadi kesalahan saat memproses permintaan.');
     }
   },
   cekProgress: async (id) => {
     const config = {
-        method: 'GET',
-        url: `https://p.oceansaver.in/ajax/progress.php?id=${id}`,
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
+      method: 'GET',
+      url: `https://p.oceansaver.in/ajax/progress.php?id=${id}`,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      },
     };
 
     try {
-        while (true) {
-            const response = await axios.request(config);
+      while (true) {
+        const response = await axios.request(config);
 
-            if (response.data && response.data.success && response.data.progress === 1000) {
-                return response.data.download_url;
-            }           
-            await new Promise(resolve => setTimeout(resolve, 5000));
+        if (response.data && response.data.success && response.data.progress === 1000) {
+          return response.data.download_url;
         }
+        // Tunggu 5 detik sebelum cek ulang
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
     } catch (error) {
-        console.error('Error:', error);
-        throw error;
+      console.error('Error:', error.message);
+      throw new Error('Terjadi kesalahan saat memantau progress.');
     }
-  }
-}
-// Fungsi untuk mengambil data
+  },
+};
+
+
 async function downloadMP3(url) {
     let result; // Deklarasi variabel result
 
@@ -3797,7 +3804,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await ddownr.download(url, format = "wav");
+  const response = await ddownr.download(url, 'wav');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -3814,7 +3821,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await ddownr.download(url, format = "720");
+  const response = await ddownr.download(url, '720');
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
