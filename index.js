@@ -64,14 +64,15 @@ class Ytdl {
             });
 
             const responseData = response.data;
+            if (!responseData || typeof responseData !== 'object') {
+                throw new Error('Invalid response data');
+            }
+
             console.log(responseData);
             return responseData;
         } catch (error) {
-            if (error.response) {
-                console.error(`HTTP error! status: ${error.response.status}`);
-            } else {
-                console.error('Axios error: ', error.message);
-            }
+            console.error('Error in search:', error.message);
+            return null; // Return null to signify failure
         }
     }
 
@@ -95,43 +96,67 @@ class Ytdl {
             });
 
             const responseData = response.data;
+            if (!responseData || typeof responseData !== 'object') {
+                throw new Error('Invalid conversion response');
+            }
+
             console.log(responseData);
             return responseData;
         } catch (error) {
-            if (error.response) {
-                console.error(`HTTP error! status: ${error.response.status}`);
-            } else {
-                console.error('Axios error: ', error.message);
-            }
+            console.error('Error in convert:', error.message);
+            return null; // Return null to signify failure
         }
     }
 
     async play(url) {
-        let { links, vid, title } = await this.search(url);
-        let video = {}, audio = {};
+        const searchResult = await this.search(url);
+
+        if (!searchResult || !searchResult.links) {
+            throw new Error('Failed to retrieve valid search data');
+        }
+
+        const { links, vid, title } = searchResult;
+        const video = {};
+        const audio = {};
 
         for (let i in links.mp4) {
-            let input = links.mp4[i];
-            let { fquality, dlink } = await this.convert(vid, input.k);
-            video[fquality] = {
-                size: input.q,
-                url: dlink
-            };
+            const input = links.mp4[i];
+            const conversionResult = await this.convert(vid, input.k);
+            if (conversionResult) {
+                const { fquality, dlink } = conversionResult;
+                video[fquality] = {
+                    size: input.q,
+                    url: dlink
+                };
+            }
         }
 
         for (let i in links.mp3) {
-            let input = links.mp3[i];
-            let { fquality, dlink } = await this.convert(vid, input.k);
-            audio[fquality] = {
-                size: input.q,
-                url: dlink
-            };
+            const input = links.mp3[i];
+            const conversionResult = await this.convert(vid, input.k);
+            if (conversionResult) {
+                const { fquality, dlink } = conversionResult;
+                audio[fquality] = {
+                    size: input.q,
+                    url: dlink
+                };
+            }
         }
 
         return { title, video, audio };
     }
 }
 
+async function y2mate(link) {
+    try {
+        const ytdl = new Ytdl();
+        const result = await ytdl.play(link);
+        return result;
+    } catch (error) {
+        console.error('Error in y2mate function:', error.message);
+        return null; // Return null to signify failure
+    }
+}
 async function y2mate(link) {
     const ytdl = new Ytdl();
     const result = await ytdl.play(link);
