@@ -39,176 +39,34 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
-class Ytdl {
-    constructor() {
-        this.baseUrl = 'https://id-y2mate.com';
-    }
 
-    async search(url) {
-        const requestData = new URLSearchParams({
-            k_query: url,
-            k_page: 'home',
-            hl: '',
-            q_auto: '0'
-        });
+// Fungsi untuk mengambil data
+async function downloadMP3(url) {
+    let result; // Deklarasi variabel result
 
-        const requestHeaders = {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Accept': '*/*',
-            'X-Requested-With': 'XMLHttpRequest'
-        };
-
-        try {
-            const response = await axios.post(`${this.baseUrl}/mates/analyzeV2/ajax`, requestData, {
-                headers: requestHeaders
-            });
-
-            const responseData = response.data;
-            console.log("Response data from search():", responseData); // Debug log
-
-            if (!responseData || typeof responseData !== 'object') {
-                throw new Error('Invalid response format');
-            }
-
-            return responseData;
-        } catch (error) {
-            console.error('Error in search():', error.message);
-            return null; // Return null to signify failure
-        }
-    }
-
-    async convert(videoId, key) {
-        const requestData = new URLSearchParams({
-            vid: videoId,
-            k: key
-        });
-
-        const requestHeaders = {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Accept': '*/*',
-            'X-Requested-With': 'XMLHttpRequest',
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Mobile Safari/537.36',
-            'Referer': `${this.baseUrl}/youtube/${videoId}`
-        };
-
-        try {
-            const response = await axios.post(`${this.baseUrl}/mates/convertV2/index`, requestData, {
-                headers: requestHeaders
-            });
-
-            const responseData = response.data;
-            console.log("Response data from convert():", responseData); // Debug log
-
-            if (!responseData || typeof responseData !== 'object') {
-                throw new Error('Invalid conversion response');
-            }
-
-            return responseData;
-        } catch (error) {
-            console.error('Error in convert():', error.message);
-            return null; // Return null to signify failure
-        }
-    }
-
-    async play(url) {
-        const searchResult = await this.search(url);
-
-        if (!searchResult) {
-            throw new Error('Failed to retrieve data from search()');
-        }
-
-        if (!searchResult.links) {
-            console.error("Search result does not contain 'links':", searchResult); // Debug log
-            throw new Error('Failed to retrieve valid search data');
-        }
-
-        const { links, vid, title } = searchResult;
-        const video = {};
-        const audio = {};
-
-        for (let i in links.mp4) {
-            const input = links.mp4[i];
-            const conversionResult = await this.convert(vid, input.k);
-            if (conversionResult) {
-                const { fquality, dlink } = conversionResult;
-                video[fquality] = {
-                    size: input.q,
-                    url: dlink
-                };
-            }
-        }
-
-        for (let i in links.mp3) {
-            const input = links.mp3[i];
-            const conversionResult = await this.convert(vid, input.k);
-            if (conversionResult) {
-                const { fquality, dlink } = conversionResult;
-                audio[fquality] = {
-                    size: input.q,
-                    url: dlink
-                };
-            }
-        }
-
-        return { title, video, audio };
-    }
-}
-
-async function y2mate(link) {
     try {
-        const ytdl = new Ytdl();
-        const result = await ytdl.play(link);
-        return result;
-    } catch (error) {
-        console.error('Error in y2mate function:', error.message);
-        return null; // Return null to signify failure
-    }
-}
-async function y2mate(link) {
-    const ytdl = new Ytdl();
-    const result = await ytdl.play(link);
-    return result
-}
-async function onlyaudio(url) {
-    const response = await axios.post('https://cobalt.siputzx.my.id', {
-        url: url,
-        downloadMode: "audio"
-    }, {
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-    });
+        // Mengambil data dari API
+        const response = await fetch(`https://api.siputzx.my.id/api/dl/youtube/mp3?url=${encodeURIComponent(url)}`);
+        
+        // Mengecek apakah respons OK
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-    return {
-        creator: 'Siputzx',
-        link: response.data.url
-    };
-}
-async function ytdlaudio(url) {
-const response = await axios.post('https://cobalt.siputzx.my.id', {
-                    url: url,                     downloadMode: "audio"
-                }, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                })
-const responsen = await axios.post('https://cobalt.siputzx.my.id', {
-                    url: url,   
-filenameStyle: 'pretty', 
-                   videoQuality: `720`
-                }, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                })
-                 return {
-creator: 'Siputzx',
-mp3: response.data.url, 
-mp4: responsen.data.url
-}
+        // Mengonversi respons menjadi JSON
+        result = await response.json();
+
+        // Jika data tidak ada, menambahkan pesan lain pada result
+        if (!result) {
+            result = 'No data received.';
+        }
+    } catch (error) {
+        // Menyimpan pesan error pada result
+        result = `Error fetching data: ${error.message}`;
+    }
+
+    // Mengembalikan hasil sebagai result
+    return result;
 }
 
 async function googleImage(query) {
@@ -3877,7 +3735,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await ytdlnew(url, format = 'mp3');
+  const response = await downloadMP3(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
