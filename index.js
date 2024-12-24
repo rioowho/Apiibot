@@ -1946,7 +1946,7 @@ function ytdlnew(url, format = 'mp3') {
             const result = await progress(convert.progressURL, convert.downloadURL);
             resolve({
                 title: result.title,
-                dl: result.dl
+                link: result.dl
             })
         } else {
             resolve({
