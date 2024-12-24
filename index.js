@@ -1940,13 +1940,12 @@ function ytdlnew(url, format = 'mp3') {
                         })
                     }
                 }
-                return { dl, title }
+                return { dl }
             }
  
             const result = await progress(convert.progressURL, convert.downloadURL);
             resolve({
-                title: result.title,
-                link: result.dl
+              dl: result.dl
             })
         } else {
             resolve({
