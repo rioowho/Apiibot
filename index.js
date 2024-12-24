@@ -1899,7 +1899,7 @@ function ytdlnew(url, format = 'mp3') {
             'Referer': 'https://id.ytmp3.mobi/v1/',
         }
  
-        const init = await axios.get(`https://d.ymcdn.org/api/v1/init?p=y&23=1llum1n471&_=${Math.random()}`, {
+        const init = await axios.get(`https://dl.ymcdn.org/api/v1/init?p=y&23=1llum1n471&_=${Math.random()}`, {
             headers: hr
         });
  
