@@ -64,14 +64,15 @@ class Ytdl {
             });
 
             const responseData = response.data;
+            console.log("Response data from search():", responseData); // Debug log
+
             if (!responseData || typeof responseData !== 'object') {
-                throw new Error('Invalid response data');
+                throw new Error('Invalid response format');
             }
 
-            console.log(responseData);
             return responseData;
         } catch (error) {
-            console.error('Error in search:', error.message);
+            console.error('Error in search():', error.message);
             return null; // Return null to signify failure
         }
     }
@@ -96,14 +97,15 @@ class Ytdl {
             });
 
             const responseData = response.data;
+            console.log("Response data from convert():", responseData); // Debug log
+
             if (!responseData || typeof responseData !== 'object') {
                 throw new Error('Invalid conversion response');
             }
 
-            console.log(responseData);
             return responseData;
         } catch (error) {
-            console.error('Error in convert:', error.message);
+            console.error('Error in convert():', error.message);
             return null; // Return null to signify failure
         }
     }
@@ -111,7 +113,12 @@ class Ytdl {
     async play(url) {
         const searchResult = await this.search(url);
 
-        if (!searchResult || !searchResult.links) {
+        if (!searchResult) {
+            throw new Error('Failed to retrieve data from search()');
+        }
+
+        if (!searchResult.links) {
+            console.error("Search result does not contain 'links':", searchResult); // Debug log
             throw new Error('Failed to retrieve valid search data');
         }
 
