@@ -19,6 +19,8 @@ const { Buffer } = require('buffer');
 const { run } = require('shannz-playwright');
 var { performance } = require("perf_hooks");
 const NodeCache = require('node-cache');
+const { CookieJar } = require('tough-cookie');
+const { wrapper } = require('axios-cookiejar-support');
 const mime = require('mime-types');
 const moment = require('moment-timezone');
 const Groq = require('groq-sdk')
@@ -39,7 +41,100 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+const jar = new CookieJar();
+const client = wrapper(axios.create({ jar }));
 
+const y2save = {
+  baseURL: 'https://y2save.com',
+  
+  headers: {
+    'accept': 'application/json, text/javascript, */*; q=0.01',
+    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'origin': 'https://y2save.com',
+    'referer': 'https://y2save.com/id',
+    'user-agent': 'Postify/1.0.0',
+    'x-requested-with': 'XMLHttpRequest'
+  },
+  
+  fmt: ['mp4', 'mp3'],
+  qualities: {
+    mp4: ['360P', '480P', '720p', '1080P'],
+    mp3: ['128kbps']
+  },
+  
+  geToken: async function() {
+    try {
+      const response = await client.get(`${this.baseURL}/id`, { headers: this.headers });
+      const $ = cheerio.load(response.data);
+      return $('meta[name="csrf-token"]').attr('content');
+    } catch (error) {
+      console.error('CSRF Token nya kagak ada! manual aja yak 😂');
+      throw error;
+    }
+  },
+  search: async function(link) {
+    try {
+      const token = await this.geToken();
+      const response = await client.post(`${this.baseURL}/search`, 
+        `_token=${token}&query=${encodeURIComponent(link)}`,
+        { headers: this.headers }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Kagak ada response 🫵');
+      throw error;
+    }
+  },
+  
+  convert: async function(vid, key) {
+    try {
+      const token = await this.geToken();
+      const response = await client.post(`${this.baseURL}/searchConvert`, 
+        `_token=${token}&vid=${vid}&key=${encodeURIComponent(key)}`,
+        { headers: this.headers }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Kagak ada response 🫵');
+      throw error;
+    }
+  },
+  
+  getfmt: function(resultx) {
+    const formats = {
+      mp4: resultx.data.convert_links.video.map(v => v.quality),
+      mp3: resultx.data.convert_links.audio.map(a => a.quality)
+    };
+    return formats;
+  },
+  
+  main: async function(link, format = 'mp4', quality = '480P') {
+    try {
+      if (!this.fmt.includes(format)) {
+        throw new Error(`Formatnya kagak valid! Pilih aja salah satu: ${this.fmt.join(', ')}`);
+      }
+      const resultx = await this.search(link);
+      if (resultx.status !== 'ok') {
+        throw new Error('Kagak ada 🫵');
+      }
+      const fmt = this.getfmt(resultx);
+      let converts = format === 'mp4' ? resultx.data.convert_links.video : resultx.data.convert_links.audio;
+      const vo = converts.find(v => v.quality === quality);
+      
+      if (!vo) {
+        throw new Error(`Format ${format} kagak ada yang cocok buat quality ${quality}. Pilih salah satu: ${fmt[format].join(', ')}`);
+      }
+      const vr = await this.convert(resultx.data.vid, vo.key);
+      if (vr.status !== 'ok') {
+        throw new Error('Eyaaa, gagal 🫵');
+      }
+      return vr.dlink;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+};
 const formatAudio = ['mp3', 'm4a', 'webm', 'acc', 'flac', 'opus', 'ogg', 'wav'];
 const formatVideo = ['360', '480', '720', '1080', '1440', '4k'];
 
@@ -3794,13 +3889,14 @@ app.get('/api/appleaudio', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 app.get('/api/ytmp3', async (req, res) => {
   try {
     const url = req.query.url; // Ambil parameter dari query
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await ddownr.download(url, 'wav');
+  const response = await y2save.main(url, "mp3", "128kbps");
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
