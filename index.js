@@ -3797,7 +3797,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await ddownr.download(url, format = "webm");
+  const response = await ddownr.download(url, format = "wav");
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -3814,7 +3814,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await ytdlaudio(url);
+  const response = await ddownr.download(url, format = "720");
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
