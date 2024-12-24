@@ -42,7 +42,7 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 const jar = new CookieJar();
-const client = wrapper(axios.create({ jar }));
+const clientt = wrapper(axios.create({ jar }));
 
 const y2save = {
   baseURL: 'https://y2save.com',
@@ -64,7 +64,7 @@ const y2save = {
   
   geToken: async function() {
     try {
-      const response = await client.get(`${this.baseURL}/id`, { headers: this.headers });
+      const response = await clientt.get(`${this.baseURL}/id`, { headers: this.headers });
       const $ = cheerio.load(response.data);
       return $('meta[name="csrf-token"]').attr('content');
     } catch (error) {
@@ -75,7 +75,7 @@ const y2save = {
   search: async function(link) {
     try {
       const token = await this.geToken();
-      const response = await client.post(`${this.baseURL}/search`, 
+      const response = await clientt.post(`${this.baseURL}/search`, 
         `_token=${token}&query=${encodeURIComponent(link)}`,
         { headers: this.headers }
       );
@@ -89,7 +89,7 @@ const y2save = {
   convert: async function(vid, key) {
     try {
       const token = await this.geToken();
-      const response = await client.post(`${this.baseURL}/searchConvert`, 
+      const response = await clientt.post(`${this.baseURL}/searchConvert`, 
         `_token=${token}&vid=${vid}&key=${encodeURIComponent(key)}`,
         { headers: this.headers }
       );
