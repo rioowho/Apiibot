@@ -1519,25 +1519,74 @@ async function searchSpotifyTracks(query) {
   return data.tracks.items;
 }
 async function fbdl(url) {
-	return new Promise((resolve, reject) => {
-axios("https://getmyfb.com/process", {
-  headers: {
-    "cookie": "PHPSESSID=mtkljtmk74aiej5h6d846gjbo4; __cflb=04dToeZfC9vebXjRcJCMjjSQh5PprejufZXs2vHCt5; _token=K5Qobnj4QvoYKeLCW6uk"
-  },
-  data: { 
-     id: url,
-     locale: "en"
-    },
-  "method": "POST"
-}).then(res => { 
-let $ = cheerio.load(res.data)
-let link = {}
-result.caption = $("div.results-item-text").eq(0).text().trim()
-result.thumb = $(".results-item-image-wrapper img").attr("src") 
-result.link = $("a").attr("href")
- resolve(result) 
-  })
- })
+const baseURL = "https://fdownloader.net/id";
+const apiURL = "https://v3.fdownloader.net/api/ajaxSearch?lang=en";
+  try {
+    const {
+      data
+    } = await axios(baseURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
+      },
+      data: new URLSearchParams(
+        Object.entries({
+          recaptchaToken: "",
+          q: url,
+          t: "media",
+          lang: "en",
+        })
+      ),
+    });
+    const $ = cheerio.load(data);
+    const script = $("body").find("script").text().trim();
+    const k_token = script.split("k_token = ")[1].split(";")[0];
+    const k_exp = script.split("k_exp = ")[1].split(";")[0];
+    const {
+      data: apiData
+    } = await axios(apiURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
+      },
+      data: new URLSearchParams(
+        Object.entries({
+          k_exp,
+          k_token,
+          q: url,
+          lang: "en",
+          web: "fdownloader.net",
+          v: "v2",
+          w: "",
+        })
+      ),
+    });
+    const $api = cheerio.load(apiData.data);
+    const result = [];
+    const duration = $api('div.clearfix > p').text().trim();
+    $api('div.tab__content')
+      .find('tbody > tr')
+      .each((index, element) => {
+        const quality = $api(element).find('td.video-quality').text();
+        const videoUrl = $api(element).find('td > a').attr('href');
+        if (quality && videoUrl) {
+          result.push({
+            quality,
+            url: videoUrl,
+          });
+        }
+      });
+    return {
+      duration,
+      result,
+    };
+  }
+  catch (error) {
+    console.log(error);
+    throw error;
+  }
 }
 function dekode(a) {
     try {
