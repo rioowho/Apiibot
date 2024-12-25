@@ -22,6 +22,7 @@ const NodeCache = require('node-cache');
 const { CookieJar } = require('tough-cookie');
 const { wrapper } = require('axios-cookiejar-support');
 const mime = require('mime-types');
+const yts = require('yt-search')
 const moment = require('moment-timezone');
 const Groq = require('groq-sdk')
 const client = new Groq({ apiKey: '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' });
@@ -1591,111 +1592,218 @@ async function grabDL(link) {
             throw new Error('Gausah macem2 bree, domain yang warek buat di grab ada di atas yak ...');
         }
     };
-const SaveTube = {
-    qualities: {
-        audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
-        video: { 1: '144', 2: '240', 3: '360', 4: '480', 5: '720', 6: '1080', 7: '1440', 8: '2160' }
-    },
+function getYouTubeVideoId(url) {
+	const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|v\/|embed\/|user\/[^\/\n\s]+\/)?(?:watch\?v=|v%3D|embed%2F|video%2F)?|youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/|youtube\.com\/playlist\?list=)([a-zA-Z0-9_-]{11})/;
+	const match = url.match(regex);
+	return match ? match[1] : null;
+}
+const audio = ["92", "128", "256", "320"]
+const video = ["144", "360", "480", "720", "1080"]
 
-    headers: {
-        accept: 'application/json, text/plain, */*', 
-        referer: 'https://ytshorts.savetube.me/', 
-        origin: 'https://ytshorts.savetube.me/',
-        'user-agent': 'Postify/1.0.0 (compatible; SavetubeBot/1.0)', 
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1'
-    },
-
-    cdn() {
-        return Math.floor(Math.random() * 11) + 51;
-    },
-
-    checkQuality(type, qualityIndex) {
-        if (!this.qualities[type] || !(qualityIndex in this.qualities[type])) {
-            throw new Error(`❌ Kualitas ${type} tidak valid. Pilih salah satu: ${Object.keys(this.qualities[type]).join(', ')}`);
-        }
-    },
-
-    async fetchData(url, cdn, body = {}) {
-        const headers = {
-            ...this.headers,
-            authority: `cdn${cdn}.savetube.su`
-        };
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify(body)
-            });
-            const data = await response.json();
-
-            if (response.ok && data) {
-                return data;
-            } else {
-                throw new Error('Respon API tidak valid.');
-            }
-        } catch (error) {
-            console.error('Fetch Data Error:', error.message);
-            throw error;
-        }
-    },
-
-    dLink(cdnUrl, type, quality, videoKey) {
-        return `https://${cdnUrl}/download?type=${type}&quality=${quality}&key=${videoKey}`;
-    },
-
-    async dl(dl, qualityIndex, typeIndex) {
-        const type = typeIndex === 1 ? 'video' : 'audio';
-        if (!type) throw new Error('❌ Tipe tidak valid. Pilih 1 untuk audio atau 2 untuk video.');
-
-        SaveTube.checkQuality(type, qualityIndex);
-        const quality = SaveTube.qualities[type][qualityIndex];
-
-        const cdnNumber = SaveTube.cdn();
-        const cdnUrl = `cdn${cdnNumber}.savetube.su`;
-
-        try {
-            // Fetch video info in parallel with download link
-            const videoInfoPromise = SaveTube.fetchData(`https://${cdnUrl}/info`, cdnNumber, { url: dl });
-            const downloadLinkPromise = videoInfoPromise.then(videoInfo => {
-                const badi = {
-                    downloadType: type,
-                    quality: quality,
-                    key: videoInfo.data.key
-                };
-                return SaveTube.fetchData(SaveTube.dLink(cdnUrl, type, quality, videoInfo.data.key), cdnNumber, badi);
-            });
-
-            const [videoInfo, dlRes] = await Promise.all([videoInfoPromise, downloadLinkPromise]);
-
-            if (!videoInfo || !videoInfo.data || !dlRes || !dlRes.data) {
-                throw new Error('❌ Gagal mendapatkan informasi atau link download.');
-            }
-
-            return {
-                link: dlRes.data.downloadUrl,
-                duration: videoInfo.data.duration,
-                durationLabel: videoInfo.data.durationLabel,
-                fromCache: videoInfo.data.fromCache,
-                id: videoInfo.data.id,
-                key: videoInfo.data.key,
-                thumbnail: videoInfo.data.thumbnail,
-                thumbnail_formats: videoInfo.data.thumbnail_formats,
-                title: videoInfo.data.title,
-                titleSlug: videoInfo.data.titleSlug,
-                videoUrl: videoInfo.data.url,
-                quality,
-                type
-            };
-        } catch (error) {
-            throw new Error('❌ Gagal mendapatkan Audio.');
-        }
+async function savetube(link, quality, value) {
+    try {
+    	const headers = {
+    		accept: '*/*',
+    		referer: 'https://ytshorts.savetube.me/',
+    		origin: 'https://ytshorts.savetube.me/',
+    		'user-agent': 'Postify/1.0.0',
+    		'Content-Type': 'application/json'
+    	};
+    	const cdnNumber = 54
+    	const cdnUrl = `cdn${cdnNumber}.savetube.su`;
+    	const videoInfoResponse = await axios.post(
+    		`https://${cdnUrl}/info`, {
+    			url: link
+    		}, {
+    			headers: {
+    				...headers,
+    				authority: `cdn${cdnNumber}.savetube.su`
+    			}
+    		}
+    	);
+    	const videoInfo = videoInfoResponse.data.data;
+    	const type = value == 1 ? "audio" : 'video'
+    	const body = {
+    		downloadType: type,
+    		quality,
+    		key: videoInfo.key
+    	};
+    	const downloadResponse = await axios.post(
+    		`https://${cdnUrl}/download`,
+    		body, {
+    			headers: {
+    				...headers,
+    				authority: `cdn${cdnNumber}.savetube.su`
+    			}
+    		}
+    	);
+    	const downloadData = downloadResponse.data.data;
+    	return {
+    	    status: true,
+    	    quality: value == 1 ? `${quality}kbps` : `${quality}p`,
+    	    availableQuality: value == 1 ? audio : video,
+    		url: downloadData.downloadUrl,
+    		filename: (`${videoInfo.title}`) + (value == 1 ? ` (${quality}kbps).mp3` : ` (${quality}p).mp4`)
+    	};
+	} catch (error) {
+    	return {
+    	    status: false,
+    	    message: error.message
+    	}
     }
-};
+}
+
+const cnv = {
+	getfile: async (url, format, value) => {
+		try {
+		    let videoId = getYouTubeVideoId(url)
+		    let cekData = await cnv.cekDatabase(url, format, value)
+		    if (cekData.success && cekData.data.server_path) {
+		        return {
+				    status: true,
+				    quality: value == 1 ? `${format}kbps` : `${format}p`,
+				    availableQuality: value == 1 ? audio : video,
+				    url: cekData.data.server_path,
+				    filename: (`${videoId}`) + (value == 1 ? ` (${format}kbps).mp3` : ` (${format}p).mp4`)
+			    };
+			} else {
+			    let down = await cnv.download(url, format, value)
+			    let base = await cnv.toDatabase(url, down.download_link, format, value)
+			    return {
+				    status: true,
+				    quality: value == 1 ? `${format}kbps` : `${format}p`,
+				    availableQuality: value == 1 ? audio : video,
+				    url: down.download_link,
+				    filename: (`${videoId}`) + (value == 1 ? ` (${format}kbps).mp3` : ` (${format}p).mp4`)
+			    };
+			}
+		} catch (error) {
+			return {
+				status: false,
+				message: error.message
+			};
+		}
+	},
+	cekDatabase: async (url, format, value) => {
+		try {
+		    let videoId = getYouTubeVideoId(url)
+            const response = await axios.post(
+                'https://cnvmp3.com/check_database.php', {
+                    'youtube_id': videoId,
+                    'quality': format,
+                    'formatValue': value
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
+                        'Referer': 'https://cnvmp3.com/'
+                    }
+                }
+            );
+			return response.data
+		} catch (error) {
+			return {
+				success: false,
+				message: error.message
+			};
+		}
+	},
+	toDatabase: async (url, file, format, value) => {
+	    try {
+	        let videoId = getYouTubeVideoId(url)
+            const response = await axios.post(
+                'https://cnvmp3.com/insert_to_database.php', {
+                    'youtube_id': videoId,
+                    'server_path': file,
+                    'quality': format,
+                    'title': videoId,
+                    'formatValue': value
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
+                        'Referer': 'https://cnvmp3.com/'
+                    }
+                }
+            );
+            return response.data
+        } catch (error) {
+            return {
+				success: false,
+				message: error.message
+			};
+		}
+	},
+download: async (url, format, value) => {
+	    try {
+	        let videoId = getYouTubeVideoId(url)
+	        const response = await axios.post(
+                'https://cnvmp3.com/download_video.php', {
+                    'url': url,
+                    'quality': format,
+                    'title': videoId,
+                    'formatValue': value
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
+                        'Referer': 'https://cnvmp3.com/'
+                    }
+                }
+            );
+            return response.data
+        } catch (error) {
+            return {
+				success: false,
+				message: error.message
+			};
+		}
+	}
+}
+
+const inv = {
+	getfile: async (url, format, value) => {
+    	let videoId = getYouTubeVideoId(url)
+	    return {
+			status: true,
+			quality: value == 140 ? `${format}kbps` : `${format}p`,
+			availableQuality: [format],
+			url: `https://inv.nadeko.net/latest_version?id=${videoId}&itag=${value}&local=true`,
+			filename: (`${videoId}`) + (value == 140 ? ` (${format}kbps).mp3` : ` (${format}p).mp4`)
+		};
+	}
+}
+
+async function ytdljir(link, formats = 128) {
+	const videoId = getYouTubeVideoId(link);
+	const format = audio.includes(formats) ? formats : 128
+	if (!videoId) {
+		return {
+			status: false,
+			message: "Invalid YouTube URL"
+		};
+	}
+	try {
+		let data = await yts("https://youtube.com/watch?v=" + videoId);
+		let response = await savetube("https://youtube.com/watch?v=" + videoId, format, 1)
+		if (!response.status) {
+		    response = await cnv.getfile("https://youtube.com/watch?v=" + videoId, format, 1)
+		}
+		if (!response.status) {
+			response = await inv.getfile("https://youtube.com/watch?v=" + videoId, 128, 140)
+		}
+		return {
+			metadata: data.all[0],
+			download: response
+		};
+	} catch (error) {
+		console.log(error)
+		return {
+			status: false,
+			message: error.response ? `HTTP Error: ${error.response.status}` : error.message
+		};
+	}
+}
 const SaveTubee = {
     qualities: {
         audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
@@ -3896,7 +4004,7 @@ app.get('/api/ytmp3', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await y2save.main(url, "mp3", "128kbps");
+  const response = await ytdljir(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
