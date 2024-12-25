@@ -1688,8 +1688,10 @@ async function savetube(link, quality, value) {
     	);
     	const downloadData = downloadResponse.data.data;
     	return {
+            status: true,
     	    quality: value == 1 ? `${quality}kbps` : `${quality}p`,
     		url: downloadData.downloadUrl,
+    		availableQuality: value == 1 ? audio : video,
     		filename: (`${videoInfo.title}`) + (value == 1 ? ` (${quality}kbps).mp3` : ` (${quality}p).mp4`)
     	};
 	} catch (error) {
@@ -1814,6 +1816,7 @@ const inv = {
 	    return {
 			status: true,
 			quality: value == 140 ? `${format}kbps` : `${format}p`,
+			availableQuality: [format],
 			url: `https://inv.nadeko.net/latest_version?id=${videoId}&itag=${value}&local=true`,
 			filename: (`${videoId}`) + (value == 140 ? ` (${format}kbps).mp3` : ` (${format}p).mp4`)
 		};
