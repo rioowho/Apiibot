@@ -1823,8 +1823,6 @@ async function ytmp4jir(link, formats = 720) {
 			response = await inv.getfile("https://youtube.com/watch?v=" + videoId, 360, 18)
 		}
 		return {
-			status: true,
-			creator: "@vreden/youtube_scraper",
 			metadata: data.all[0],
 			download: response
 		};
