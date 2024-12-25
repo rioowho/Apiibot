@@ -1816,7 +1816,6 @@ const inv = {
 	    return {
 			status: true,
 			quality: value == 140 ? `${format}kbps` : `${format}p`,
-			availableQuality: [format],
 			url: `https://inv.nadeko.net/latest_version?id=${videoId}&itag=${value}&local=true`,
 			filename: (`${videoId}`) + (value == 140 ? ` (${format}kbps).mp3` : ` (${format}p).mp4`)
 		};
