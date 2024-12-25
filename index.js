@@ -1531,10 +1531,10 @@ axios("https://getmyfb.com/process", {
   "method": "POST"
 }).then(res => { 
 let $ = cheerio.load(res.data)
-let result = {}
+let link = {}
 result.caption = $("div.results-item-text").eq(0).text().trim()
 result.thumb = $(".results-item-image-wrapper img").attr("src") 
-result.result = $("a").attr("href")
+result.link = $("a").attr("href")
  resolve(result) 
   })
  })
