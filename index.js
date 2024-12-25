@@ -42,6 +42,106 @@ app.set("json spaces", 2);
 global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
+
+const userAgentList = [
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Linux; Android 10; SM-G960U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Mobile Safari/537.36'
+];
+
+async function exdytdl(youtubeUrl) {
+    try {
+        const response = await axios({
+            method: 'post',
+            url: 'https://contentforest.com/api/tools/youtube-video-data',
+            headers: {
+                'Accept': 'application/json, text/plain, */*',
+                'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+                'Content-Type': 'application/json',
+                'Origin': 'https://contentforest.com',
+                'Referer': 'https://contentforest.com/tools/youtube-description-extractor',
+                'User-Agent': userAgentList[Math.floor(Math.random() * userAgentList.length)]
+            },
+            data: {
+                youtube_link: youtubeUrl,
+                pick_keys: ["title", "description", "shortDescription"]
+            }
+        });
+
+        return {
+            description: response.data.shortDescription.replace(/\n+/g, ' ').trim()
+        };
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function ytdlapsi(youtubeUrl) {
+    try {
+        const apiUrl = `https://p.oceansaver.in/ajax/download.php?copyright=0&format=1080&url=${encodeURIComponent(youtubeUrl)}&api=dfcb6d76f2f6a9894gjkege8a4ab232222`;
+
+        const downloadRequest = await axios.get(apiUrl, {
+            headers: {
+                'User-Agent': userAgentList[Math.floor(Math.random() * userAgentList.length)],
+                'referer': 'https://ddownr.com/'
+            }
+        });
+
+        if (!downloadRequest.data.success) {
+            throw new Error('Failed to initiate download.');
+        }
+
+        const videoId = downloadRequest.data.id;
+        const videoTitle = downloadRequest.data.info.title;
+        const thumbnailUrl = downloadRequest.data.info.image;
+
+        let downloadUrl = '';
+        while (true) {
+            const progressUrl = `https://p.oceansaver.in/ajax/progress.php?id=${videoId}`;
+            const progressRequest = await axios.get(progressUrl);
+            
+            if (progressRequest.data.success && progressRequest.data.progress >= 1000) {
+                downloadUrl = progressRequest.data.download_url;
+                break;
+            }
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+
+        if (!downloadUrl) {
+            throw new Error('Failed to fetch download URL.');
+        }
+
+        const downloadResponse = await axios.get(downloadUrl, {
+            responseType: 'arraybuffer'
+        });
+
+        const videoBuffer = downloadResponse.data;
+
+        const formData = new FormData();
+        formData.append('reqtype', 'fileupload');
+        formData.append('fileToUpload', videoBuffer, { filename: `${videoTitle.replace(/\s/g, '_')}.mp4` });
+
+        const uploadResponse = await axios.post('https://catbox.moe/user/api.php', formData, {
+            headers: {
+                ...formData.getHeaders(),
+                'User-Agent': userAgentList[Math.floor(Math.random() * userAgentList.length)]
+            }
+        });
+
+        const descriptionData = await exdytdl(youtubeUrl);
+
+        return {
+            title: videoTitle,
+            thumbnailxins: thumbnailUrl,
+            descriptionxins: descriptionData.description,
+            downloadxins: uploadResponse.data
+        };
+
+    } catch (error) {
+        throw error;
+    }
+}
+
 const jar = new CookieJar();
 const clientt = wrapper(axios.create({ jar }));
 
@@ -4034,7 +4134,7 @@ app.get('/api/ytmp4', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytmp4jir(url);
+    const response = await ytdlapsi(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
