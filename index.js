@@ -1688,9 +1688,7 @@ async function savetube(link, quality, value) {
     	);
     	const downloadData = downloadResponse.data.data;
     	return {
-    	    status: true,
     	    quality: value == 1 ? `${quality}kbps` : `${quality}p`,
-    	    availableQuality: value == 1 ? audio : video,
     		url: downloadData.downloadUrl,
     		filename: (`${videoInfo.title}`) + (value == 1 ? ` (${quality}kbps).mp3` : ` (${quality}p).mp4`)
     	};
