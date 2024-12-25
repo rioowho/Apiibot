@@ -1804,6 +1804,38 @@ async function ytdljir(link, formats = 128) {
 		};
 	}
 }
+async function ytmp4jir(link, formats = 720) {
+	const videoId = getYouTubeVideoId(link);
+	const format = video.includes(formats) ? formats : 360
+	if (!videoId) {
+		return {
+			status: false,
+			message: "Invalid YouTube URL"
+		};
+	}
+	try {
+		let data = await yts("https://youtube.com/watch?v=" + videoId);
+		let response = await savetube("https://youtube.com/watch?v=" + videoId, format, 0)
+		if (!response.status) {
+		    response = await cnv.getfile("https://youtube.com/watch?v=" + videoId, format, 0)
+		}
+		if (!response.status) {
+			response = await inv.getfile("https://youtube.com/watch?v=" + videoId, 360, 18)
+		}
+		return {
+			status: true,
+			creator: "@vreden/youtube_scraper",
+			metadata: data.all[0],
+			download: response
+		};
+	} catch (error) {
+		console.log(error)
+		return {
+			status: false,
+			message: error.response ? `HTTP Error: ${error.response.status}` : error.message
+		};
+	}
+}
 const SaveTubee = {
     qualities: {
         audio: { 1: '32', 2: '64', 3: '128', 4: '192' },
@@ -3955,7 +3987,7 @@ app.get('/api/ytmp4', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-    const response = await ytdlaudio(url);
+    const response = await ytmp4jir(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -4021,7 +4053,7 @@ app.get('/api/ytdl', async (req, res) => {
     if (!url) {
       return res.status(400).json({ error: 'Parameter "url" tidak ditemukan' });
     }
-  const response = await ddownr.download(url, '4k');
+  const response = await ytmp4jir(url);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
