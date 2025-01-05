@@ -4,10 +4,94 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rioo - Asisten</title>
-  <!-- Linking Google Fonts for Icons -->
+  <!-- Google Fonts for Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0">
-  <!-- Linking Local CSS -->
-  <link href="/css/chat.css" rel="stylesheet">
+  <!-- External CSS -->
+      <link href='/css/styles.css' rel='stylesheet'>
+    <link href='/css/chat.css' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Montserrat:700' rel='stylesheet' type='text/css'>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    .header {
+      text-align: center;
+      padding: 20px;
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .title {
+      font-size: 24px;
+      margin: 0;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      margin: 5px 0;
+    }
+
+    .suggestion-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .suggestion {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      margin: 10px auto;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      max-width: 600px;
+    }
+
+    .suggestion .icon {
+      margin-left: auto;
+      color: #4CAF50;
+    }
+
+    .typing-area {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #fff;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+      padding: 10px 20px;
+    }
+
+    .typing-form {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .typing-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+
+    .icon {
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .disclaimer-text {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #888;
+    }
+  </style>
 </head>
 <body>
   <header class="header">
@@ -40,7 +124,7 @@
 
   <!-- External Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <!-- Linking Local JavaScript -->
+  <!-- Local JavaScript -->
   <script src="/view/js/chat.js"></script>
 </body>
 </html>
