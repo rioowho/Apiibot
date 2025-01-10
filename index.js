@@ -120,7 +120,7 @@ const gpt24o = {
       "presence_penalty": 0,
       "frequency_penalty": 0,
       "top_p": 1,
-      "max_tokens": 4000
+      "max_tokens": null
     });
 
     const config = {
@@ -4024,13 +4024,13 @@ app.get('/api/chatgpt', async (req, res) => {
 });
 app.get('/api/gpt4oimg', async (req, res) => {
   try {
-   const img = req.query.url;
     const text = req.query.message;
-    if (!img) {
-      return res.status(400).json({ error: 'Parameter "img" tidak ditemukan' });
-    }
+    const url = req.query.url;
     if (!text) {
-      return res.status(403).json({ error: 'Parameter "text" tidak ditemukan' });
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
+    }
+    if (!img) {
+      return res.status(403).json({ error: 'Parameter "img" tidak ditemukan' });
     }
     const response = await gpt24o.chatWithImage(text, img);
     res.status(200).json({
