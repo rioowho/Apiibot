@@ -43,38 +43,110 @@ global.creator = "@riooxdzz"
 // Middleware untuk CORS
 app.use(cors());
 
-const userAgentList = [
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Safari/605.1.15',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Mozilla/5.0 (Linux; Android 10; SM-G960U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Mobile Safari/537.36'
-];
+const gpt24 = {
+  chatOnly: async (question) => {
+    const data = JSON.stringify({
+      "messages": [
+        {
+          "role": "system",
+          "content": "Halo, aku Rioo! Aku adalah model GPT-4o-mini yang dirancang untuk memberikan respons cerdas, fleksibel, dan membantu dalam berbagai situasi. Aku dapat menjawab pertanyaanmu, memberikan informasi, atau sekadar berbincang santai. Model ini menggunakan teknologi mutakhir untuk memastikan hasil yang akurat, relevan, dan informatif. Silakan ajukan pertanyaan apa pun, dan aku akan memberikan jawaban terbaikku."
+        },
+        {
+          "role": "user",
+          "content": question
+        }
+      ],
+      "stream": false,
+      "model": "gpt-4o-mini",
+      "temperature": 0.5,
+      "presence_penalty": 0,
+      "frequency_penalty": 0,
+      "top_p": 1,
+      "max_tokens": null
+    });
 
-async function exdytdl(youtubeUrl) {
-    try {
-        const response = await axios({
-            method: 'post',
-            url: 'https://contentforest.com/api/tools/youtube-video-data',
-            headers: {
-                'Accept': 'application/json, text/plain, */*',
-                'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
-                'Content-Type': 'application/json',
-                'Origin': 'https://contentforest.com',
-                'Referer': 'https://contentforest.com/tools/youtube-description-extractor',
-                'User-Agent': userAgentList[Math.floor(Math.random() * userAgentList.length)]
-            },
-            data: {
-                youtube_link: youtubeUrl,
-                pick_keys: ["title", "description", "shortDescription"]
-            }
-        });
+    const config = {
+      method: 'POST',
+      url: 'https://gpt24-ecru.vercel.app/api/openai/v1/chat/completions',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Android 10; Mobile; rv:131.0) Gecko/131.0 Firefox/131.0',
+        'Accept': 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+        'accept-language': 'id-ID',
+        'referer': 'https://gpt24-ecru.vercel.app/',
+        'origin': 'https://gpt24-ecru.vercel.app',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'priority': 'u=0',
+        'te': 'trailers',
+        'Cookie': '_ga_89WN60ZK2E=GS1.1.1736208261.1.1.1736208312.0.0.0; _ga=GA1.1.1312319525.1736208262'
+      },
+      data: data
+    };
 
-        return {
-            description: response.data.shortDescription.replace(/\n+/g, ' ').trim()
-        };
-    } catch (error) {
-        throw error;
-    }
+    const api = await axios.request(config);
+    return api.data.choices[0].message.content; // Hanya mengembalikan hasil
+  }
 }
+
+const gpt24o = {
+  chatWithImage: async (question, imageUrl) => {
+    const data = JSON.stringify({
+      "messages": [
+        {
+          "role": "system",
+          "content": "Halo, aku Rioo! Aku adalah model GPT-4o-mini yang dirancang untuk memberikan respons cerdas, fleksibel, dan membantu dalam berbagai situasi. Aku dapat menjawab pertanyaanmu, memberikan informasi, atau sekadar berbincang santai. Model ini menggunakan teknologi mutakhir untuk memastikan hasil yang akurat, relevan, dan informatif. Silakan ajukan pertanyaan apa pun, dan aku akan memberikan jawaban terbaikku."
+        },
+        {
+          "role": "user",
+          "content": [
+            {
+              "type": "text",
+              "text": question
+            },
+            {
+              "type": "image_url",
+              "image_url": {
+                "url": imageUrl
+              }
+            }
+          ]
+        }
+      ],
+      "stream": false,
+      "model": "gpt-4o-mini",
+      "temperature": 0.5,
+      "presence_penalty": 0,
+      "frequency_penalty": 0,
+      "top_p": 1,
+      "max_tokens": 4000
+    });
+
+    const config = {
+      method: 'POST',
+      url: 'https://gpt24-ecru.vercel.app/api/openai/v1/chat/completions',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Android 10; Mobile; rv:131.0) Gecko/131.0 Firefox/131.0',
+        'Accept': 'application/json, text/event-stream',
+        'Content-Type': 'application/json',
+        'accept-language': 'id-ID',
+        'referer': 'https://gpt24-ecru.vercel.app/',
+        'origin': 'https://gpt24-ecru.vercel.app',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'priority': 'u=4',
+        'te': 'trailers',
+        'Cookie': '_ga_89WN60ZK2E=GS1.1.1736208261.1.1.1736208312.0.0.0; _ga=GA1.1.1312319525.1736208262'
+      },
+      data: data
+    };
+
+    const api = await axios.request(config);
+    return api.data.choices[0].message.content; // Hanya mengembalikan hasil
+  }
+};
 
 async function ytdlapsi(youtubeUrl) {
     try {
@@ -3941,6 +4013,42 @@ app.get('/api/chatgpt', async (req, res) => {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
     const response = await chatgpt(text);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/gpt4oimg', async (req, res) => {
+  try {
+    const text = req.query.message;
+    const img = req.query.url;
+    if (!text) {
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
+    }
+    if (!img) {
+      return res.status(403).json({ error: 'Parameter "img" tidak ditemukan' });
+    }
+    const response = await gpt24o(text, img);
+    res.status(200).json({
+      status: 200,
+      creator: "RiooXdzz",
+      data: { response }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.get('/api/gpt4o', async (req, res) => {
+  try {
+    const text = req.query.message;
+    if (!text) {
+      return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
+    }
+    const response = await gpt24(text);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
