@@ -4032,7 +4032,7 @@ app.get('/api/gpt4oimg', async (req, res) => {
     if (!img) {
       return res.status(403).json({ error: 'Parameter "img" tidak ditemukan' });
     }
-    const response = await gpt24o(text, img);
+    const response = await gpt24o.chatWithImage(text, img);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
@@ -4048,7 +4048,7 @@ app.get('/api/gpt4o', async (req, res) => {
     if (!text) {
       return res.status(400).json({ error: 'Parameter "text" tidak ditemukan' });
     }
-    const response = await gpt24(text);
+    const response = await gpt24.chatOnly(text);
     res.status(200).json({
       status: 200,
       creator: "RiooXdzz",
